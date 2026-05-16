@@ -30,33 +30,110 @@
         </div>
     </div>
 
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content" style="max-width: 450px; padding: 2rem;">
+            <span class="modal-close" onclick="closePaymentModal()">&times;</span>
+            <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-credit-card" style="color:var(--primary);"></i> بوابة الدفع الآمنة</h3>
+            <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--text-muted);">اشتراك شهري للمنشآت بقيمة <strong style="color:var(--primary); font-size:1.2rem;">20$</strong> شهرياً</p>
+            
+            <form id="paymentForm">
+                <div class="form-group" style="text-align: right;">
+                    <label style="font-size:0.85rem;">اسم صاحب البطاقة</label>
+                    <input type="text" placeholder="مثال: أحمد محمد" required style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
+                </div>
+                <div class="form-group" style="text-align: right;">
+                    <label style="font-size:0.85rem;">رقم البطاقة (Visa / Mastercard)</label>
+                    <input type="text" placeholder="4000 1234 5678 9010" required maxlength="19" style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
+                </div>
+                <div style="display:flex; gap:1rem; margin-bottom:1.5rem;">
+                    <div style="flex:1; text-align: right;">
+                        <label style="font-size:0.85rem;">تاريخ الانتهاء</label>
+                        <input type="text" placeholder="MM/YY" required maxlength="5" style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
+                    </div>
+                    <div style="flex:1; text-align: right;">
+                        <label style="font-size:0.85rem;">الرمز السري (CVV)</label>
+                        <input type="password" placeholder="123" required maxlength="3" style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:1rem;">دفع وتأكيد الاشتراك ($20)</button>
+            </form>
+        </div>
+    </div>
+
     <main class="container">
-        <div class="form-container">
+        <div class="form-container" style="margin-top: 1rem; max-width: 700px; padding: 2rem;">
             <form id="partnerForm">
                 <div class="form-group">
                     <label>اسم المنشأة / العمل</label>
                     <input type="text" id="bizName" placeholder="مثال: صالون الفخامة" required>
                 </div>
-                <div class="form-group">
-                    <label>المدينة</label>
-                    <select id="bizCity" required>
-                        <option value="رام الله">رام الله</option>
-                        <option value="نابلس">نابلس</option>
-                        <option value="الخليل">الخليل</option>
-                        <option value="بيت لحم">بيت لحم</option>
-                        <option value="جنين">جنين</option>
-                    </select>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>المدينة (مدن الضفة الغربية)</label>
+                        <select id="bizCity" required>
+                            <option value="رام الله">رام الله</option>
+                            <option value="بيت لحم">بيت لحم</option>
+                            <option value="الخليل">الخليل</option>
+                            <option value="طولكرم">طولكرم</option>
+                            <option value="جنين">جنين</option>
+                            <option value="نابلس">نابلس</option>
+                            <option value="سلفيت">سلفيت</option>
+                            <option value="قلقيلية">قلقيلية</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>التصنيف</label>
+                        <select id="bizCat" required onchange="handleCategoryChange()">
+                            <option value="مطاعم">مطاعم</option>
+                            <option value="coffe">coffe</option>
+                            <option value="صالات افراح">صالات افراح</option>
+                            <option value="نوادي رياضية">نوادي رياضية</option>
+                            <option value="ملاعب كرة قدم">ملاعب كرة قدم</option>
+                            <option value="صالات ترفيهية">صالات ترفيهية</option>
+                            <option value="شركات توصيل">شركات توصيل</option>
+                            <option value="فنادق">فنادق</option>
+                            <option value="عيادات تجميلية">عيادات تجميلية</option>
+                            <option value="صالونات نسائية">صالونات نسائية</option>
+                            <option value="صالونات رجالية">صالونات رجالية</option>
+                        </select>
+                    </div>
                 </div>
+
+                <!-- Custom Fields container based on category selection -->
+                <div id="customFieldsContainer" style="background:#f8fafc; padding:1.5rem; border-radius:15px; margin-bottom:1.5rem; display:none;"></div>
+
                 <div class="form-group">
-                    <label>التصنيف</label>
-                    <select id="bizCat" required>
-                        <option value="صالونات">صالونات وتجميل</option>
-                        <option value="عيادات">عيادات ومراكز طبية</option>
-                        <option value="ملاعب">ملاعب ورياضة</option>
-                        <option value="مطاعم">مطاعم وحجوزات</option>
-                    </select>
+                    <label>نبذة تعريفية عن المنشأة</label>
+                    <textarea id="bizDesc" placeholder="اكتب نبذة تعريفية قصيرة تظهر للزبائن..." rows="3" style="width:100%; padding:1rem; border-radius:12px; border:1px solid var(--border); outline:none; resize:none;" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; height:60px; margin-top:1rem;">إرسال طلب الانضمام</button>
+
+                <div class="form-group">
+                    <label>تحميل صور المنشأة (يمكنك اختيار حتى 3 صور)</label>
+                    <input type="file" id="bizImages" accept="image/*" multiple style="padding: 0.5rem;" required>
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem;">الصورة الأولى ستكون الغلاف الأساسي والـ 2 المتبقية في التفاصيل.</p>
+                </div>
+
+                <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem;">
+                    <h3 style="font-size:1.1rem; margin-bottom:1rem;"><i class="fa-solid fa-share-nodes" style="color:var(--primary);"></i> روابط التواصل الاجتماعي (اختياري)</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> فيسبوك</label>
+                            <input type="url" id="fbLink" placeholder="https://facebook.com/yourpage">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> انستغرام</label>
+                            <input type="url" id="igLink" placeholder="https://instagram.com/yourpage">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> رقم الواتساب</label>
+                        <input type="text" id="waLink" placeholder="مثال: +970599000000">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; height:60px; margin-top:1rem; font-size:1.1rem;">دفع الاشتراك وتقديم الطلب</button>
             </form>
         </div>
     </main>
@@ -69,28 +146,162 @@
 
     <script src="js/api.js"></script>
     <script>
+        let uploadedImages = [];
+
+        // Convert files to base64
+        document.getElementById('bizImages').addEventListener('change', function(e) {
+            uploadedImages = [];
+            const files = Array.from(e.target.files).slice(0, 3);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    uploadedImages.push(evt.target.result);
+                }
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function handleCategoryChange() {
+            const cat = document.getElementById('bizCat').value;
+            const container = document.getElementById('customFieldsContainer');
+            container.innerHTML = '';
+            
+            if (cat === 'صالات ترفيهية') {
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <h4 style="margin-bottom:0.8rem; font-size:0.95rem; color:var(--primary);">تفاصيل صالة الترفيه</h4>
+                    <div class="form-group" style="margin:0;">
+                        <label style="font-size:0.8rem;">نوع الخدمة / الألعاب المتوفرة</label>
+                        <input type="text" id="extraServiceType" placeholder="مثال: ألعاب واقع افتراضي، بولينج، بلياردو" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                `;
+            } else if (cat === 'شركات توصيل') {
+                container.style.display = 'block';
+                container.innerHTML = `
+                    <h4 style="margin-bottom:0.8rem; font-size:0.95rem; color:var(--primary);">تفاصيل التوصيل</h4>
+                    <div style="display:flex; gap:1rem;">
+                        <div class="form-group" style="flex:1; margin:0;">
+                            <label style="font-size:0.8rem;">نوع التوصيل</label>
+                            <input type="text" id="extraDelivType" placeholder="مثال: طعام، طرود، أجهزة" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                        <div class="form-group" style="flex:1; margin:0;">
+                            <label style="font-size:0.8rem;">وقت التوصيل</label>
+                            <input type="text" id="extraDelivTime" placeholder="مثال: 24 ساعة، صباحي" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:1rem; margin-bottom:0;">
+                        <label style="font-size:0.8rem;">أماكن ومناطق التوصيل</label>
+                        <input type="text" id="extraDelivPlace" placeholder="مثال: داخل المدينة، كافة أنحاء الضفة" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                `;
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Check if admin is adding
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdminMode = urlParams.get('admin') === 'true';
+        
+        if (isAdminMode) {
+            const submitBtn = document.querySelector('#partnerForm button[type="submit"]');
+            if (submitBtn) submitBtn.innerText = "إضافة المنشأة كمسؤول (مجاناً)";
+        }
+
+        // Handle partner submission (opens payment modal or submits directly if admin)
         document.getElementById('partnerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
-            btn.disabled = true;
+            if (isAdminMode) {
+                // Submit directly for free
+                const btn = e.target.querySelector('button[type="submit"]');
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال كمسؤول...';
+                btn.disabled = true;
+
+                const extraServicesData = {};
+                const cat = document.getElementById('bizCat').value;
+                if (cat === 'صالات ترفيهية') {
+                    extraServicesData.serviceType = document.getElementById('extraServiceType').value;
+                } else if (cat === 'شركات توصيل') {
+                    extraServicesData.deliveryType = document.getElementById('extraDelivType').value;
+                    extraServicesData.deliveryTime = document.getElementById('extraDelivTime').value;
+                    extraServicesData.deliveryPlace = document.getElementById('extraDelivPlace').value;
+                }
+
+                const biz = {
+                    name: document.getElementById('bizName').value,
+                    location: document.getElementById('bizCity').value,
+                    category: cat,
+                    img: uploadedImages[0] || "https://images.unsplash.com/photo-1521791136064-7986c2959210?auto=format&fit=crop&w=800",
+                    secondaryImages: uploadedImages.slice(1).join(','),
+                    description: document.getElementById('bizDesc').value,
+                    extraServices: JSON.stringify(extraServicesData),
+                    social: {
+                        fb: document.getElementById('fbLink').value,
+                        ig: document.getElementById('igLink').value,
+                        wa: document.getElementById('waLink').value
+                    }
+                };
+
+                try {
+                    await E7_DB.saveBusiness(biz);
+                    alert("تمت إضافة المنشأة بنجاح ومجاناً كمسؤول!");
+                    window.location.href = "admin.html";
+                } catch (err) {
+                    alert("حدث خطأ أثناء الاتصال بالسيرفر. يرجى المحاولة لاحقاً.");
+                    btn.innerHTML = 'إضافة المنشأة كمسؤول (مجاناً)';
+                    btn.disabled = false;
+                }
+            } else {
+                // Show payment modal
+                document.getElementById('paymentModal').style.display = 'flex';
+            }
+        });
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        // Handle Payment Submit & Save to DB
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const payBtn = e.target.querySelector('button');
+            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الدفع...';
+            payBtn.disabled = true;
+
+            const extraServicesData = {};
+            const cat = document.getElementById('bizCat').value;
+            if (cat === 'صالات ترفيهية') {
+                extraServicesData.serviceType = document.getElementById('extraServiceType').value;
+            } else if (cat === 'شركات توصيل') {
+                extraServicesData.deliveryType = document.getElementById('extraDelivType').value;
+                extraServicesData.deliveryTime = document.getElementById('extraDelivTime').value;
+                extraServicesData.deliveryPlace = document.getElementById('extraDelivPlace').value;
+            }
 
             const biz = {
                 name: document.getElementById('bizName').value,
                 location: document.getElementById('bizCity').value,
-                category: document.getElementById('bizCat').value,
-                img: "https://images.unsplash.com/photo-1521791136064-7986c2959210?auto=format&fit=crop&w=800", // Default Image
-                status: "active"
+                category: cat,
+                img: uploadedImages[0] || "https://images.unsplash.com/photo-1521791136064-7986c2959210?auto=format&fit=crop&w=800",
+                secondaryImages: uploadedImages.slice(1).join(','),
+                description: document.getElementById('bizDesc').value,
+                extraServices: JSON.stringify(extraServicesData),
+                social: {
+                    fb: document.getElementById('fbLink').value,
+                    ig: document.getElementById('igLink').value,
+                    wa: document.getElementById('waLink').value
+                }
             };
 
             try {
                 await E7_DB.saveBusiness(biz);
-                alert("شكراً لانضمامك! تم تسجيل منشأتك بنجاح في قاعدة البيانات.");
+                alert("تم الدفع بنجاح وتسجيل منشأتك في قاعدة البيانات!");
                 window.location.href = "index.html";
             } catch (err) {
-                alert("حدث خطأ أثناء الإرسال. تأكد من تشغيل السيرفر.");
-                btn.innerHTML = 'إرسال طلب الانضمام';
-                btn.disabled = false;
+                alert("حدث خطأ أثناء الاتصال بالسيرفر. يرجى المحاولة لاحقاً.");
+                payBtn.innerHTML = 'دفع وتأكيد الاشتراك ($20)';
+                payBtn.disabled = false;
             }
         });
     </script>

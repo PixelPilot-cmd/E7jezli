@@ -111,18 +111,65 @@
                 return;
             }
 
+            let extraHTML = '';
+            const extraData = currentBiz.extraServices ? JSON.parse(currentBiz.extraServices) : {};
+            
+            if (currentBiz.category === 'صالات ترفيهية') {
+                extraHTML = `
+                    <div style="margin-top: 1.5rem; text-align: right;">
+                        <p style="font-weight:700; margin-bottom:0.5rem;">نوع الخدمة المطلوبة:</p>
+                        <select id="extraInputSelect" class="btn btn-outline" style="width:100%; text-align:right; background:white;">
+                            ${(extraData.serviceType || 'ألعاب ترفيهية').split('،').map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            } else if (currentBiz.category === 'شركات توصيل') {
+                extraHTML = `
+                    <div style="margin-top: 1.5rem; text-align: right; display:flex; flex-direction:column; gap:0.8rem;">
+                        <div>
+                            <p style="font-weight:700; margin-bottom:0.3rem;">نوع الطرد/التوصيل:</p>
+                            <select id="extraDelivType" class="btn btn-outline" style="width:100%; text-align:right; background:white;">
+                                ${(extraData.deliveryType || 'طعام، طرود، أجهزة').split('،').map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <p style="font-weight:700; margin-bottom:0.3rem;">مكان/منطقة التوصيل:</p>
+                            <input type="text" id="extraDelivPlace" value="${extraData.deliveryPlace || 'كافة المناطق'}" readonly style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
+                        </div>
+                        <div>
+                            <p style="font-weight:700; margin-bottom:0.3rem;">وقت التوصيل المتاح:</p>
+                            <input type="text" id="extraDelivTime" value="${extraData.deliveryTime || '24 ساعة'}" readonly style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Secondary Images HTML
+            let secondaryImgsHTML = '';
+            if (currentBiz.secondaryImages) {
+                secondaryImgsHTML = `
+                    <div style="margin-top: 2rem;">
+                        <h4 style="margin-bottom:1rem;">صور إضافية للمنشأة</h4>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:1rem;">
+                            ${currentBiz.secondaryImages.split(',').map(imgSrc => `<img src="${imgSrc}" style="width:100%; height:120px; object-fit:cover; border-radius:12px; border:1px solid var(--border);">`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             document.getElementById('detailsMain').innerHTML = `
                 <div class="biz-header">
                     <h1>${currentBiz.name}</h1>
-                    <p><i class="fa-solid fa-location-dot" style="color:var(--primary);"></i> فلسطين - ${currentBiz.location}</p>
+                    <p><i class="fa-solid fa-location-dot" style="color:var(--primary);"></i> فلسطين - ${currentBiz.location} (${currentBiz.category})</p>
                 </div>
                 <div class="details-grid">
                     <section class="content-area">
                         <div class="main-img-box"><img src="${currentBiz.img || currentBiz.imageUrl}"></div>
                         <div style="background: white; padding: 2rem; border-radius: 20px; border: 1px solid var(--border);">
                             <h3>عن المشروع</h3>
-                            <p style="color:var(--text-muted); line-height: 1.8;">هذا المشروع هو أحد شركاء منصة E7jezli الرسميين في مدينة ${currentBiz.location}.</p>
+                            <p style="color:var(--text-muted); line-height: 1.8; margin-top: 1rem;">${currentBiz.description || `هذا المشروع هو أحد شركاء منصة E7jezli الرسميين في مدينة ${currentBiz.location}.`}</p>
                         </div>
+                        ${secondaryImgsHTML}
                     </section>
                     <aside class="sidebar-area">
                         <div class="booking-sidebar">
@@ -131,6 +178,9 @@
                                 <div class="service-option" onclick="selectService(this, 'خدمة أساسية', 80)"><span>خدمة أساسية</span><strong>80 شيكل</strong></div>
                                 <div class="service-option" onclick="selectService(this, 'خدمة مميزة', 150)"><span>خدمة مميزة</span><strong>150 شيكل</strong></div>
                             </div>
+                            
+                            ${extraHTML}
+
                             <div style="margin: 2rem 0;" id="timeGrid">
                                 <p style="font-weight:700; margin-bottom:1rem;">الوقت المتاح:</p>
                                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem;">
@@ -180,9 +230,24 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة الدفع...';
             btn.disabled = true;
 
+            let finalService = selectedService;
+            if (currentBiz.category === 'صالات ترفيهية') {
+                const selectEl = document.getElementById('extraInputSelect');
+                if (selectEl) {
+                    finalService += ` [نوع الخدمة: ${selectEl.value}]`;
+                }
+            } else if (currentBiz.category === 'شركات توصيل') {
+                const delivType = document.getElementById('extraDelivType');
+                const delivPlace = document.getElementById('extraDelivPlace');
+                const delivTime = document.getElementById('extraDelivTime');
+                if (delivType && delivPlace && delivTime) {
+                    finalService += ` [توصيل ${delivType.value} | من/إلى: ${delivPlace.value} | وقت: ${delivTime.value}]`;
+                }
+            }
+
             const booking = { 
                 businessName: currentBiz.name, 
-                service: selectedService, 
+                service: finalService, 
                 price: selectedPrice, 
                 time: selectedTime, 
                 date: new Date().toLocaleDateString('ar-EG'), 

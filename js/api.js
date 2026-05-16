@@ -41,6 +41,9 @@ const E7_DB = {
                     facebookLink: biz.social?.fb,
                     instagramLink: biz.social?.ig,
                     whatsappLink: biz.social?.wa,
+                    description: biz.description,
+                    secondaryImages: biz.secondaryImages,
+                    extraServices: biz.extraServices,
                     rating: 5.0,
                     status: "active"
                 })

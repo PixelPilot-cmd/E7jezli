@@ -15,6 +15,10 @@ namespace E7jezli.Server.Models
         public string? InstagramLink { get; set; }
         public string? WhatsappLink { get; set; }
         
+        public string? Description { get; set; }
+        public string? SecondaryImages { get; set; } // Comma-separated list of additional images
+        public string? ExtraServices { get; set; } // JSON or text list of extra service categories/details
+        
         public double Rating { get; set; } = 5.0;
         public string Status { get; set; } = "active";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

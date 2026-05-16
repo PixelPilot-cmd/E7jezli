@@ -42,4 +42,19 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Automatically run EF Core migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+        Console.WriteLine("Database migrated successfully!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error running migrations: {ex.Message}");
+    }
+}
+
 app.Run();
