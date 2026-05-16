@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استكشف الخدمات | E7jezli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .services-header { padding: 4rem 0; background: var(--bg-card); border-bottom: 1px solid var(--border); }
+        .filter-bar { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+        .filter-input { flex: 1; min-width: 250px; position: relative; }
+        .filter-input i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); }
+        .filter-input input { width: 100%; padding: 1rem 3rem 1rem 1rem; border-radius: 12px; border: 1px solid var(--border); outline: none; transition: 0.3s; }
+        .filter-input input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo"><i class="fa-solid fa-calendar-check"></i> <span>E7jezli</span></a>
+            <nav class="nav-menu" id="navMenu">
+                <ul class="nav-links">
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="services.html" class="active">الخدمات</a></li>
+                    <li><a href="my-bookings.html">حجوزاتي</a></li>
+                </ul>
+            </nav>
+            <button class="mobile-toggle" id="mobileToggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="services-header">
+        <div class="container">
+            <h1 style="font-size: 2.5rem; font-weight: 800;">استكشف جميع الخدمات</h1>
+            <p style="color: var(--text-muted);">ابحث وفلتر بين مئات الأماكن والخدمات المتاحة في فلسطين</p>
+            
+            <div class="filter-bar">
+                <div class="filter-input">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" placeholder="ابحث عن صالون، مطعم، ملعب...">
+                </div>
+                <select id="cityFilter" class="btn btn-outline" style="min-width: 150px; background: white;">
+                    <option value="">جميع المدن</option>
+                    <option>رام الله</option>
+                    <option>نابلس</option>
+                    <option>الخليل</option>
+                    <option>جنين</option>
+                </select>
+                <select id="catFilter" class="btn btn-outline" style="min-width: 150px; background: white;">
+                    <option value="">جميع التصنيفات</option>
+                    <option>صالونات</option>
+                    <option>مطاعم</option>
+                    <option>ملاعب</option>
+                    <option>عيادات</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <main class="container" style="padding: 4rem 1.5rem;">
+        <div id="servicesGrid" class="business-grid">
+            <!-- سيتم التحميل هنا -->
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        let allData = [];
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            allData = await E7_DB.getBusinesses();
+            render(allData);
+
+            // تفعيل البحث الفوري
+            const searchInput = document.getElementById('searchInput');
+            const cityFilter = document.getElementById('cityFilter');
+            const catFilter = document.getElementById('catFilter');
+
+            const applyFilters = () => {
+                const term = searchInput.value.toLowerCase();
+                const city = cityFilter.value;
+                const cat = catFilter.value.toLowerCase();
+
+                const filtered = allData.filter(b => {
+                    const matchesTerm = b.name.toLowerCase().includes(term) || b.category.toLowerCase().includes(term);
+                    const matchesCity = city === "" || b.location === city;
+                    const matchesCat = cat === "" || b.category.toLowerCase().includes(cat);
+                    return matchesTerm && matchesCity && matchesCat;
+                });
+                render(filtered);
+            };
+
+            searchInput.addEventListener('input', applyFilters);
+            cityFilter.addEventListener('change', applyFilters);
+            catFilter.addEventListener('change', applyFilters);
+        });
+
+        function render(data) {
+            const grid = document.getElementById('servicesGrid');
+            if (data.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; padding: 5rem 0; opacity: 0.5;">لا توجد نتائج مطابقة لبحثك.</p>';
+                return;
+            }
+            grid.innerHTML = data.map(biz => `
+                <div class="business-card">
+                    <div class="card-image"><img src="${biz.img || biz.imageUrl}"></div>
+                    <div class="card-content">
+                        <span style="color:var(--primary); font-weight:700; font-size: 0.8rem;">${biz.category}</span>
+                        <h3 style="margin: 0.5rem 0;">${biz.name}</h3>
+                        <p style="font-size:0.9rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${biz.location}</p>
+                        <div class="card-meta">
+                            <div class="card-price">80 <span>شيكل</span></div>
+                            <button class="btn btn-primary" onclick="window.location.href='business-details.html?id=${biz.id}'">احجز الآن</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

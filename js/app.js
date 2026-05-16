@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     initSearch();
     initMobileMenu();
+    initCategoryFilters();
     initScrollEffects();
 });
 
@@ -117,6 +118,31 @@ function initMobileMenu() {
         });
     }
 }
+function initCategoryFilters() {
+    const categories = document.querySelectorAll('.category-item');
+    categories.forEach(item => {
+        item.addEventListener('click', () => {
+            // إضافة كلاس Active للشكل الجمالي
+            categories.forEach(c => c.classList.remove('active'));
+            item.classList.add('active');
+
+            const selectedCat = item.querySelector('span').innerText.toLowerCase();
+            
+            // فلترة البيانات بناءً على النص الموجود في الـ span
+            const filtered = cachedBusinesses.filter(b => 
+                b.category.toLowerCase().includes(selectedCat) || 
+                selectedCat.includes(b.category.toLowerCase())
+            );
+
+            renderBusinesses(filtered);
+
+            // النزول لنتائج البحث بسلاسة
+            const featuredSection = document.getElementById('featured');
+            if (featuredSection) featuredSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+}
+
 function initScrollEffects() {
     const sections = document.querySelectorAll('.section, .hero, .dashboard-card');
     const observer = new IntersectionObserver((entries) => {
