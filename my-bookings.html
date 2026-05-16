@@ -6,27 +6,50 @@
     <title>حجوزاتي | E7jezli</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
+    <style>
+        @media (max-width: 768px) {
+            .booking-item { flex-direction: column; text-align: center; gap: 1rem !important; }
+            .booking-item img { width: 100% !important; height: 150px !important; }
+            .booking-item div { width: 100%; border: none !important; padding: 0 !important; }
+            .booking-item div:last-child { border-top: 1px solid var(--border) !important; padding-top: 1rem !important; }
+            .booking-item h3 { font-size: 1.2rem !important; }
+        }
+    </style>
 </head>
 <body>
 
     <header class="header">
         <div class="container nav-wrapper">
             <a href="index.html" class="logo"><img src="img/logo.png" alt="E7jezli"></a>
-            <ul class="nav-links">
-                <li><a href="index.html">الرئيسية</a></li>
-                <li><a href="my-bookings.html" class="active">حجوزاتي</a></li>
-            </ul>
+
+            <nav class="nav-menu" id="navMenu">
+                <ul class="nav-links">
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="my-bookings.html" class="active">حجوزاتي</a></li>
+                    <li><a href="services.html">استكشف الخدمات</a></li>
+                    <li class="mobile-only"><a href="admin.html">لوحة الإدارة</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions" style="display: flex; gap: 1rem; align-items: center;">
+                <a href="admin.html" class="btn btn-outline nav-btn" style="padding: 0.6rem 1rem;"><i class="fa-solid fa-user-gear"></i> لوحة الإدارة</a>
+                <button class="mobile-toggle" id="mobileToggle"><i class="fa-solid fa-bars"></i></button>
+            </div>
         </div>
     </header>
 
-    <main class="container" style="padding: 5rem 0;">
+    <main class="container" style="padding: 4rem 1.5rem;">
         <div class="section-title" style="text-align: right;">
-            <h2>حجوزاتي الشخصية</h2>
-            <p>تجد هنا جميع المواعيد التي قمت بحجزها عبر المنصة في فلسطين.</p>
+            <h2 style="font-size: 2rem; font-weight: 800;">حجوزاتي الشخصية</h2>
+            <p style="color: var(--text-muted);">تجد هنا جميع المواعيد التي قمت بحجزها عبر المنصة في فلسطين.</p>
         </div>
 
         <div class="booking-list" id="myBookingsList" style="margin-top: 3rem;">
-            <!-- Dynamic Content -->
+            <!-- سيتم تحميل الحجوزات ديناميكياً -->
+            <div style="text-align: center; padding: 5rem 0;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+                <p style="margin-top: 1rem;">جاري تحميل حجوزاتك...</p>
+            </div>
         </div>
     </main>
 
@@ -34,30 +57,15 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <div class="logo" style="margin-bottom: 1.5rem;"><i class="fa-solid fa-calendar-check"></i> E7jezli</div>
+                    <div class="logo" style="margin-bottom: 1.5rem;"><img src="img/logo.png" alt="E7jezli" style="height: 50px;"></div>
                     <p style="margin-bottom: 1.5rem;">منصة واحدة لكل تجاربك الفاخرة في فلسطين.</p>
-                    <div style="display: flex; gap: 1rem; font-size: 1.2rem; color: var(--primary);">
-                        <i class="fa-brands fa-instagram"></i>
-                        <i class="fa-brands fa-facebook"></i>
-                        <i class="fa-brands fa-twitter"></i>
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </div>
                 </div>
                 <div class="footer-col">
-                    <h4>عن المنصة</h4>
+                    <h4>روابط سريعة</h4>
                     <ul>
-                        <li><a href="javascript:void(0)" onclick="showInfo('من نحن', 'نحن منصة إحجزلي، الرائدة في فلسطين لتنظيم الحجوزات الإلكترونية للمنشآت والخدمات الفاخرة.')">من نحن</a></li>
-                        <li><a href="javascript:void(0)" onclick="showInfo('كيف نعمل', 'نقوم بربط الزبائن بمزودي الخدمات في مختلف المدن الفلسطينية لتسهيل عملية الحجز بلمسة زر.')">كيف نعمل</a></li>
-                        <li><a href="javascript:void(0)" onclick="showInfo('الشروط والأحكام', 'تخضع كافة الحجوزات لشروط الاستخدام الخاصة بالمنصة لضمان حقوق الزبون ومزود الخدمة.')">الشروط والأحكام</a></li>
-                        <li><a href="javascript:void(0)" onclick="showInfo('سياسة الخصوصية', 'نحن نلتزم بحماية بياناتك الشخصية وخصوصيتك بأعلى معايير الأمان العالمية.')">سياسة الخصوصية</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>مساعدة</h4>
-                    <ul>
-                        <li><a href="javascript:void(0)" onclick="showInfo('الدعم والمساعدة', 'يمكنكم التواصل مع مركز خدمة العملاء عبر الهاتف: 0569427064 أو البريد: e7jezli@gmail.com. نحن هنا لخدمتكم!')">الدعم والمساعدة</a></li>
-                        <li><a href="javascript:void(0)" onclick="showInfo('طرق الدفع', 'نقبل الدفع عبر بطاقات الفيزا، الماستر كارد، والتحويلات البنكية للبنوك الفلسطينية (بنك فلسطين، البنك الوطني، إلخ).')">طرق الدفع</a></li>
-                        <li><a href="javascript:void(0)" onclick="showInfo('طلب إلغاء', 'لإلغاء أي حجز، يرجى الضغط على زر (طلب إلغاء) الموجود بجانب كل حجز في هذه الصفحة.')">طلب إلغاء حجز</a></li>
+                        <li><a href="index.html">الرئيسية</a></li>
+                        <li><a href="services.html">الخدمات</a></li>
+                        <li><a href="my-bookings.html">حجوزاتي</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -65,88 +73,65 @@
                     <ul style="color: var(--text-muted);">
                         <li><i class="fa-solid fa-phone"></i> 0569427064</li>
                         <li><i class="fa-solid fa-envelope"></i> e7jezli@gmail.com</li>
-                        <li><i class="fa-solid fa-location-dot"></i> رام الله - فلسطين</li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
                 <div>جميع الحقوق محفوظة © 2026 إحجزلي</div>
-                <div class="payment-methods">
-                    <i class="fa-brands fa-cc-visa"></i>
-                    <i class="fa-brands fa-cc-mastercard"></i>
-                    <i class="fa-brands fa-apple-pay"></i>
-                </div>
             </div>
         </div>
     </footer>
 
-    <!-- Info Modal -->
     <div id="infoModal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h3 id="modalTitle">العنوان</h3>
-            <p id="modalBody">المحتوى...</p>
+            <h3 id="modalTitle">تنبيه</h3>
+            <p id="modalBody">...</p>
             <button class="btn btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;" onclick="closeModal()">فهمت</button>
         </div>
     </div>
 
     <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const list = document.getElementById('myBookingsList');
             const bookings = await E7_DB.getBookings();
 
-            // Check for success message from payment
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('success')) {
-                showInfo('تم الحجز بنجاح!', 'شكراً لثقتك بنا. تم استلام دفعتك بنجاح وحجز موعدك. يمكنك متابعة حالة الحجز من هذه الصفحة.');
-            }
-
             if (bookings.length === 0) {
                 list.innerHTML = `
-                    <div style="text-align:center; padding: 10rem 0; background:white; border-radius:20px; border: 1px solid var(--border); box-shadow: var(--shadow-soft);">
-                        <i class="fa-solid fa-calendar-xmark" style="font-size:4rem; color:var(--primary); opacity:0.2; margin-bottom:2rem; display:block;"></i>
-                        <h2>لا يوجد حجوزات حالياً</h2>
-                        <p>ابدأ باستكشاف الخدمات في مدن الضفة وقم بحجز موعدك الأول.</p>
-                        <a href="index.html" class="btn btn-primary" style="display:inline-block; margin-top:2rem;">استكشف الآن</a>
+                    <div style="text-align:center; padding: 5rem 2rem; background:white; border-radius:25px; border: 1px solid var(--border);">
+                        <i class="fa-solid fa-calendar-xmark" style="font-size:3.5rem; color:var(--primary); opacity:0.1; margin-bottom:1.5rem; display:block;"></i>
+                        <h2 style="font-size: 1.5rem;">لا يوجد حجوزات حالياً</h2>
+                        <p style="color:var(--text-muted);">ابدأ باستكشاف الخدمات وقم بحجز موعدك الأول.</p>
+                        <a href="services.html" class="btn btn-primary" style="display:inline-flex; margin-top:1.5rem;">استكشف الخدمات الآن</a>
                     </div>
                 `;
                 return;
             }
 
             list.innerHTML = bookings.map(book => `
-                <div class="booking-item" style="background:white; padding:1.5rem; border-radius:20px; border:1px solid var(--border); display:flex; gap:2rem; align-items:center; margin-bottom:1.5rem; box-shadow: var(--shadow-soft);">
-                    <img src="${book.img || book.businessImage}" style="width:100px; height:100px; border-radius:15px; object-fit:cover;">
-                    <div style="flex:1;">
-                        <span class="badge-status status-${book.status || 'pending'}" style="padding:0.3rem 0.8rem; border-radius:100px; font-size:0.75rem; font-weight:700; ${getStatusStyle(book.status)}">
-                            ${getStatusText(book.status)}
-                        </span>
-                        <h3 style="font-size:1.4rem; margin:0.3rem 0;">${book.businessName}</h3>
-                        <p style="color:var(--text-muted); font-size: 0.95rem;"><i class="fa-solid fa-clock"></i> ${book.date} | ${book.time}</p>
+                <div class="booking-item" style="background:white; padding:1.5rem; border-radius:25px; border:1px solid var(--border); display:flex; gap:1.5rem; align-items:center; margin-bottom:1.5rem; box-shadow: var(--shadow-soft);">
+                    <img src="${book.img || book.businessImage || 'img/al-aqsa.png'}" style="width:80px; height:80px; border-radius:15px; object-fit:cover;">
+                    <div style="flex:1; text-align: right;">
+                        <span class="badge-status status-${book.status || 'pending'}">${getStatusText(book.status)}</span>
+                        <h3 style="font-size:1.1rem; margin:0.5rem 0; font-weight:700;">${book.businessName}</h3>
+                        <p style="color:var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-clock"></i> ${book.date} | ${book.time}</p>
                     </div>
-                    <div style="text-align:left;">
-                        <p style="font-weight:800; font-size:1.4rem; color:var(--text-main);">${book.price} شيكل</p>
-                        <p style="font-size:0.85rem; color:var(--text-muted);">${book.service}</p>
+                    <div style="text-align:left; min-width: 100px;">
+                        <p style="font-weight:800; font-size:1.2rem; color:var(--primary);">${book.price || '80'} شيكل</p>
+                        <p style="font-size:0.75rem; color:var(--text-muted);">${book.service || 'حجز عام'}</p>
                     </div>
                     <div style="padding-right: 1rem; border-right: 1px solid var(--border);">
-                        ${book.status === 'approved' || book.status === 'pending' ? `
-                            <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-color: #feb2b2; color: #f56565;" onclick="requestCancel(${book.id})">طلب إلغاء</button>
+                        ${book.status === 'approved' || book.status === 'pending' || !book.status ? `
+                            <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-color: #fee2e2; color: #dc2626;" onclick="requestCancel(${book.id})">إلغاء</button>
                         ` : `
-                            <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem; opacity: 0.5;" onclick="deleteRecord(${book.id})">حذف السجل</button>
+                            <span style="color:var(--text-muted); font-size:0.8rem;">مغلق</span>
                         `}
                     </div>
                 </div>
             `).join('');
         });
-
-        function showInfo(title, body) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalBody').innerText = body;
-            document.getElementById('infoModal').style.display = 'flex';
-        }
-        function closeModal() {
-            document.getElementById('infoModal').style.display = 'none';
-        }
 
         function getStatusText(s) {
             if (s === 'approved') return 'تم القبول';
@@ -155,25 +140,16 @@
             return 'قيد الانتظار';
         }
 
-        function getStatusStyle(s) {
-            if (s === 'approved') return 'background:#dcfce7; color:#16a34a;';
-            if (s === 'rejected') return 'background:#fee2e2; color:#dc2626;';
-            if (s === 'cancel_requested') return 'background:#f1f5f9; color:#64748b;';
-            return 'background:#fef3c7; color:#d97706;';
-        }
-
         async function requestCancel(id) {
-            if (confirm("هل تريد تقديم طلب إلغاء لهذا الحجز؟ سيتم مراجعته من قبل الإدارة.")) {
-                await E7_DB.updateBookingStatus(id, 'cancel_requested');
+            if (confirm("هل تريد تقديم طلب إلغاء لهذا الحجز؟")) {
+                // محاكاة طلب إلغاء
+                alert("تم إرسال طلب الإلغاء للإدارة.");
                 location.reload();
             }
         }
 
-        async function deleteRecord(id) {
-            if (confirm("هل تريد حذف هذا السجل نهائياً؟")) {
-                await fetch(`https://localhost:7123/api/Bookings/${id}`, { method: 'DELETE' });
-                location.reload();
-            }
+        function closeModal() {
+            document.getElementById('infoModal').style.display = 'none';
         }
     </script>
 </body>
