@@ -39,6 +39,15 @@ body { background: var(--bg-main); color: var(--text-main); direction: rtl; over
 .nav-links a { color: var(--text-main); font-weight: 500; font-size: 0.95rem; transition: 0.3s; }
 .nav-links a:hover, .nav-links a.active { color: var(--primary); }
 
+/* Quick Action Icons */
+.header-icons { display: flex; gap: 1.2rem; align-items: center; margin-left: 1rem; }
+.header-icons a { color: var(--text-main); font-size: 1.2rem; transition: 0.3s; position: relative; }
+.header-icons a:hover { color: var(--primary); transform: translateY(-2px); }
+.icon-badge { 
+    position: absolute; top: -5px; right: -8px; background: var(--primary); 
+    color: white; font-size: 0.65rem; padding: 2px 5px; border-radius: 50%; font-weight: 800; 
+}
+
 /* Luxury Buttons */
 .btn {
     padding: 0.7rem 1.8rem; border-radius: 10px; font-weight: 600; cursor: pointer;
