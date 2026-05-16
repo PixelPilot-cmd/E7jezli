@@ -148,14 +148,42 @@
     <script>
         let uploadedImages = [];
 
-        // Convert files to base64
+        // Compress and convert files to base64
         document.getElementById('bizImages').addEventListener('change', function(e) {
             uploadedImages = [];
             const files = Array.from(e.target.files).slice(0, 3);
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
-                    uploadedImages.push(evt.target.result);
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const max_size = 800; // Max width or height
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > height) {
+                            if (width > max_size) {
+                                height *= max_size / width;
+                                width = max_size;
+                            }
+                        } else {
+                            if (height > max_size) {
+                                width *= max_size / height;
+                                height = max_size;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to 70% quality JPEG
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        uploadedImages.push(compressedBase64);
+                    };
+                    img.src = evt.target.result;
                 }
                 reader.readAsDataURL(file);
             });
@@ -247,7 +275,7 @@
                     alert("تمت إضافة المنشأة بنجاح ومجاناً كمسؤول!");
                     window.location.href = "admin.html";
                 } catch (err) {
-                    alert("حدث خطأ أثناء الاتصال بالسيرفر. يرجى المحاولة لاحقاً.");
+                    alert("⚠️ لم نتمكن من الاتصال بالسيرفر السحابي. قد يكون السيرفر في وضع النوم (استيقاظه يستغرق 30 ثانية لأول مرة). يرجى الضغط مرة أخرى بعد قليل للتأكيد.");
                     btn.innerHTML = 'إضافة المنشأة كمسؤول (مجاناً)';
                     btn.disabled = false;
                 }
@@ -266,7 +294,7 @@
             e.preventDefault();
             
             const payBtn = e.target.querySelector('button');
-            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الدفع...';
+            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الاتصال بالسيرفر وتأكيد الدفع... (الرجاء الانتظار)';
             payBtn.disabled = true;
 
             const extraServicesData = {};
@@ -296,10 +324,10 @@
 
             try {
                 await E7_DB.saveBusiness(biz);
-                alert("تم الدفع بنجاح وتسجيل منشأتك في قاعدة البيانات!");
+                alert("🎉 تم الدفع بنجاح وتسجيل منشأتك في قاعدة البيانات!");
                 window.location.href = "index.html";
             } catch (err) {
-                alert("حدث خطأ أثناء الاتصال بالسيرفر. يرجى المحاولة لاحقاً.");
+                alert("⚠️ لم نتمكن من الاتصال بالسيرفر السحابي. قد يكون السيرفر في وضع النوم (استيقاظه يستغرق 30 ثانية لأول مرة). يرجى المحاولة مرة أخرى بعد ثوانٍ قليلة.");
                 payBtn.innerHTML = 'دفع وتأكيد الاشتراك ($20)';
                 payBtn.disabled = false;
             }
