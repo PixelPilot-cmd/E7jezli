@@ -121,18 +121,11 @@
         async function loadAdminData() {
             try {
                 // Show loading indicator
-                document.getElementById('adminBookingList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر السحابي (قد يستغرق 50 ثانية لأول مرة)...</p></div>';
+                document.getElementById('adminBookingList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر وجلب البيانات...</p></div>';
+                document.getElementById('adminPartnerList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر وجلب البيانات...</p></div>';
                 
                 let bookings = await E7_DB.getBookings();
                 let partners = await E7_DB.getBusinesses();
-
-                // If empty, add a dummy booking for demonstration
-                if(bookings.length === 0) {
-                    bookings = [{ id: 1, businessName: 'صالون الأناقة', service: 'حلاقة رجالي', date: '2026-05-17', price: 50, status: 'pending' }];
-                }
-                if(partners.length === 0) {
-                    partners = [{ name: 'مطعم القلعة', image: 'img/logo.png' }];
-                }
 
                 // Fill Stats
                 document.getElementById('totalCount').innerText = bookings.length;
@@ -141,32 +134,41 @@
 
                 // Fill Bookings
                 const bookingList = document.getElementById('adminBookingList');
-                bookingList.innerHTML = bookings.map(b => `
-                    <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : '#f59e0b'};">
-                        <div style="text-align: right;">
-                            <strong>${b.businessName}</strong>
-                            <p style="font-size:0.8rem; color:var(--text-muted);">${b.date} - ${b.service}</p>
+                if (bookings.length === 0) {
+                    bookingList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد حجوزات حقيقية في قاعدة البيانات حتى الآن.</p>';
+                } else {
+                    bookingList.innerHTML = bookings.map(b => `
+                        <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : '#f59e0b'};">
+                            <div style="text-align: right;">
+                                <strong>${b.businessName}</strong>
+                                <p style="font-size:0.8rem; color:var(--text-muted);">${b.date} - ${b.service}</p>
+                            </div>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
+                            </div>
                         </div>
-                        <div style="display:flex; gap:0.5rem;">
-                            <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
-                            <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
-                        </div>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
 
                 // Fill Partners
                 const partnerList = document.getElementById('adminPartnerList');
-                partnerList.innerHTML = partners.map(p => `
-                    <div class="data-card">
-                        <div style="display:flex; align-items:center; gap:1rem;">
-                            <img src="${p.image || 'img/al-aqsa.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                            <strong>${p.name}</strong>
+                if (partners.length === 0) {
+                    partnerList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد شركاء حقيقيين في قاعدة البيانات حتى الآن.</p>';
+                } else {
+                    partnerList.innerHTML = partners.map(p => `
+                        <div class="data-card">
+                            <div style="display:flex; align-items:center; gap:1rem;">
+                                <img src="${p.image || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                                <strong>${p.name}</strong>
+                            </div>
+                            <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem;">تعديل</button>
                         </div>
-                        <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem;">تعديل</button>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
             } catch (err) {
                 console.error("Failed to load admin data:", err);
+                document.getElementById('adminBookingList').innerHTML = '<p style="text-align:center; color:red;">حدث خطأ أثناء جلب البيانات من السيرفر.</p>';
             }
         }
 
