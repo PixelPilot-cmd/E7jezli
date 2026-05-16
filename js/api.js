@@ -96,5 +96,14 @@ const E7_DB = {
         } catch (e) {
             console.error("Failed to update status");
         }
+    },
+
+    // حذف حجز من السحاب
+    deleteBooking: async (id) => {
+        try {
+            await fetch(`${API_BASE_URL}/Bookings/${id}`, { method: 'DELETE' });
+        } catch (e) {
+            console.error("Delete booking failed");
+        }
     }
 };
