@@ -95,7 +95,28 @@ function initSearch() {
     });
 }
 
-function initMobileMenu() {}
+function initMobileMenu() {
+    const toggle = document.getElementById('mobileToggle');
+    const menu = document.getElementById('navMenu');
+    
+    if (toggle && menu) {
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.classList.toggle('active');
+            toggle.querySelector('i').classList.toggle('fa-bars');
+            toggle.querySelector('i').classList.toggle('fa-xmark');
+        });
+
+        // إغلاق القائمة عند الضغط في أي مكان خارجها
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+                menu.classList.remove('active');
+                toggle.querySelector('i').classList.add('fa-bars');
+                toggle.querySelector('i').classList.remove('fa-xmark');
+            }
+        });
+    }
+}
 function initScrollEffects() {
     const sections = document.querySelectorAll('.section, .hero, .dashboard-card');
     const observer = new IntersectionObserver((entries) => {

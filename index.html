@@ -26,19 +26,26 @@
         <div class="container nav-wrapper">
             <a href="index.html" class="logo"><i class="fa-solid fa-calendar-check"></i> <span>E7jezli</span></a>
 
-            <nav>
+            <nav class="nav-menu" id="navMenu">
                 <ul class="nav-links">
                     <li><a href="index.html" class="active">الرئيسية</a></li>
                     <li><a href="my-bookings.html">حجوزاتي</a></li>
                     <li><a href="partner.html">انضم كشريك</a></li>
+                    <li class="mobile-only"><a href="admin.html">لوحة الإدارة</a></li>
+                    <li class="mobile-only"><a href="auth.html">دخول / تسجيل</a></li>
                 </ul>
             </nav>
 
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <a href="admin.html" class="btn btn-outline" style="padding: 0.6rem 1rem;"><i
+            <div class="nav-actions" style="display: flex; gap: 1rem; align-items: center;">
+                <a href="admin.html" class="btn btn-outline nav-btn" style="padding: 0.6rem 1rem;"><i
                         class="fa-solid fa-user-gear"></i> لوحة الإدارة</a>
-                <a href="auth.html" class="btn btn-primary" style="padding: 0.6rem 1.5rem;"><i
+                <a href="auth.html" class="btn btn-primary nav-btn" style="padding: 0.6rem 1.5rem;"><i
                         class="fa-solid fa-user"></i> دخول / تسجيل</a>
+                
+                <!-- زر القائمة للهواتف -->
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </div>
     </header>
