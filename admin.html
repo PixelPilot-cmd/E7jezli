@@ -120,6 +120,9 @@
 
         async function loadAdminData() {
             try {
+                // Show loading indicator
+                document.getElementById('adminBookingList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر السحابي (قد يستغرق 50 ثانية لأول مرة)...</p></div>';
+                
                 let bookings = await E7_DB.getBookings();
                 let partners = await E7_DB.getBusinesses();
 
@@ -128,7 +131,7 @@
                     bookings = [{ id: 1, businessName: 'صالون الأناقة', service: 'حلاقة رجالي', date: '2026-05-17', price: 50, status: 'pending' }];
                 }
                 if(partners.length === 0) {
-                    partners = [{ name: 'مطعم القلعة', image: 'img/al-aqsa.png' }];
+                    partners = [{ name: 'مطعم القلعة', image: 'img/logo.png' }];
                 }
 
                 // Fill Stats

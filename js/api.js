@@ -19,7 +19,7 @@ const E7_DB = {
     // جلب الحجوزات
     getBookings: async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/Booking`);
+            const response = await fetch(`${API_BASE_URL}/Bookings`);
             if (!response.ok) return [];
             return await response.json();
         } catch (e) {
@@ -55,7 +55,7 @@ const E7_DB = {
     // تأكيد حجز جديد
     saveBooking: async (booking) => {
         try {
-            await fetch(`${API_BASE_URL}/Booking`, {
+            await fetch(`${API_BASE_URL}/Bookings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(booking)
@@ -82,6 +82,19 @@ const E7_DB = {
             return null;
         } catch (e) {
             return null;
+        }
+    },
+
+    // تحديث حالة الحجز
+    updateBookingStatus: async (id, status) => {
+        try {
+            await fetch(`${API_BASE_URL}/Bookings/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(status)
+            });
+        } catch (e) {
+            console.error("Failed to update status");
         }
     }
 };
