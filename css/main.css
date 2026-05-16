@@ -252,25 +252,31 @@ body { background: var(--bg-main); color: var(--text-main); direction: rtl; over
     .nav-links { flex-direction: column; gap: 2.5rem; text-align: right; }
     .nav-links a { font-size: 1.3rem; color: white; display: block; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
 
-    .hero { padding: 4rem 0 16rem; } /* Increased bottom padding */
-    .hero-text h1 { font-size: 1.9rem; line-height: 1.4; margin-bottom: 1.5rem; }
-    .hero-text p { font-size: 0.95rem; line-height: 1.6; }
+    .hero { padding: 3rem 0 2rem; } /* Reduced padding since it's not absolute anymore */
+    .hero-text h1 { font-size: 1.8rem; line-height: 1.3; margin-bottom: 1rem; }
+    .hero-text p { font-size: 0.9rem; margin-bottom: 1.5rem; }
 
-    .search-container { bottom: -160px; width: 94%; } /* Pushed down a bit more */
-    .search-box { flex-direction: column; padding: 1.5rem; gap: 0.5rem; border-radius: 25px; }
-    .search-field { border-left: none; border-bottom: 1px solid var(--border); width: 100%; padding: 1.2rem 0; }
+    .search-container { 
+        position: relative; /* Switch to natural flow */
+        bottom: 0; 
+        left: 0; 
+        transform: none; 
+        width: 100%; 
+        margin: 2rem 0; /* Add space around the box */
+    }
+    .search-box { flex-direction: column; padding: 1.2rem; gap: 0; border-radius: 20px; }
+    .search-field { border-left: none; border-bottom: 1px solid var(--border); width: 100%; padding: 0.8rem 0; }
     .search-field:last-of-type { border-bottom: none; }
-    .search-box button { width: 100%; margin-top: 1.5rem; padding: 1.2rem !important; border-radius: 15px; }
+    .search-box button { width: 100%; margin-top: 1rem; padding: 1rem !important; border-radius: 12px; }
 
-    .stats-bar { padding: 3rem 0; gap: 2rem; display: none; } 
+    .stats-bar { display: none; } 
     
-    .category-grid { gap: 1rem; padding: 0.5rem; justify-content: flex-start; }
-    .category-item { min-width: 110px; padding: 1rem; }
+    .category-grid { gap: 0.8rem; padding: 1rem 0; }
+    .category-item { min-width: 100px; padding: 1rem; }
 
-    .footer { padding-top: 10rem; }
+    .footer { padding-top: 4rem; }
     
-    /* منع التداخل مع القسم التالي */
-    #featured { margin-top: 12rem; } 
+    #featured { margin-top: 2rem; } /* Reset margin since it's natural flow now */
 }
 
 @media (max-width: 480px) {
