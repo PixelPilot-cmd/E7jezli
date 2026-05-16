@@ -9,10 +9,7 @@
     <style>
         :root { --admin-sidebar: #1e293b; }
         body { background: #f8fafc; }
-        
         .admin-layout { display: flex; min-height: 100vh; }
-        
-        /* Sidebar Styles */
         .admin-sidebar { 
             width: 260px; background: var(--admin-sidebar); color: white; 
             padding: 2rem 1.5rem; transition: 0.3s; position: sticky; top: 0; height: 100vh;
@@ -21,11 +18,9 @@
         .admin-nav li { margin-bottom: 0.5rem; }
         .admin-nav a { 
             display: flex; align-items: center; gap: 1rem; padding: 1rem; 
-            color: #cbd5e1; border-radius: 12px; transition: 0.3s; text-decoration: none;
+            color: #cbd5e1; border-radius: 12px; transition: 0.3s; text-decoration: none; cursor: pointer;
         }
         .admin-nav a:hover, .admin-nav a.active { background: var(--primary); color: white; }
-
-        /* Main Content */
         .admin-main { flex: 1; padding: 2rem; overflow-x: hidden; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow-soft); border: 1px solid var(--border); }
@@ -33,11 +28,8 @@
         .stat-card h3 { font-size: 0.9rem; color: var(--text-muted); }
         .stat-card p { font-size: 1.8rem; font-weight: 800; margin-top: 0.5rem; }
 
-        /* Responsive Mobile */
         @media (max-width: 992px) {
-            .admin-sidebar { 
-                position: fixed; right: -100%; z-index: 1000; height: 100vh; 
-            }
+            .admin-sidebar { position: fixed; right: -100%; z-index: 1000; height: 100vh; }
             .admin-sidebar.active { right: 0; }
             .mobile-admin-header { 
                 display: flex !important; justify-content: space-between; align-items: center;
@@ -48,113 +40,115 @@
         }
 
         .data-card { 
-            background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 1rem;
+            background: white; border-radius: 20px; padding: 1.2rem; margin-bottom: 1rem;
             border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
         }
-        @media (max-width: 600px) {
-            .data-card { flex-direction: column; text-align: center; gap: 1rem; }
-        }
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
     </style>
 </head>
 <body>
 
-    <!-- Mobile Header (Only visible on mobile) -->
     <div class="mobile-admin-header" style="display: none;">
         <a href="index.html" class="logo"><img src="img/logo.png" alt="E7jezli" style="height: 40px;"></a>
         <button class="btn btn-outline" id="adminMenuToggle" style="padding: 0.5rem;"><i class="fa-solid fa-bars-staggered"></i></button>
     </div>
 
     <div class="admin-layout">
-        <!-- Sidebar -->
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="logo" style="justify-content: center; margin-bottom: 2rem;">
                 <img src="img/logo.png" alt="E7jezli" style="height: 50px; filter: brightness(0) invert(1);">
             </div>
             <ul class="admin-nav">
-                <li><a href="#" class="active"><i class="fa-solid fa-chart-line"></i> الإحصائيات</a></li>
-                <li><a href="#"><i class="fa-solid fa-calendar-check"></i> الحجوزات</a></li>
-                <li><a href="#"><i class="fa-solid fa-users"></i> المستخدمين</a></li>
+                <li><a onclick="showSection('stats')" class="nav-item active"><i class="fa-solid fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a onclick="showSection('bookings')" class="nav-item"><i class="fa-solid fa-calendar-check"></i> الحجوزات</a></li>
+                <li><a onclick="showSection('partners')" class="nav-item"><i class="fa-solid fa-users"></i> الشركاء</a></li>
                 <li><a href="index.html" style="margin-top: 5rem; color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a></li>
             </ul>
         </aside>
 
-        <!-- Main Content -->
         <main class="admin-main">
-            <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
-                <h1 style="font-size: 1.5rem; font-weight: 800;">لوحة التحكم</h1>
-                <span style="color: var(--text-muted); font-size: 0.9rem;">أهلاً بك، المدير</span>
-            </header>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fa-solid fa-calendar-day"></i>
-                    <h3>حجوزات اليوم</h3>
-                    <p id="todayBookings">12</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fa-solid fa-coins"></i>
-                    <h3>إجمالي الدخل</h3>
-                    <p id="totalIncome">2,450 ₪</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <h3>شركاء جدد</h3>
-                    <p id="newPartners">4</p>
+            <!-- Stats Section -->
+            <div id="statsSection" class="admin-section active">
+                <header style="margin-bottom: 2rem;"><h1 style="font-size: 1.5rem; font-weight: 800;">إحصائيات المنصة</h1></header>
+                <div class="stats-grid">
+                    <div class="stat-card"><i class="fa-solid fa-calendar-day"></i><h3>إجمالي الحجوزات</h3><p id="totalCount">0</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-coins"></i><h3>إجمالي الدخل</h3><p id="totalIncome">0 ₪</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-user-plus"></i><h3>الشركاء</h3><p id="partnerCount">0</p></div>
                 </div>
             </div>
 
-            <h2 style="margin-bottom: 1.5rem; font-size: 1.2rem;">أحدث الحجوزات</h2>
-            <div id="adminBookingList">
-                <!-- Dynamic Content -->
+            <!-- Bookings Section -->
+            <div id="bookingsSection" class="admin-section">
+                <header style="margin-bottom: 2rem;"><h1 style="font-size: 1.5rem; font-weight: 800;">إدارة الحجوزات</h1></header>
+                <div id="adminBookingList"></div>
+            </div>
+
+            <!-- Partners Section -->
+            <div id="partnersSection" class="admin-section">
+                <header style="margin-bottom: 2rem;"><h1 style="font-size: 1.5rem; font-weight: 800;">إدارة الشركاء</h1></header>
+                <div id="adminPartnerList"></div>
             </div>
         </main>
     </div>
 
     <script src="js/api.js"></script>
     <script>
-        // Mobile Toggle Logic
-        const toggleBtn = document.getElementById('adminMenuToggle');
-        const sidebar = document.getElementById('adminSidebar');
-        
-        if(toggleBtn) {
-            toggleBtn.onclick = () => sidebar.classList.toggle('active');
+        function showSection(id) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById(id + 'Section').classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(window.innerWidth < 992) document.getElementById('adminSidebar').classList.remove('active');
         }
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth < 992 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-                sidebar.classList.remove('active');
-            }
-        });
+        const toggleBtn = document.getElementById('adminMenuToggle');
+        if(toggleBtn) toggleBtn.onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
 
-        // Load Admin Data
-        document.addEventListener('DOMContentLoaded', async () => {
-            const list = document.getElementById('adminBookingList');
+        document.addEventListener('DOMContentLoaded', loadAdminData);
+
+        async function loadAdminData() {
             const bookings = await E7_DB.getBookings();
-            
-            if(bookings.length === 0) {
-                list.innerHTML = '<p style="text-align:center; padding:3rem; color:var(--text-muted);">لا توجد بيانات حالياً</p>';
-                return;
-            }
+            const partners = await E7_DB.getBusinesses();
 
-            list.innerHTML = bookings.map(b => `
-                <div class="data-card">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="background: var(--primary-light); color: var(--primary); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-receipt"></i>
-                        </div>
-                        <div style="text-align: right;">
-                            <strong style="display: block;">${b.businessName}</strong>
-                            <small style="color: var(--text-muted);">${b.date} | ${b.service}</small>
-                        </div>
+            // Fill Stats
+            document.getElementById('totalCount').innerText = bookings.length;
+            document.getElementById('totalIncome').innerText = bookings.reduce((acc, b) => acc + (parseInt(b.price) || 0), 0) + ' ₪';
+            document.getElementById('partnerCount').innerText = partners.length;
+
+            // Fill Bookings
+            const bookingList = document.getElementById('adminBookingList');
+            bookingList.innerHTML = bookings.map(b => `
+                <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : '#f59e0b'};">
+                    <div style="text-align: right;">
+                        <strong>${b.businessName}</strong>
+                        <p style="font-size:0.8rem; color:var(--text-muted);">${b.date} - ${b.service}</p>
                     </div>
-                    <div>
-                        <span style="font-weight: 700;">${b.price} ₪</span>
-                        <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; margin-right: 1rem;">تفاصيل</button>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
+                        <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
                     </div>
                 </div>
             `).join('');
-        });
+
+            // Fill Partners
+            const partnerList = document.getElementById('adminPartnerList');
+            partnerList.innerHTML = partners.map(p => `
+                <div class="data-card">
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <img src="${p.image}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                        <strong>${p.name}</strong>
+                    </div>
+                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem;">تعديل</button>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(id, status) {
+            await E7_DB.updateBookingStatus(id, status);
+            alert('تم تحديث حالة الحجز بنجاح');
+            loadAdminData();
+        }
     </script>
 </body>
 </html>
