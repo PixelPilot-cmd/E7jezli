@@ -224,3 +224,35 @@ body { background: var(--bg-main); color: var(--text-main); direction: rtl; over
 .status-approved { background: #dcfce7; color: #16a34a; }
 .status-rejected { background: #fee2e2; color: #dc2626; }
 .status-cancel_requested { background: #f1f5f9; color: #64748b; border: 1px dashed #cbd5e1; }
+/* --- RESPONSIVE DESIGN --- */
+
+@media (max-width: 1024px) {
+    .footer-grid { grid-template-columns: 1.5fr 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+    .nav-links, .nav-btns { display: none; } /* Hide on mobile - can add hamburger menu later */
+    
+    .hero { padding: 4rem 0 10rem; }
+    .hero-text h1 { font-size: 2.2rem; }
+    .hero-text p { font-size: 1rem; padding: 0 1rem; }
+
+    .search-container { bottom: -120px; width: 95%; }
+    .search-box { flex-direction: column; padding: 1.5rem; }
+    .search-field { border-left: none; border-bottom: 1px solid var(--border); width: 100%; padding: 1rem 0; }
+    .search-field:last-of-type { border-bottom: none; }
+    .search-box button { width: 100%; margin-top: 1rem; padding: 1.2rem !important; }
+
+    .stats-bar { flex-direction: column; gap: 2rem; align-items: flex-start; padding-left: 2rem; }
+    
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+    .footer-bottom { flex-direction: column; gap: 1.5rem; }
+    
+    .modal-content { padding: 2rem 1.5rem; }
+}
+
+@media (max-width: 480px) {
+    .hero-text h1 { font-size: 1.8rem; }
+    .section-title h2 { font-size: 1.8rem; }
+    .container { padding: 0 1rem; }
+}
