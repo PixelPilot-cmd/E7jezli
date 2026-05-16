@@ -252,22 +252,25 @@ body { background: var(--bg-main); color: var(--text-main); direction: rtl; over
     .nav-links { flex-direction: column; gap: 2.5rem; text-align: right; }
     .nav-links a { font-size: 1.3rem; color: white; display: block; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
 
-    .hero { padding: 4rem 0 14rem; } /* Increased padding to avoid overlap */
+    .hero { padding: 4rem 0 16rem; } /* Increased bottom padding */
     .hero-text h1 { font-size: 1.9rem; line-height: 1.4; margin-bottom: 1.5rem; }
     .hero-text p { font-size: 0.95rem; line-height: 1.6; }
 
-    .search-container { bottom: -140px; width: 94%; }
+    .search-container { bottom: -160px; width: 94%; } /* Pushed down a bit more */
     .search-box { flex-direction: column; padding: 1.5rem; gap: 0.5rem; border-radius: 25px; }
     .search-field { border-left: none; border-bottom: 1px solid var(--border); width: 100%; padding: 1.2rem 0; }
     .search-field:last-of-type { border-bottom: none; }
     .search-box button { width: 100%; margin-top: 1.5rem; padding: 1.2rem !important; border-radius: 15px; }
 
-    .stats-bar { padding: 3rem 0; gap: 2rem; display: none; } /* Hide stats on mobile for length */
+    .stats-bar { padding: 3rem 0; gap: 2rem; display: none; } 
     
     .category-grid { gap: 1rem; padding: 0.5rem; justify-content: flex-start; }
     .category-item { min-width: 110px; padding: 1rem; }
 
     .footer { padding-top: 10rem; }
+    
+    /* منع التداخل مع القسم التالي */
+    #featured { margin-top: 12rem; } 
 }
 
 @media (max-width: 480px) {
