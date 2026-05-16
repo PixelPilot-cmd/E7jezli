@@ -1,0 +1,30 @@
+:root {
+    /* Unique & Modern Palette - Deep Violet & Rose theme */
+    --primary: #8b5cf6; /* Electric Violet */
+    --primary-glow: rgba(139, 92, 246, 0.4);
+    --secondary: #f43f5e; /* Rose */
+    --secondary-glow: rgba(244, 63, 94, 0.4);
+    
+    /* Backgrounds - Dark & Premium */
+    --bg-main: #020617; /* Slate 950 */
+    --bg-card: #0f172a; /* Slate 900 */
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    
+    /* Text Colors */
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    
+    /* Shapes & Shadows */
+    --radius-xl: 2rem;
+    --radius-lg: 1.25rem;
+    --shadow-neon: 0 0 15px var(--primary-glow);
+    
+    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+[data-theme="light"] {
+    --bg-main: #ffffff;
+    --bg-card: #f8fafc;
+    --text-main: #020617;
+    --text-muted: #64748b;
+}

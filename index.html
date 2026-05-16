@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E7jezli | منصة الحجوزات الفاخرة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="icon" href="data:,">
+</head>
+
+<body>
+
+
+    <div id="splash" class="splash-screen">
+        <div class="logo" style="font-size: 3rem;"><i class="fa-solid fa-calendar-check"></i> E7jezli</div>
+        <div
+            style="width: 200px; height: 4px; background: var(--border); border-radius: 10px; margin-top: 2rem; overflow: hidden;">
+            <div style="width: 40%; height: 100%; background: var(--primary); animation: load 2s infinite ease-in-out;">
+            </div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo"><i class="fa-solid fa-calendar-check"></i> <span>E7jezli</span></a>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">الرئيسية</a></li>
+                    <li><a href="my-bookings.html">حجوزاتي</a></li>
+                    <li><a href="partner.html">انضم كشريك</a></li>
+                </ul>
+            </nav>
+
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="admin.html" class="btn btn-outline" style="padding: 0.6rem 1rem;"><i
+                        class="fa-solid fa-user-gear"></i> لوحة الإدارة</a>
+                <a href="auth.html" class="btn btn-primary" style="padding: 0.6rem 1.5rem;"><i
+                        class="fa-solid fa-user"></i> دخول / تسجيل</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-text">
+                    <h1>تجارب فاخرة <br>في <span style="color: var(--primary);">أفضل الأماكن</span></h1>
+                    <p>اكتشف واحجز أفضل الخدمات في فلسطين بسهولة وسرعة وأمان</p>
+                </div>
+
+                <div class="search-container">
+                    <div class="search-box">
+                        <div class="search-field">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <select id="serviceSelect">
+                                <option value="">اختر الخدمة</option>
+                                <option>صالونات تجميل</option>
+                                <option>مطاعم ومقاهي</option>
+                                <option>ملاعب رياضية</option>
+                                <option>عيادات طبية</option>
+                            </select>
+                        </div>
+                        <div class="search-field">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <select id="locationSelect">
+                                <option value="">اختر المدينة</option>
+                                <option>رام الله</option>
+                                <option>نابلس</option>
+                                <option>الخليل</option>
+                                <option>جنين</option>
+                                <option>بيت لحم</option>
+                            </select>
+                        </div>
+                        <div class="search-field">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <input type="text" placeholder="اختر التاريخ" onfocus="(this.type='date')"
+                                onblur="(this.type='text')">
+                        </div>
+                        <button class="btn btn-primary" id="mainSearchBtn"
+                            style="padding: 1rem 2.5rem; border-radius: 15px;">ابحث الآن</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <i class="fa-solid fa-headset"></i>
+                    <div class="stat-info">
+                        <h4>24/7</h4>
+                        <p>دعم متواصل</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-city"></i>
+                    <div class="stat-info">
+                        <h4>+20</h4>
+                        <p>مدينة</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <div class="stat-info">
+                        <h4>+50K</h4>
+                        <p>حجز ناجح</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-star"></i>
+                    <div class="stat-info">
+                        <h4>+500</h4>
+                        <p>مكان فاخر</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="categories-section">
+            <div class="container">
+                <div class="section-title">
+                    <p>.. تصفح الخدمات ..</p>
+                    <h2>اختر من مجموعة متنوعة من الخدمات المميزة</h2>
+                </div>
+                <div class="category-grid">
+                    <div class="category-item"><i class="fa-solid fa-scissors"></i><span>صالونات تجميل</span></div>
+                    <div class="category-item"><i class="fa-solid fa-stethoscope"></i><span>مراكز طبية</span></div>
+                    <div class="category-item"><i class="fa-solid fa-utensils"></i><span>مطاعم ومقاهي</span></div>
+                    <div class="category-item"><i class="fa-solid fa-volleyball"></i><span>ملاعب رياضية</span></div>
+                    <div class="category-item"><i class="fa-solid fa-dumbbell"></i><span>صالات رياضية</span></div>
+                    <div class="category-item"><i class="fa-solid fa-hotel"></i><span>فنادق وشقق</span></div>
+                    <div class="category-item"><i class="fa-solid fa-ellipsis"></i><span>المزيد</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="featured">
+            <div class="container">
+                <div class="section-title">
+                    <p>خدمات مميزة</p>
+                    <h2>اكتشف الأكثر تميزاً وتقييماً من قبل عملائنا</h2>
+                </div>
+                <div class="business-grid" id="nearbyGrid">
+                    <!-- Dynamic Loading from JS -->
+                </div>
+                <div style="text-align: center; margin-top: 4rem;">
+                    <button class="btn btn-outline" style="padding: 0.8rem 3rem;">عرض المزيد</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo" style="margin-bottom: 1.5rem;"><i class="fa-solid fa-calendar-check"></i> E7jezli
+                    </div>
+                    <p style="margin-bottom: 1.5rem;">منصة واحدة لكل تجاربك الفاخرة في فلسطين.</p>
+                    <div style="display: flex; gap: 1rem; font-size: 1.2rem; color: var(--primary);">
+                        <i class="fa-brands fa-instagram"></i>
+                        <i class="fa-brands fa-facebook"></i>
+                        <i class="fa-brands fa-twitter"></i>
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>عن المنصة</h4>
+                    <ul>
+                        <li><a href="javascript:void(0)" onclick="showInfo('من نحن', 'نحن منصة إحجزلي، الرائدة في فلسطين لتنظيم الحجوزات الإلكترونية للمنشآت والخدمات الفاخرة.')">من نحن</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfo('كيف نعمل', 'نقوم بربط الزبائن بمزودي الخدمات في مختلف المدن الفلسطينية لتسهيل عملية الحجز بلمسة زر.')">كيف نعمل</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfo('الشروط والأحكام', 'تخضع كافة الحجوزات لشروط الاستخدام الخاصة بالمنصة لضمان حقوق الزبون ومزود الخدمة.')">الشروط والأحكام</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfo('سياسة الخصوصية', 'نحن نلتزم بحماية بياناتك الشخصية وخصوصيتك بأعلى معايير الأمان العالمية.')">سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>مساعدة</h4>
+                    <ul>
+                        <li><a href="javascript:void(0)" onclick="showInfo('الدعم والمساعدة', 'يمكنكم التواصل مع مركز خدمة العملاء عبر الهاتف: 0569427064 أو البريد: e7jezli@gmail.com. نحن هنا لخدمتكم!')">الدعم والمساعدة</a></li>
+                        <li><a href="javascript:void(0)" onclick="showInfo('طرق الدفع', 'نقبل الدفع عبر بطاقات الفيزا، الماستر كارد، والتحويلات البنكية للبنوك الفلسطينية (بنك فلسطين، البنك الوطني، إلخ).')">طرق الدفع</a></li>
+                        <li><a href="my-bookings.html">طلب إلغاء حجز</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>تواصل معنا</h4>
+                    <ul style="color: var(--text-muted);">
+                        <li><i class="fa-solid fa-phone"></i> 0569427064</li>
+                        <li><i class="fa-solid fa-envelope"></i> e7jezli@gmail.com</li>
+                        <li><i class="fa-solid fa-location-dot"></i> رام الله - فلسطين</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>جميع الحقوق محفوظة © 2026 إحجزلي</div>
+                <div class="payment-methods">
+                    <i class="fa-brands fa-cc-visa"></i>
+                    <i class="fa-brands fa-cc-mastercard"></i>
+                    <i class="fa-brands fa-apple-pay"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">العنوان</h3>
+            <p id="modalBody">المحتوى...</p>
+            <button class="btn btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;" onclick="closeModal()">فهمت</button>
+        </div>
+    </div>
+
+    <script>
+        function showInfo(title, body) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = body;
+            document.getElementById('infoModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('infoModal').style.display = 'none';
+        }
+    </script>
+
+    <style>
+        @keyframes load {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+    </style>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+    "businesses": [
+        {
+            "id": 1,
+            "name": "صالون الفخامة الملكي",
+            "location": "رام الله",
+            "category": "صالونات",
+            "imageUrl": "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1974",
+            "status": "active"
+        },
+        {
+            "id": 2,
+            "name": "عيادة الشفاء التخصصية",
+            "location": "نابلس",
+            "category": "عيادات",
+            "imageUrl": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2070",
+            "status": "active"
+        },
+        {
+            "id": 3,
+            "name": "ملعب النجوم الدولي",
+            "location": "الخليل",
+            "category": "ملاعب",
+            "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2093",
+            "status": "active"
+        }
+    ]
+}

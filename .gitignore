@@ -1,0 +1,18 @@
+# .NET folders
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docuser.json
+
+# Visual Studio files
+.vs/
+.vscode/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Database secrets (CRITICAL)
+appsettings.json
+appsettings.Development.json

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الخدمة | E7jezli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .details-wrapper { padding: 4rem 0; }
+        .details-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 4rem; }
+        .biz-header { margin-bottom: 2rem; }
+        .biz-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .main-img-box { width: 100%; height: 450px; border-radius: 20px; overflow: hidden; margin-bottom: 1.5rem; box-shadow: var(--shadow-soft); }
+        .main-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .booking-sidebar { background: white; padding: 2rem; border-radius: 20px; border: 1px solid var(--border); position: sticky; top: 120px; box-shadow: var(--shadow-soft); }
+        .service-option { 
+            background: var(--bg-main); padding: 1rem; border-radius: 12px; 
+            display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+            margin-bottom: 1rem; border: 1px solid var(--border); transition: 0.3s;
+        }
+        .service-option:hover, .service-option.active { border-color: var(--primary); background: var(--primary-light); }
+        .time-slot { width: 100%; padding: 0.8rem; border-radius: 10px; font-size: 0.9rem; }
+
+        /* Payment Modal Specifics */
+        .pay-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .pay-tab { cursor: pointer; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; color: var(--text-muted); }
+        .pay-tab.active { background: var(--primary); color: white; }
+        .payment-form input { margin-bottom: 1rem; width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); }
+        .wallet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .wallet-item { border: 1px solid var(--border); padding: 1.5rem; border-radius: 15px; cursor: pointer; transition: 0.3s; text-align: center; }
+        .wallet-item:hover { border-color: var(--primary); background: var(--primary-light); }
+        .wallet-item i { font-size: 2rem; display: block; margin-bottom: 0.5rem; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo"><i class="fa-solid fa-calendar-check"></i> <span>E7jezli</span></a>
+            <div class="auth-buttons"><a href="index.html" class="btn btn-outline">العودة للرئيسية</a></div>
+        </div>
+    </header>
+
+    <main class="container details-wrapper" id="detailsMain">
+        <div class="loading-state" style="text-align:center; padding: 10rem 0;">جاري تحميل تفاصيل المنشأة...</div>
+    </main>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="modal-close" onclick="closePayment()">&times;</span>
+            <h3>تأكيد الدفع والحجز</h3>
+            <p style="margin-bottom: 2rem;">اختر طريقة الدفع المناسبة لإتمام حجزك في فلسطين</p>
+            
+            <div class="pay-tabs">
+                <div class="pay-tab active" onclick="switchTab('card', this)">بطاقة بنكية</div>
+                <div class="pay-tab" onclick="switchTab('wallets', this)">محافظ إلكترونية</div>
+                <div class="pay-tab" onclick="switchTab('bank', this)">حوالة بنكية</div>
+            </div>
+
+            <div id="cardSection" class="payment-form">
+                <input type="text" placeholder="الاسم على البطاقة">
+                <input type="text" placeholder="رقم البطاقة (16 رقم)">
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" placeholder="MM/YY">
+                    <input type="text" placeholder="CVV">
+                </div>
+            </div>
+
+            <div id="walletsSection" style="display: none;">
+                <div class="wallet-grid">
+                    <div class="wallet-item">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                        <span>Jawwal Pay</span>
+                    </div>
+                    <div class="wallet-item">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>PalPay</span>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.85rem;">سيتم توجيهك لتطبيق المحفظة لتأكيد الدفع</p>
+            </div>
+
+            <div id="bankSection" style="display: none; text-align: right; background: #f1f5f9; padding: 1.5rem; border-radius: 15px;">
+                <p><strong>البنك الوطني:</strong> 1234567-001</p>
+                <p><strong>بنك فلسطين:</strong> 9876543-050</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: #ef4444;">* يرجى إرسال صورة التحويل لخدمة العملاء بعد الدفع.</p>
+            </div>
+
+            <button class="btn btn-primary" id="payBtn" style="width: 100%; justify-content: center; height: 60px; margin-top: 2rem;" onclick="processPayment()">
+                تأكيد الدفع الآن
+            </button>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let currentBiz = null;
+        let selectedService = "";
+        let selectedPrice = 0;
+        let selectedTime = "";
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const bizId = params.get('id');
+            currentBiz = await E7_DB.getBusinessById(bizId);
+
+            if (!currentBiz) {
+                document.getElementById('detailsMain').innerHTML = `<div style="text-align:center; padding: 10rem 0;"><h2>المشروع غير موجود</h2></div>`;
+                return;
+            }
+
+            document.getElementById('detailsMain').innerHTML = `
+                <div class="biz-header">
+                    <h1>${currentBiz.name}</h1>
+                    <p><i class="fa-solid fa-location-dot" style="color:var(--primary);"></i> فلسطين - ${currentBiz.location}</p>
+                </div>
+                <div class="details-grid">
+                    <section class="content-area">
+                        <div class="main-img-box"><img src="${currentBiz.img || currentBiz.imageUrl}"></div>
+                        <div style="background: white; padding: 2rem; border-radius: 20px; border: 1px solid var(--border);">
+                            <h3>عن المشروع</h3>
+                            <p style="color:var(--text-muted); line-height: 1.8;">هذا المشروع هو أحد شركاء منصة E7jezli الرسميين في مدينة ${currentBiz.location}.</p>
+                        </div>
+                    </section>
+                    <aside class="sidebar-area">
+                        <div class="booking-sidebar">
+                            <h4>حجز موعد جديد</h4>
+                            <div style="margin-top: 1.5rem;">
+                                <div class="service-option" onclick="selectService(this, 'خدمة أساسية', 80)"><span>خدمة أساسية</span><strong>80 شيكل</strong></div>
+                                <div class="service-option" onclick="selectService(this, 'خدمة مميزة', 150)"><span>خدمة مميزة</span><strong>150 شيكل</strong></div>
+                            </div>
+                            <div style="margin: 2rem 0;" id="timeGrid">
+                                <p style="font-weight:700; margin-bottom:1rem;">الوقت المتاح:</p>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem;">
+                                    <button class="btn btn-outline time-slot" onclick="selectTime(this)">04:00 م</button>
+                                    <button class="btn btn-outline time-slot" onclick="selectTime(this)">06:00 م</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="openPayment()">تأكيد والحجز</button>
+                        </div>
+                    </aside>
+                </div>
+            `;
+        });
+
+        function selectService(el, name, price) {
+            document.querySelectorAll('.service-option').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+            selectedService = name;
+            selectedPrice = price;
+        }
+
+        function selectTime(el) {
+            document.querySelectorAll('.time-slot').forEach(t => t.classList.replace('btn-primary', 'btn-outline'));
+            el.classList.replace('btn-outline', 'btn-primary');
+            selectedTime = el.innerText;
+        }
+
+        function openPayment() {
+            if (!selectedService || !selectedTime) return alert("يرجى اختيار الخدمة والوقت");
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+        function closePayment() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        function switchTab(tab, el) {
+            ['cardSection', 'walletsSection', 'bankSection'].forEach(s => document.getElementById(s).style.display = 'none');
+            document.getElementById(tab + 'Section').style.display = 'block';
+            
+            document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        async function processPayment() {
+            const btn = document.getElementById('payBtn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة الدفع...';
+            btn.disabled = true;
+
+            const booking = { 
+                businessName: currentBiz.name, 
+                service: selectedService, 
+                price: selectedPrice, 
+                time: selectedTime, 
+                date: new Date().toLocaleDateString('ar-EG'), 
+                businessImage: currentBiz.img || currentBiz.imageUrl
+            };
+
+            await E7_DB.saveBooking(booking);
+
+            setTimeout(() => {
+                window.location.href = 'my-bookings.html?success=true';
+            }, 1500);
+        }
+    </script>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <div>جميع الحقوق محفوظة © 2026 إحجزلي</div>
+                <div class="payment-methods">
+                    <i class="fa-brands fa-cc-visa"></i>
+                    <i class="fa-brands fa-cc-mastercard"></i>
+                    <i class="fa-brands fa-apple-pay"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

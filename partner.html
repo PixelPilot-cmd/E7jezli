@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>انضم كشريك | E7jezli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .partner-hero { padding: 5rem 0; text-align: center; background: var(--primary-light); }
+        .form-container { max-width: 600px; margin: -3rem auto 5rem; background: white; padding: 3rem; border-radius: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; color: var(--text-main); }
+        .form-group input, .form-group select { width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); outline: none; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container nav-wrapper">
+            <a href="index.html" class="logo"><i class="fa-solid fa-calendar-check"></i> <span>E7jezli</span></a>
+            <a href="index.html" class="btn btn-outline">العودة للرئيسية</a>
+        </div>
+    </header>
+
+    <div class="partner-hero">
+        <div class="container">
+            <h1>كن شريكاً في قصة نجاحنا</h1>
+            <p>انضم إلى مئات المنشآت الفلسطينية التي تدير حجوزاتها عبر إحجزلي.</p>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="form-container">
+            <form id="partnerForm">
+                <div class="form-group">
+                    <label>اسم المنشأة / العمل</label>
+                    <input type="text" id="bizName" placeholder="مثال: صالون الفخامة" required>
+                </div>
+                <div class="form-group">
+                    <label>المدينة</label>
+                    <select id="bizCity" required>
+                        <option value="رام الله">رام الله</option>
+                        <option value="نابلس">نابلس</option>
+                        <option value="الخليل">الخليل</option>
+                        <option value="بيت لحم">بيت لحم</option>
+                        <option value="جنين">جنين</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>التصنيف</label>
+                    <select id="bizCat" required>
+                        <option value="صالونات">صالونات وتجميل</option>
+                        <option value="عيادات">عيادات ومراكز طبية</option>
+                        <option value="ملاعب">ملاعب ورياضة</option>
+                        <option value="مطاعم">مطاعم وحجوزات</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; height:60px; margin-top:1rem;">إرسال طلب الانضمام</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="text-align:center; padding: 2rem 0;">
+            <p style="color:var(--text-muted);">جميع الحقوق محفوظة © 2026 إحجزلي</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.getElementById('partnerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
+            btn.disabled = true;
+
+            const biz = {
+                name: document.getElementById('bizName').value,
+                location: document.getElementById('bizCity').value,
+                category: document.getElementById('bizCat').value,
+                imageUrl: "https://images.unsplash.com/photo-1521791136064-7986c2959210?auto=format&fit=crop&w=800", // Default Image
+                status: "active"
+            };
+
+            try {
+                await E7_DB.saveBusiness(biz);
+                alert("شكراً لانضمامك! تم تسجيل منشأتك بنجاح في قاعدة البيانات.");
+                window.location.href = "index.html";
+            } catch (err) {
+                alert("حدث خطأ أثناء الإرسال. تأكد من تشغيل السيرفر.");
+                btn.innerHTML = 'إرسال طلب الانضمام';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

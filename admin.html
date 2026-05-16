@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الإدارية | E7jezli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+        }
+        body { background: #f8fafc; display: flex; min-height: 100vh; overflow-x: hidden; }
+        
+        .admin-sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-left: 1px solid var(--border);
+            padding: 2rem;
+            position: fixed;
+            height: 100vh;
+            right: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-main {
+            margin-right: var(--sidebar-width);
+            flex: 1;
+            padding: 3rem;
+            display: none; /* Hidden by lock screen */
+        }
+
+        .admin-nav { list-style: none; margin-top: 3rem; }
+        .admin-nav li { margin-bottom: 0.5rem; }
+        .admin-nav a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        .admin-nav a:hover, .admin-nav a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-soft);
+        }
+        .stat-card h3 { font-size: 2.5rem; color: var(--text-main); margin-top: 0.5rem; }
+        .stat-card span { color: var(--text-muted); font-size: 0.9rem; font-weight: 700; }
+
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            border-collapse: collapse;
+        }
+        .data-table th { background: #f1f5f9; padding: 1.2rem; text-align: right; font-size: 0.9rem; color: var(--text-muted); }
+        .data-table td { padding: 1.2rem; border-top: 1px solid var(--border); vertical-align: middle; }
+
+        .badge-status {
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-approved { background: #dcfce7; color: #16a34a; }
+        .status-rejected { background: #fee2e2; color: #dc2626; }
+
+        .lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 1000; display: flex; align-items: center; justify-content: center;
+        }
+        .lock-box {
+            background: white; padding: 3rem; border-radius: 30px; border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Lock Screen -->
+    <div id="adminLock" class="lock-screen">
+        <div class="lock-box">
+            <div class="logo" style="justify-content: center; margin-bottom: 2rem;"><i class="fa-solid fa-shield-halved"></i> <span>E7jezli Admin</span></div>
+            <p style="margin-bottom: 1.5rem; color: var(--text-muted);">كلمة سر الإدارة</p>
+            <input type="password" id="adminPassInput" placeholder="••••" style="text-align: center; font-size: 1.5rem; margin-bottom: 1.5rem;">
+            <button class="btn btn-primary" style="width: 100%; justify-content: center; height: 55px;" onclick="checkAdminPass()">دخول النظام</button>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="sidebar" style="display: none;">
+        <div class="logo"><i class="fa-solid fa-calendar-check" style="color: var(--primary);"></i> <span>E7jezli</span></div>
+        <ul class="admin-nav">
+            <li><a href="#" class="active" onclick="showSection('stats', this)"><i class="fa-solid fa-chart-pie"></i> الإحصائيات</a></li>
+            <li><a href="#" onclick="showSection('businesses', this)"><i class="fa-solid fa-city"></i> إدارة الشركاء والخدمات</a></li>
+            <li><a href="#" onclick="showSection('bookings', this)"><i class="fa-solid fa-calendar-day"></i> إدارة الحجوزات</a></li>
+            <li style="margin-top: 2rem;"><a href="index.html" style="color: #ef4444;"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main" id="adminPanel">
+        <div id="statsSection">
+            <div class="section-title">
+                <h2>نظرة عامة على النظام</h2>
+                <p>مرحباً بك في لوحة تحكم إحجزلي فلسطين.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span>إجمالي الشركاء</span>
+                    <h3 id="stBiz">0</h3>
+                </div>
+                <div class="stat-card">
+                    <span>إجمالي الحجوزات</span>
+                    <h3 id="stBook">0</h3>
+                </div>
+                <div class="stat-card">
+                    <span>حجوزات معلقة</span>
+                    <h3 id="stPending" style="color: #d97706;">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="businessesSection" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2>إدارة الشركاء والمنشآت</h2>
+                <button class="btn btn-primary" onclick="window.location.href='partner.html'"><i class="fa-solid fa-plus"></i> إضافة شريك جديد</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr><th>اسم المنشأة</th><th>المدينة</th><th>الفئة</th><th>الإجراءات</th></tr>
+                </thead>
+                <tbody id="bizListBody"></tbody>
+            </table>
+        </div>
+
+        <div id="bookingsSection" style="display: none;">
+            <div class="section-title">
+                <h2>إدارة الحجوزات</h2>
+                <p>قم بالموافقة أو رفض مواعيد الزبائن بدقة.</p>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr><th>الزبون</th><th>الخدمة</th><th>الموعد</th><th>الحالة</th><th>التحكم</th></tr>
+                </thead>
+                <tbody id="bookingsListBody"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        async function checkAdminPass() {
+            if (document.getElementById('adminPassInput').value === "MMA") {
+                document.getElementById('adminLock').style.display = 'none';
+                document.getElementById('sidebar').style.display = 'block';
+                document.getElementById('adminPanel').style.display = 'block';
+                await refreshData();
+            } else { alert("كلمة السر خاطئة!"); }
+        }
+
+        async function showSection(sectionId, link) {
+            ['statsSection', 'businessesSection', 'bookingsSection'].forEach(s => document.getElementById(s).style.display = 'none');
+            document.getElementById(sectionId + 'Section').style.display = 'block';
+            document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
+            await refreshData();
+        }
+
+        async function refreshData() {
+            const biz = await E7_DB.getBusinesses();
+            const books = await E7_DB.getBookings();
+
+            document.getElementById('stBiz').innerText = biz.length;
+            document.getElementById('stBook').innerText = books.length;
+            document.getElementById('stPending').innerText = books.filter(b => b.status === 'pending' || b.status === 'cancel_requested').length;
+
+            // Render Businesses
+            const bizBody = document.getElementById('bizListBody');
+            bizBody.innerHTML = biz.length ? biz.map(b => `
+                <tr>
+                    <td><strong>${b.name}</strong></td>
+                    <td>${b.location}</td>
+                    <td><span class="badge" style="position:static;">${b.category}</span></td>
+                    <td><button class="btn btn-outline" style="color:#ef4444; border-color:#fee2e2;" onclick="deleteBiz(${b.id})">حذف</button></td>
+                </tr>
+            `).join('') : '<tr><td colspan="4" style="text-align:center; padding:3rem;">لا يوجد مشاريع</td></tr>';
+
+            // Render Bookings
+            const bookBody = document.getElementById('bookingsListBody');
+            bookBody.innerHTML = books.length ? books.map(b => `
+                <tr>
+                    <td>
+                        <div style="display:flex; gap:1rem; align-items:center;">
+                            <img src="${b.img || b.businessImage}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                            <div><strong>${b.businessName}</strong></div>
+                        </div>
+                    </td>
+                    <td>${b.service}</td>
+                    <td>${b.date} | ${b.time}</td>
+                    <td><span class="badge-status status-${b.status}">${getStatusText(b.status)}</span></td>
+                    <td>
+                        ${b.status === 'pending' ? `
+                            <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
+                            <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
+                        ` : b.status === 'cancel_requested' ? `
+                            <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.8rem; color:#ef4444; border-color:#fee2e2;" onclick="updateStatus(${b.id}, 'rejected')">الموافقة على الإلغاء</button>
+                        ` : `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.8rem; color:#ef4444;" onclick="deleteBooking(${b.id})">حذف</button>`}
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" style="text-align:center; padding:3rem;">لا يوجد حجوزات</td></tr>';
+        }
+
+        function getStatusText(s) {
+            if (s === 'pending') return 'قيد الانتظار';
+            if (s === 'approved') return 'مقبول';
+            if (s === 'cancel_requested') return 'طلب إلغاء من الزبون';
+            return 'مرفوض';
+        }
+
+        async function updateStatus(id, status) {
+            await E7_DB.updateBookingStatus(id, status);
+            await refreshData();
+        }
+
+        async function deleteBiz(id) {
+            if (confirm("هل تريد حذف هذا المشروع؟")) { 
+                await E7_DB.deleteBusiness(id); 
+                await refreshData(); 
+            }
+        }
+
+        async function deleteBooking(id) {
+            if (confirm("هل تريد حذف هذا السجل؟")) {
+                await fetch(`https://localhost:7123/api/Bookings/${id}`, { method: 'DELETE' });
+                await refreshData();
+            }
+        }
+    </script>
+</body>
+</html>
