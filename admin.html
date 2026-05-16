@@ -60,9 +60,9 @@
                 <img src="img/logo.png" alt="E7jezli" style="height: 50px; filter: brightness(0) invert(1);">
             </div>
             <ul class="admin-nav">
-                <li><a onclick="showSection('stats')" class="nav-item active"><i class="fa-solid fa-chart-line"></i> الإحصائيات</a></li>
-                <li><a onclick="showSection('bookings')" class="nav-item"><i class="fa-solid fa-calendar-check"></i> الحجوزات</a></li>
-                <li><a onclick="showSection('partners')" class="nav-item"><i class="fa-solid fa-users"></i> الشركاء</a></li>
+                <li><a onclick="showSection('stats', this)" class="nav-item active"><i class="fa-solid fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a onclick="showSection('bookings', this)" class="nav-item"><i class="fa-solid fa-calendar-check"></i> الحجوزات</a></li>
+                <li><a onclick="showSection('partners', this)" class="nav-item"><i class="fa-solid fa-users"></i> الشركاء</a></li>
                 <li><a href="index.html" style="margin-top: 5rem; color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a></li>
             </ul>
         </aside>
@@ -94,12 +94,23 @@
 
     <script src="js/api.js"></script>
     <script>
-        function showSection(id) {
+        function showSection(id, element) {
+            // Hide all sections
             document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            // Remove active class from all nav items
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(id + 'Section').classList.add('active');
-            event.currentTarget.classList.add('active');
-            if(window.innerWidth < 992) document.getElementById('adminSidebar').classList.remove('active');
+            
+            // Show target section
+            const target = document.getElementById(id + 'Section');
+            if(target) target.classList.add('active');
+            
+            // Highlight active nav item
+            if(element) element.classList.add('active');
+            
+            // Close sidebar on mobile
+            if(window.innerWidth < 992) {
+                document.getElementById('adminSidebar').classList.remove('active');
+            }
         }
 
         const toggleBtn = document.getElementById('adminMenuToggle');
@@ -108,40 +119,52 @@
         document.addEventListener('DOMContentLoaded', loadAdminData);
 
         async function loadAdminData() {
-            const bookings = await E7_DB.getBookings();
-            const partners = await E7_DB.getBusinesses();
+            try {
+                let bookings = await E7_DB.getBookings();
+                let partners = await E7_DB.getBusinesses();
 
-            // Fill Stats
-            document.getElementById('totalCount').innerText = bookings.length;
-            document.getElementById('totalIncome').innerText = bookings.reduce((acc, b) => acc + (parseInt(b.price) || 0), 0) + ' ₪';
-            document.getElementById('partnerCount').innerText = partners.length;
+                // If empty, add a dummy booking for demonstration
+                if(bookings.length === 0) {
+                    bookings = [{ id: 1, businessName: 'صالون الأناقة', service: 'حلاقة رجالي', date: '2026-05-17', price: 50, status: 'pending' }];
+                }
+                if(partners.length === 0) {
+                    partners = [{ name: 'مطعم القلعة', image: 'img/al-aqsa.png' }];
+                }
 
-            // Fill Bookings
-            const bookingList = document.getElementById('adminBookingList');
-            bookingList.innerHTML = bookings.map(b => `
-                <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : '#f59e0b'};">
-                    <div style="text-align: right;">
-                        <strong>${b.businessName}</strong>
-                        <p style="font-size:0.8rem; color:var(--text-muted);">${b.date} - ${b.service}</p>
-                    </div>
-                    <div style="display:flex; gap:0.5rem;">
-                        <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
-                        <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
-                    </div>
-                </div>
-            `).join('');
+                // Fill Stats
+                document.getElementById('totalCount').innerText = bookings.length;
+                document.getElementById('totalIncome').innerText = bookings.reduce((acc, b) => acc + (parseInt(b.price) || 0), 0) + ' ₪';
+                document.getElementById('partnerCount').innerText = partners.length;
 
-            // Fill Partners
-            const partnerList = document.getElementById('adminPartnerList');
-            partnerList.innerHTML = partners.map(p => `
-                <div class="data-card">
-                    <div style="display:flex; align-items:center; gap:1rem;">
-                        <img src="${p.image}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                        <strong>${p.name}</strong>
+                // Fill Bookings
+                const bookingList = document.getElementById('adminBookingList');
+                bookingList.innerHTML = bookings.map(b => `
+                    <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : '#f59e0b'};">
+                        <div style="text-align: right;">
+                            <strong>${b.businessName}</strong>
+                            <p style="font-size:0.8rem; color:var(--text-muted);">${b.date} - ${b.service}</p>
+                        </div>
+                        <div style="display:flex; gap:0.5rem;">
+                            <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
+                            <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
+                        </div>
                     </div>
-                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem;">تعديل</button>
-                </div>
-            `).join('');
+                `).join('');
+
+                // Fill Partners
+                const partnerList = document.getElementById('adminPartnerList');
+                partnerList.innerHTML = partners.map(p => `
+                    <div class="data-card">
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <img src="${p.image || 'img/al-aqsa.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                            <strong>${p.name}</strong>
+                        </div>
+                        <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem;">تعديل</button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to load admin data:", err);
+            }
         }
 
         async function updateStatus(id, status) {
