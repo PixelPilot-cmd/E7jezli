@@ -31,8 +31,8 @@ body { background: var(--bg-main); color: var(--text-main); direction: rtl; over
 
 .nav-wrapper { display: flex; align-items: center; justify-content: space-between; }
 
-.logo { display: flex; align-items: center; gap: 0.5rem; }
-.logo img { height: 60px; width: auto; object-fit: contain; mix-blend-mode: multiply; }
+.logo { display: flex; align-items: center; gap: 0.5rem; -webkit-tap-highlight-color: transparent; outline: none; }
+.logo img { height: 60px; width: auto; object-fit: contain; mix-blend-mode: multiply; pointer-events: none; }
 .logo span { font-size: 1.6rem; font-weight: 800; color: var(--primary); display: none; } /* Hide text if logo has text */
 
 .nav-links { display: flex; gap: 2.5rem; }
