@@ -1,7 +1,7 @@
-// E7_DB Management System - PURE CLOUD VERSION
-// This system now connects exclusively to the .NET Backend & PostgreSQL Cloud Database
+// E7_DB Management System - PRODUCTION CLOUD VERSION
+// This system connects to the .NET Backend hosted on Render & PostgreSQL on Supabase
 
-const API_BASE_URL = "https://localhost:7123/api";
+const API_BASE_URL = "https://e7jezli.onrender.com/api";
 
 const E7_DB = {
     // جلب كافة المشاريع من السحاب
@@ -37,7 +37,7 @@ const E7_DB = {
                     name: biz.name,
                     location: biz.location,
                     category: biz.category,
-                    imageUrl: biz.img, // Mapping 'img' from frontend to 'imageUrl' in backend
+                    imageUrl: biz.img,
                     facebookLink: biz.social?.fb,
                     instagramLink: biz.social?.ig,
                     whatsappLink: biz.social?.wa,
