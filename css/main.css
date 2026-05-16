@@ -31,8 +31,9 @@ body { background: var(--bg-main); color: var(--text-main); direction: rtl; over
 
 .nav-wrapper { display: flex; align-items: center; justify-content: space-between; }
 
-.logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem; font-weight: 800; color: var(--primary); }
-.logo i { font-size: 2rem; }
+.logo { display: flex; align-items: center; gap: 0.5rem; }
+.logo img { height: 45px; width: auto; object-fit: contain; }
+.logo span { font-size: 1.6rem; font-weight: 800; color: var(--primary); display: none; } /* Hide text if logo has text */
 
 .nav-links { display: flex; gap: 2.5rem; }
 .nav-links a { color: var(--text-main); font-weight: 500; font-size: 0.95rem; transition: 0.3s; }
