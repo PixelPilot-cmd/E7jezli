@@ -68,7 +68,7 @@ function renderBusinesses(data) {
                 <h3>${biz.name}</h3>
                 <p style="font-size:0.9rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${biz.location}</p>
                 <div class="card-meta">
-                    <div class="card-price">80 <span>شيكل</span></div>
+                    <div class="card-price" style="font-size: 0.9rem; color: var(--text-muted);"><i class="fa-solid fa-calendar-check"></i> <span>متاح للحجز</span></div>
                     <button class="btn btn-primary" onclick="window.location.href='business-details.html?id=${biz.id}'">احجز الآن</button>
                 </div>
             </div>
