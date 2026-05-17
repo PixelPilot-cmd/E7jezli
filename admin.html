@@ -211,10 +211,12 @@
                                     <p style="font-size:0.8rem; color:var(--text-muted);">الحالة: ${p.status === 'active' ? 'نشط' : p.status === 'approved' ? 'بانتظار الدفع' : 'قيد المراجعة'}</p>
                                 </div>
                             </div>
-                            <div style="display:flex; gap:0.5rem;">
+                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
                                 ${p.status === 'pending' ? `<button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;" onclick="adminUpdatePartnerStatus(${p.id}, 'approved')">موافقة مبدئية</button>` : ''}
-                                ${p.status === 'approved' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b; cursor:default;" disabled>بانتظار دفع الشريك</button>` : ''}
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeletePartner(${p.id})"><i class="fa-solid fa-trash"></i> رفض / حذف</button>
+                                ${p.status === 'approved' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b; cursor:default;" disabled>بانتظار الدفع</button>
+                                <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="adminUpdatePartnerStatus(${p.id}, 'active')">تنشيط مباشر</button>` : ''}
+                                ${p.status === 'active' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;" onclick="adminUpdatePartnerStatus(${p.id}, 'pending')">إيقاف مؤقت</button>` : ''}
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeletePartner(${p.id})"><i class="fa-solid fa-trash"></i> حذف</button>
                             </div>
                         </div>
                     `).join('');
@@ -227,6 +229,11 @@
 
         async function updateStatus(id, status) {
             await E7_DB.updateBookingStatus(id, status);
+            loadAdminData();
+        }
+
+        async function adminUpdatePartnerStatus(id, status) {
+            await E7_DB.updateBusinessStatus(id, status);
             loadAdminData();
         }
 
