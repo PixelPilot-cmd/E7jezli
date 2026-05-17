@@ -46,53 +46,7 @@
         <div class="loading-state" style="text-align:center; padding: 10rem 0;">جاري تحميل تفاصيل المنشأة...</div>
     </main>
 
-    <!-- Payment Modal -->
-    <div id="paymentModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="modal-close" onclick="closePayment()">&times;</span>
-            <h3>تأكيد الدفع والحجز</h3>
-            <p style="margin-bottom: 2rem;">اختر طريقة الدفع المناسبة لإتمام حجزك في فلسطين</p>
-            
-            <div class="pay-tabs">
-                <div class="pay-tab active" onclick="switchTab('card', this)">بطاقة بنكية</div>
-                <div class="pay-tab" onclick="switchTab('wallets', this)">محافظ إلكترونية</div>
-                <div class="pay-tab" onclick="switchTab('bank', this)">حوالة بنكية</div>
-            </div>
-
-            <div id="cardSection" class="payment-form">
-                <input type="text" placeholder="الاسم على البطاقة">
-                <input type="text" placeholder="رقم البطاقة (16 رقم)">
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" placeholder="MM/YY">
-                    <input type="text" placeholder="CVV">
-                </div>
-            </div>
-
-            <div id="walletsSection" style="display: none;">
-                <div class="wallet-grid">
-                    <div class="wallet-item">
-                        <i class="fa-solid fa-mobile-screen-button"></i>
-                        <span>Jawwal Pay</span>
-                    </div>
-                    <div class="wallet-item">
-                        <i class="fa-solid fa-wallet"></i>
-                        <span>PalPay</span>
-                    </div>
-                </div>
-                <p style="margin-top: 1rem; font-size: 0.85rem;">سيتم توجيهك لتطبيق المحفظة لتأكيد الدفع</p>
-            </div>
-
-            <div id="bankSection" style="display: none; text-align: right; background: #f1f5f9; padding: 1.5rem; border-radius: 15px;">
-                <p><strong>البنك الوطني:</strong> 1234567-001</p>
-                <p><strong>بنك فلسطين:</strong> 9876543-050</p>
-                <p style="margin-top: 1rem; font-size: 0.85rem; color: #ef4444;">* يرجى إرسال صورة التحويل لخدمة العملاء بعد الدفع.</p>
-            </div>
-
-            <button class="btn btn-primary" id="payBtn" style="width: 100%; justify-content: center; height: 60px; margin-top: 2rem;" onclick="processPayment()">
-                تأكيد الدفع الآن
-            </button>
-        </div>
-    </div>
+    <!-- Form is now in sidebar -->
 
     <script src="js/api.js"></script>
     <script>
@@ -111,38 +65,7 @@
                 return;
             }
 
-            let extraHTML = '';
-            const extraData = currentBiz.extraServices ? JSON.parse(currentBiz.extraServices) : {};
-            
-            if (currentBiz.category === 'صالات ترفيهية') {
-                extraHTML = `
-                    <div style="margin-top: 1.5rem; text-align: right;">
-                        <p style="font-weight:700; margin-bottom:0.5rem;">نوع الخدمة المطلوبة:</p>
-                        <select id="extraInputSelect" class="btn btn-outline" style="width:100%; text-align:right; background:white;">
-                            ${(extraData.serviceType || 'ألعاب ترفيهية').split('،').map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
-            } else if (currentBiz.category === 'شركات توصيل') {
-                extraHTML = `
-                    <div style="margin-top: 1.5rem; text-align: right; display:flex; flex-direction:column; gap:0.8rem;">
-                        <div>
-                            <p style="font-weight:700; margin-bottom:0.3rem;">نوع الطرد/التوصيل:</p>
-                            <select id="extraDelivType" class="btn btn-outline" style="width:100%; text-align:right; background:white;">
-                                ${(extraData.deliveryType || 'طعام، طرود، أجهزة').split('،').map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div>
-                            <p style="font-weight:700; margin-bottom:0.3rem;">مكان/منطقة التوصيل:</p>
-                            <input type="text" id="extraDelivPlace" value="${extraData.deliveryPlace || 'كافة المناطق'}" readonly style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
-                        </div>
-                        <div>
-                            <p style="font-weight:700; margin-bottom:0.3rem;">وقت التوصيل المتاح:</p>
-                            <input type="text" id="extraDelivTime" value="${extraData.deliveryTime || '24 ساعة'}" readonly style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
-                        </div>
-                    </div>
-                `;
-            }
+
 
             // Secondary Images HTML
             let secondaryImgsHTML = '';
@@ -173,92 +96,81 @@
                     </section>
                     <aside class="sidebar-area">
                         <div class="booking-sidebar">
-                            <h4>حجز موعد جديد</h4>
-                            <div style="margin-top: 1.5rem;">
-                                <div class="service-option" onclick="selectService(this, 'خدمة أساسية', 80)"><span>خدمة أساسية</span><strong>80 شيكل</strong></div>
-                                <div class="service-option" onclick="selectService(this, 'خدمة مميزة', 150)"><span>خدمة مميزة</span><strong>150 شيكل</strong></div>
-                            </div>
-                            
-                            ${extraHTML}
-
-                            <div style="margin: 2rem 0;" id="timeGrid">
-                                <p style="font-weight:700; margin-bottom:1rem;">الوقت المتاح:</p>
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem;">
-                                    <button class="btn btn-outline time-slot" onclick="selectTime(this)">04:00 م</button>
-                                    <button class="btn btn-outline time-slot" onclick="selectTime(this)">06:00 م</button>
+                            <h4 style="margin-bottom:1.5rem; font-size:1.3rem;">تقديم طلب حجز جديد</h4>
+                            <form id="bookingForm" onsubmit="submitBooking(event)">
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="font-weight:700; margin-bottom:0.5rem; display:block;">نوع الحجز</label>
+                                    <input type="text" id="b_type" required placeholder="مثال: خدمة تصوير، طاولة لشخصين..." style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
                                 </div>
-                            </div>
-                            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="openPayment()">تأكيد والحجز</button>
+                                <div style="margin-bottom: 1rem;">
+                                    <label style="font-weight:700; margin-bottom:0.5rem; display:block;">الغرض من الحجز (تفاصيل)</label>
+                                    <textarea id="b_purpose" required placeholder="اكتب غرضك من الحجز أو تفاصيل إضافية" rows="3" style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none; resize:none;"></textarea>
+                                </div>
+                                <div style="display:flex; gap:1rem; margin-bottom: 1rem;">
+                                    <div style="flex:1;">
+                                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">تاريخ الحجز</label>
+                                        <input type="date" id="b_date" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
+                                    </div>
+                                    <div style="flex:1;">
+                                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">الوقت</label>
+                                        <input type="time" id="b_time" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 1.5rem;">
+                                    <label style="font-weight:700; margin-bottom:0.5rem; display:block;">رقم الجوال للتواصل</label>
+                                    <input type="tel" id="b_phone" required placeholder="059xxxxxxx" style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="bookSubmitBtn" style="width:100%; justify-content:center; padding:1rem;">تأكيد وتقديم الطلب</button>
+                            </form>
                         </div>
                     </aside>
                 </div>
             `;
         });
 
-        function selectService(el, name, price) {
-            document.querySelectorAll('.service-option').forEach(s => s.classList.remove('active'));
-            el.classList.add('active');
-            selectedService = name;
-            selectedPrice = price;
-        }
-
-        function selectTime(el) {
-            document.querySelectorAll('.time-slot').forEach(t => t.classList.replace('btn-primary', 'btn-outline'));
-            el.classList.replace('btn-outline', 'btn-primary');
-            selectedTime = el.innerText;
-        }
-
-        function openPayment() {
-            if (!selectedService || !selectedTime) return alert("يرجى اختيار الخدمة والوقت");
-            document.getElementById('paymentModal').style.display = 'flex';
-        }
-
-        function closePayment() {
-            document.getElementById('paymentModal').style.display = 'none';
-        }
-
-        function switchTab(tab, el) {
-            ['cardSection', 'walletsSection', 'bankSection'].forEach(s => document.getElementById(s).style.display = 'none');
-            document.getElementById(tab + 'Section').style.display = 'block';
+        async function submitBooking(e) {
+            e.preventDefault();
             
-            document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-        }
+            // Authentication check
+            if (!localStorage.getItem('user_profile')) {
+                localStorage.setItem('redirect_after_login', window.location.href);
+                window.location.href = 'auth.html';
+                return;
+            }
 
-        async function processPayment() {
-            const btn = document.getElementById('payBtn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة الدفع...';
+            const btn = document.getElementById('bookSubmitBtn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
             btn.disabled = true;
 
-            let finalService = selectedService;
-            if (currentBiz.category === 'صالات ترفيهية') {
-                const selectEl = document.getElementById('extraInputSelect');
-                if (selectEl) {
-                    finalService += ` [نوع الخدمة: ${selectEl.value}]`;
-                }
-            } else if (currentBiz.category === 'شركات توصيل') {
-                const delivType = document.getElementById('extraDelivType');
-                const delivPlace = document.getElementById('extraDelivPlace');
-                const delivTime = document.getElementById('extraDelivTime');
-                if (delivType && delivPlace && delivTime) {
-                    finalService += ` [توصيل ${delivType.value} | من/إلى: ${delivPlace.value} | وقت: ${delivTime.value}]`;
-                }
-            }
+            const type = document.getElementById('b_type').value;
+            const purpose = document.getElementById('b_purpose').value;
+            const date = document.getElementById('b_date').value;
+            const time = document.getElementById('b_time').value;
+            const phone = document.getElementById('b_phone').value;
+
+            // Generate unique booking number
+            const bookingId = "E7-" + Math.floor(10000 + Math.random() * 90000);
+            const fullService = `رقم الحجز: ${bookingId} | النوع: ${type} | الغرض: ${purpose} | جوال: ${phone}`;
 
             const booking = { 
                 businessName: currentBiz.name, 
-                service: finalService, 
-                price: selectedPrice, 
-                time: selectedTime, 
-                date: new Date().toLocaleDateString('ar-EG'), 
+                service: fullService, 
+                price: 0, 
+                time: time, 
+                date: date, 
                 businessImage: currentBiz.img || currentBiz.imageUrl
             };
 
-            await E7_DB.saveBooking(booking);
-
-            setTimeout(() => {
-                window.location.href = 'my-bookings.html?success=true';
-            }, 1500);
+            try {
+                await E7_DB.saveBooking(booking);
+                setTimeout(() => {
+                    window.location.href = 'my-bookings.html?success=true';
+                }, 1000);
+            } catch (err) {
+                alert("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة لاحقاً.");
+                btn.innerHTML = 'تأكيد وتقديم الطلب';
+                btn.disabled = false;
+            }
         }
     </script>
 

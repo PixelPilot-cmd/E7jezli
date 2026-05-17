@@ -79,17 +79,24 @@
 
         function handleAuth(e, type) {
             e.preventDefault();
+            
             if (type === 'register') {
                 const name = document.getElementById('regName').value;
-                // محاكاة تسجيل
-                localStorage.setItem('user_profile', JSON.stringify({
-                    name: name,
-                    email: document.getElementById('regEmail').value,
-                    points: 150 // نقاط ترحيبية
-                }));
+                const email = document.getElementById('regEmail').value;
+                localStorage.setItem('user_profile', JSON.stringify({ name: name, email: email, points: 150 }));
                 alert('تم إنشاء الحساب بنجاح! تم منحك 150 نقطة ولاء ترحيبية.');
+            } else if (type === 'login') {
+                const email = document.querySelector('#loginForm input[type="email"]').value;
+                localStorage.setItem('user_profile', JSON.stringify({ name: "مستخدم E7jezli", email: email, points: 100 }));
             }
-            window.location.href = 'profile.html';
+
+            const redirectUrl = localStorage.getItem('redirect_after_login');
+            if (redirectUrl) {
+                localStorage.removeItem('redirect_after_login');
+                window.location.href = redirectUrl;
+            } else {
+                window.location.href = 'profile.html';
+            }
         }
     </script>
 </body>

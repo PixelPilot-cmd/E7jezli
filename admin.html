@@ -101,7 +101,7 @@
                 </header>
                 <div class="stats-grid">
                     <div class="stat-card"><i class="fa-solid fa-calendar-day"></i><h3>إجمالي الحجوزات</h3><p id="totalCount">0</p></div>
-                    <div class="stat-card"><i class="fa-solid fa-coins"></i><h3>إجمالي الدخل</h3><p id="totalIncome">0 ₪</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-clock-rotate-left"></i><h3>حجوزات قيد المراجعة</h3><p id="pendingCount">0</p></div>
                     <div class="stat-card"><i class="fa-solid fa-user-plus"></i><h3>الشركاء</h3><p id="partnerCount">0</p></div>
                 </div>
             </div>
@@ -174,7 +174,7 @@
                 let partners = await E7_DB.getBusinesses();
 
                 document.getElementById('totalCount').innerText = bookings.length;
-                document.getElementById('totalIncome').innerText = bookings.reduce((acc, b) => acc + (parseInt(b.price) || 0), 0) + ' ₪';
+                document.getElementById('pendingCount').innerText = bookings.filter(b => b.status === 'pending').length;
                 document.getElementById('partnerCount').innerText = partners.length;
 
                 // Render Bookings
