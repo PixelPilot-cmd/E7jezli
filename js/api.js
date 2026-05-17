@@ -80,9 +80,8 @@ const E7_DB = {
     // جلب تفاصيل مشروع معين
     getBusinessById: async (id) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/Business/${id}`);
-            if (response.ok) return await response.json();
-            return null;
+            const list = await E7_DB.getBusinesses();
+            return list.find(b => b.id == id) || null;
         } catch (e) {
             return null;
         }
