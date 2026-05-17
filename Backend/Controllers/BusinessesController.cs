@@ -43,5 +43,17 @@ namespace E7jezli.Server.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        // PUT: api/Businesses/5/status
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateBusinessStatus(int id, [FromBody] string newStatus)
+        {
+            var business = await _context.Businesses.FindAsync(id);
+            if (business == null) return NotFound();
+
+            business.Status = newStatus;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }

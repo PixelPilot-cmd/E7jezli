@@ -45,7 +45,7 @@ const E7_DB = {
                     secondaryImages: biz.secondaryImages,
                     extraServices: biz.extraServices,
                     rating: 5.0,
-                    status: "active"
+                    status: "pending"
                 })
             });
             return await response.json();
@@ -107,6 +107,19 @@ const E7_DB = {
             await fetch(`${API_BASE_URL}/Bookings/${id}`, { method: 'DELETE' });
         } catch (e) {
             console.error("Delete booking failed");
+        }
+    },
+
+    // تحديث حالة الشريك
+    updateBusinessStatus: async (id, status) => {
+        try {
+            await fetch(`${API_BASE_URL}/Business/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(status)
+            });
+        } catch (e) {
+            console.error("Failed to update business status");
         }
     }
 };

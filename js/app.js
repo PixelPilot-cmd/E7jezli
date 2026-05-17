@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadInitialData() {
     try {
         // جلب المشاريع وتخزينها في الذاكرة الثابتة
-        cachedBusinesses = await E7_DB.getBusinesses();
+        const allBusinesses = await E7_DB.getBusinesses();
+        // فقط الشركاء النشطين (الذين تم قبولهم ودفعوا) يظهرون للزبائن
+        cachedBusinesses = allBusinesses.filter(b => b.status === 'active' || !b.status);
         renderBusinesses(cachedBusinesses);
         
         // تحديث الإحصائيات

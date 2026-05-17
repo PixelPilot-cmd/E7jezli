@@ -48,5 +48,21 @@ namespace E7jezli.Server.Controllers
 
             return NoContent();
         }
+
+        // PATCH: api/Business/5/status
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateBusinessStatus(int id, [FromBody] string status)
+        {
+            var business = await _context.Businesses.FindAsync(id);
+            if (business == null)
+            {
+                return NotFound();
+            }
+
+            business.Status = status;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

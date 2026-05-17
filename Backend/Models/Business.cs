@@ -20,7 +20,9 @@ namespace E7jezli.Server.Models
         public string? ExtraServices { get; set; } // JSON or text list of extra service categories/details
         
         public double Rating { get; set; } = 5.0;
-        public string Status { get; set; } = "active";
+        
+        // Status can be "pending", "approved_unpaid", "rejected", "active"
+        public string Status { get; set; } = "pending"; 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

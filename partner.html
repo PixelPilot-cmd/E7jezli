@@ -26,8 +26,7 @@
     <div class="partner-hero">
         <div class="container">
             <h1>كن شريكاً في قصة نجاحنا</h1>
-            <p>انضم إلى مئات المنشآت الفلسطينية التي تدير حجوزاتها عبر إحجزلي.</p>
-        </div>
+            <p>انضم إلى مئات �        </div>
     </div>
 
     <!-- Payment Modal -->
@@ -35,7 +34,7 @@
         <div class="modal-content" style="max-width: 450px; padding: 2rem;">
             <span class="modal-close" onclick="closePaymentModal()">&times;</span>
             <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-credit-card" style="color:var(--primary);"></i> بوابة الدفع الآمنة</h3>
-            <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--text-muted);">اشتراك شهري للمنشآت بقيمة <strong style="color:var(--primary); font-size:1.2rem;">20$</strong> شهرياً</p>
+            <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--text-muted);">تنشيط المنشأة واشتراكها شهرياً بقيمة <strong style="color:var(--primary); font-size:1.2rem;">20$</strong></p>
             
             <form id="paymentForm">
                 <div class="form-group" style="text-align: right;">
@@ -56,13 +55,21 @@
                         <input type="password" placeholder="123" required maxlength="3" style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:1rem;">دفع وتأكيد الاشتراك ($20)</button>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:1rem;">تأكيد الدفع والتنشيط ($20)</button>
             </form>
         </div>
     </div>
 
-    <main class="container">
-        <div class="form-container" style="margin-top: 1rem; max-width: 700px; padding: 2rem;">
+    <main class="container" style="margin-top: 2rem; margin-bottom: 5rem;">
+        <!-- Tabs Section -->
+        <div class="partner-tabs" style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem; max-width:700px; margin-left:auto; margin-right:auto;">
+            <button class="btn btn-primary" id="tabRegisterBtn" onclick="switchPartnerTab('register')" style="flex:1; justify-content:center; height: 50px;">تقديم طلب جديد</button>
+            <button class="btn btn-outline" id="tabPaymentBtn" onclick="switchPartnerTab('payment')" style="flex:1; justify-content:center; height: 50px;">استكمال الدفع للطلبات المقبولة</button>
+        </div>
+
+        <!-- Tab 1: Registration Form -->
+        <div id="registerTab" class="form-container" style="max-width: 700px; padding: 2.5rem; display: block; margin: 0 auto;">
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center;">تقديم طلب انضمام كشريك</h2>
             <form id="partnerForm">
                 <div class="form-group">
                     <label>اسم المنشأة / العمل</label>
@@ -133,8 +140,25 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; height:60px; margin-top:1rem; font-size:1.1rem;">دفع الاشتراك وتقديم الطلب</button>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; height:60px; margin-top:1rem; font-size:1.1rem;">تقديم طلب الانضمام</button>
             </form>
+        </div>
+
+        <!-- Tab 2: Complete Payment Form -->
+        <div id="paymentTab" class="form-container" style="max-width: 700px; padding: 2.5rem; display: none; margin: 0 auto;">
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; text-align: center;"><i class="fa-solid fa-credit-card" style="color:var(--primary);"></i> استكمال الدفع للشركاء المقبولين</h2>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:2rem; text-align: center;">إذا قمت بتقديم طلب انضمام ووافق عليه الآدمن، اكتب اسم منشأتك أدناه لاستكمال الدفع وتنشيط حسابك فوراً.</p>
+            
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label>اسم المنشأة كما سجلته</label>
+                <div style="display:flex; gap:0.5rem;">
+                    <input type="text" id="searchBizName" placeholder="مثال: صالون الفخامة" style="flex:1; padding:0.8rem; border-radius:12px; border:1px solid var(--border); outline:none;">
+                    <button class="btn btn-primary" onclick="searchApprovedPartner()" style="padding:0 2rem; border-radius: 12px; height: 50px;">تحقق وبحث</button>
+                </div>
+            </div>
+
+            <!-- Status Result Box -->
+            <div id="partnerStatusResult" style="padding: 1.5rem; border-radius: 15px; background: var(--bg-main); border: 1px solid var(--border); display: none; text-align: right;"></div>
         </div>
     </main>
 
@@ -147,6 +171,22 @@
     <script src="js/api.js"></script>
     <script>
         let uploadedImages = [];
+        let selectedBusinessIdToPay = null;
+
+        // Tab Switching
+        function switchPartnerTab(tab) {
+            if (tab === 'register') {
+                document.getElementById('registerTab').style.display = 'block';
+                document.getElementById('paymentTab').style.display = 'none';
+                document.getElementById('tabRegisterBtn').className = 'btn btn-primary';
+                document.getElementById('tabPaymentBtn').className = 'btn btn-outline';
+            } else {
+                document.getElementById('registerTab').style.display = 'none';
+                document.getElementById('paymentTab').style.display = 'block';
+                document.getElementById('tabRegisterBtn').className = 'btn btn-outline';
+                document.getElementById('tabPaymentBtn').className = 'btn btn-primary';
+            }
+        }
 
         // Compress and convert files to base64
         document.getElementById('bizImages').addEventListener('change', function(e) {
@@ -158,7 +198,7 @@
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        const max_size = 800; // Max width or height
+                        const max_size = 800;
                         let width = img.width;
                         let height = img.height;
                         
@@ -179,7 +219,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Compress to 70% quality JPEG
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                         uploadedImages.push(compressedBase64);
                     };
@@ -236,66 +275,12 @@
             if (submitBtn) submitBtn.innerText = "إضافة المنشأة كمسؤول (مجاناً)";
         }
 
-        // Handle partner submission (opens payment modal or submits directly if admin)
+        // Register Partner Submit Action (NO INITIAL PAYMENT!)
         document.getElementById('partnerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (isAdminMode) {
-                // Submit directly for free
-                const btn = e.target.querySelector('button[type="submit"]');
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال كمسؤول...';
-                btn.disabled = true;
-
-                const extraServicesData = {};
-                const cat = document.getElementById('bizCat').value;
-                if (cat === 'صالات ترفيهية') {
-                    extraServicesData.serviceType = document.getElementById('extraServiceType').value;
-                } else if (cat === 'شركات توصيل') {
-                    extraServicesData.deliveryType = document.getElementById('extraDelivType').value;
-                    extraServicesData.deliveryTime = document.getElementById('extraDelivTime').value;
-                    extraServicesData.deliveryPlace = document.getElementById('extraDelivPlace').value;
-                }
-
-                const biz = {
-                    name: document.getElementById('bizName').value,
-                    location: document.getElementById('bizCity').value,
-                    category: cat,
-                    img: uploadedImages[0] || "https://images.unsplash.com/photo-1521791136064-7986c2959210?auto=format&fit=crop&w=800",
-                    secondaryImages: uploadedImages.slice(1).join(','),
-                    description: document.getElementById('bizDesc').value,
-                    extraServices: JSON.stringify(extraServicesData),
-                    social: {
-                        fb: document.getElementById('fbLink').value,
-                        ig: document.getElementById('igLink').value,
-                        wa: document.getElementById('waLink').value
-                    }
-                };
-
-                try {
-                    await E7_DB.saveBusiness(biz);
-                    alert("تمت إضافة المنشأة بنجاح ومجاناً كمسؤول!");
-                    window.location.href = "admin.html";
-                } catch (err) {
-                    alert("⚠️ لم نتمكن من الاتصال بالسيرفر السحابي. قد يكون السيرفر في وضع النوم (استيقاظه يستغرق 30 ثانية لأول مرة). يرجى الضغط مرة أخرى بعد قليل للتأكيد.");
-                    btn.innerHTML = 'إضافة المنشأة كمسؤول (مجاناً)';
-                    btn.disabled = false;
-                }
-            } else {
-                // Show payment modal
-                document.getElementById('paymentModal').style.display = 'flex';
-            }
-        });
-
-        function closePaymentModal() {
-            document.getElementById('paymentModal').style.display = 'none';
-        }
-
-        // Handle Payment Submit & Save to DB
-        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const payBtn = e.target.querySelector('button');
-            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الاتصال بالسيرفر وتأكيد الدفع... (الرجاء الانتظار)';
-            payBtn.disabled = true;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
+            btn.disabled = true;
 
             const extraServicesData = {};
             const cat = document.getElementById('bizCat').value;
@@ -308,6 +293,113 @@
             }
 
             const biz = {
+                name: document.getElementById('bizName').value,
+                location: document.getElementById('bizCity').value,
+                category: cat,
+                img: uploadedImages[0] || "https://images.unsplash.com/photo-1521791136064-7986c2959210?auto=format&fit=crop&w=800",
+                secondaryImages: uploadedImages.slice(1).join(','),
+                description: document.getElementById('bizDesc').value,
+                extraServices: JSON.stringify(extraServicesData),
+                social: {
+                    fb: document.getElementById('fbLink').value,
+                    ig: document.getElementById('igLink').value,
+                    wa: document.getElementById('waLink').value
+                },
+                status: isAdminMode ? "active" : "pending" // Admin added is active directly, regular is pending
+            };
+
+            try {
+                await E7_DB.saveBusiness(biz);
+                if (isAdminMode) {
+                    alert("تمت إضافة المنشأة بنجاح ومجاناً كمسؤول!");
+                    window.location.href = "admin.html";
+                } else {
+                    alert("🎉 تم إرسال طلب الانضمام بنجاح! طلبك الآن قيد المراجعة والدراسة من قبل الإدارة. بمجرد الموافقة، يمكنك العودة لهذه الصفحة لاستكمال الدفع وتنشيط حسابك.");
+                    window.location.reload();
+                }
+            } catch (err) {
+                alert("⚠️ لم نتمكن من الاتصال بالسيرفر السحابي. قد يكون السيرفر في وضع النوم (استيقاظه يستغرق 30 ثانية لأول مرة). يرجى الضغط مرة أخرى بعد قليل للتأكيد.");
+                btn.innerHTML = isAdminMode ? 'إضافة المنشأة كمسؤول (مجاناً)' : 'تقديم طلب الانضمام';
+                btn.disabled = false;
+            }
+        });
+
+        // Search for Approved Partner in Tab 2
+        async function searchApprovedPartner() {
+            const query = document.getElementById('searchBizName').value.trim().toLowerCase();
+            const resultBox = document.getElementById('partnerStatusResult');
+            
+            if (!query) return alert("يرجى كتابة اسم المنشأة للبحث");
+
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري البحث والتحقق...';
+
+            try {
+                const businesses = await E7_DB.getBusinesses();
+                const matched = businesses.find(b => b.name.trim().toLowerCase() === query);
+
+                if (!matched) {
+                    resultBox.innerHTML = `
+                        <p style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-circle-xmark"></i> لم يتم العثور على منشأة بهذا الاسم!</p>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">يرجى التأكد من كتابة الاسم تماماً كما سجلته في نموذج طلب الانضمام.</p>
+                    `;
+                    return;
+                }
+
+                selectedBusinessIdToPay = matched.id;
+
+                if (matched.status === 'pending') {
+                    resultBox.innerHTML = `
+                        <p style="color:#f59e0b; font-weight:800; font-size:1.1rem;"><i class="fa-solid fa-clock"></i> طلبك قيد المراجعة والدراسة</p>
+                        <p style="color:var(--text-muted); margin-top:0.5rem; font-size:0.9rem;">شريكنا العزيز <strong>${matched.name}</strong>، طلب انضمامك لا يزال قيد الدراسة والمراجعة من قبل الإدارة. يرجى التحقق مرة أخرى لاحقاً.</p>
+                    `;
+                } else if (matched.status === 'approved') {
+                    resultBox.innerHTML = `
+                        <p style="color:#10b981; font-weight:800; font-size:1.1rem;"><i class="fa-solid fa-circle-check"></i> تهانينا! تمت الموافقة على طلبك</p>
+                        <p style="color:var(--text-muted); margin-top:0.5rem; font-size:0.9rem;">طلبك للمنشأة <strong>${matched.name}</strong> مقبول وجاهز للتنشيط! يرجى استكمال عملية الدفع بقيمة <strong>20$</strong> لتنشيط حسابك وظهوره فوراً على المنصة للزبائن.</p>
+                        <button class="btn btn-primary" onclick="openPaymentModal()" style="margin-top:1rem; width:100%; justify-content:center;">دفع الاشتراك وتنشيط المنشأة ($20)</button>
+                    `;
+                } else if (matched.status === 'active') {
+                    resultBox.innerHTML = `
+                        <p style="color:#10b981; font-weight:800; font-size:1.1rem;"><i class="fa-solid fa-circle-check"></i> حسابك نشط بالفعل!</p>
+                        <p style="color:var(--text-muted); margin-top:0.5rem; font-size:0.9rem;">منشأتك <strong>${matched.name}</strong> نشطة ومتاحة لحجوزات الزبائن وتظهر على المنصة بشكل كامل. شكراً لانضمامك إلينا!</p>
+                    `;
+                }
+            } catch (err) {
+                resultBox.innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء الاتصال بالسيرفر. يرجى المحاولة لاحقاً.</p>';
+            }
+        }
+
+        function openPaymentModal() {
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+
+        // Handle Payment Submit (Visa) & Activate Partner Status in DB
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payBtn = e.target.querySelector('button');
+            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الدفع والتنشيط...';
+            payBtn.disabled = true;
+
+            try {
+                // Update business status to active in cloud DB
+                await E7_DB.updateBusinessStatus(selectedBusinessIdToPay, "active");
+                alert("🎉 تم تأكيد الدفع وتنشيط منشأتك بنجاح! أصبحت منشأتك تظهر للزبائن الآن ويمكنهم الحجز عندك.");
+                closePaymentModal();
+                window.location.href = "index.html";
+            } catch (err) {
+                alert("⚠️ حدث خطأ أثناء الاتصال بالسيرفر لتنشيط الحساب. يرجى المحاولة مرة أخرى.");
+                payBtn.innerHTML = 'تأكيد الدفع والتنشيط ($20)';
+                payBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>nst biz = {
                 name: document.getElementById('bizName').value,
                 location: document.getElementById('bizCity').value,
                 category: cat,

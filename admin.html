@@ -200,16 +200,21 @@
                 // Render Partners
                 const partnerList = document.getElementById('adminPartnerList');
                 if (partners.length === 0) {
-                    partnerList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد شركاء حقيقيين في قاعدة البيانات حتى الآن.</p>';
+                    partnerList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد شركاء في قاعدة البيانات حتى الآن.</p>';
                 } else {
                     partnerList.innerHTML = partners.map(p => `
-                        <div class="data-card">
+                        <div class="data-card" style="border-right: 4px solid ${p.status === 'active' ? '#10b981' : p.status === 'approved' ? '#3b82f6' : '#f59e0b'};">
                             <div style="display:flex; align-items:center; gap:1rem;">
-                                <img src="${p.image || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                                <strong>${p.name}</strong>
+                                <img src="${p.image || p.imageUrl || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                                <div>
+                                    <strong>${p.name}</strong>
+                                    <p style="font-size:0.8rem; color:var(--text-muted);">الحالة: ${p.status === 'active' ? 'نشط' : p.status === 'approved' ? 'بانتظار الدفع' : 'قيد المراجعة'}</p>
+                                </div>
                             </div>
                             <div style="display:flex; gap:0.5rem;">
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeletePartner(${p.id})"><i class="fa-solid fa-trash"></i> حذف</button>
+                                ${p.status === 'pending' ? `<button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;" onclick="adminUpdatePartnerStatus(${p.id}, 'approved')">موافقة مبدئية</button>` : ''}
+                                ${p.status === 'approved' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b; cursor:default;" disabled>بانتظار دفع الشريك</button>` : ''}
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeletePartner(${p.id})"><i class="fa-solid fa-trash"></i> رفض / حذف</button>
                             </div>
                         </div>
                     `).join('');
