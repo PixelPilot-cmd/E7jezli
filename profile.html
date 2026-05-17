@@ -109,5 +109,131 @@
             window.location.href = 'index.html';
         }
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const myBizName = localStorage.getItem("myBusinessName");
+            if (!myBizName) return;
+
+            // Ensure E7_DB is loaded
+            if (typeof E7_DB === 'undefined') {
+                await new Promise((resolve) => {
+                    const s = document.createElement('script');
+                    s.src = 'js/api.js';
+                    s.onload = resolve;
+                    document.head.appendChild(s);
+                });
+            }
+
+            try {
+                const businesses = await E7_DB.getBusinesses();
+                const myBiz = businesses.find(b => b.name === myBizName);
+                if (!myBiz) return;
+
+                // Create a container card for the partner status
+                const card = document.createElement('div');
+                card.className = 'dashboard-card fade-in';
+                card.style.cssText = `
+                    background: rgba(255, 255, 255, 0.8);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(229, 231, 235, 0.5);
+                    border-radius: 20px;
+                    padding: 2rem;
+                    margin-top: 2rem;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                    position: relative;
+                    overflow: hidden;
+                    direction: rtl;
+                    text-align: right;
+                `;
+
+                // Status configuration
+                let statusText = '';
+                let statusColor = '';
+                let statusIcon = '';
+                let actionHtml = '';
+
+                if (myBiz.status === 'pending') {
+                    statusText = 'طلبك قيد المراجعة';
+                    statusColor = '#f59e0b'; // Amber
+                    statusIcon = 'fa-clock';
+                    actionHtml = `<p style="font-size:0.9rem; color:var(--text-muted); margin:0; line-height:1.6;">يسعدنا اهتمامك بالانضمام إلينا كشريك! طلبك الخاص بالمنشأة <strong>${myBiz.name}</strong> يخضع حالياً للمراجعة والتدقيق من قبل الإدارة وسنقوم بالرد عليك في أقرب وقت.</p>`;
+                } else if (myBiz.status === 'approved') {
+                    statusText = 'تمت الموافقة! بانتظار تفعيل الاشتراك';
+                    statusColor = '#3b82f6'; // Blue
+                    statusIcon = 'fa-circle-check';
+                    actionHtml = `
+                        <p style="font-size:0.9rem; color:var(--text-muted); margin:0; line-height:1.6;">تهانينا! تمت الموافقة المبدئية على منشأتك <strong>${myBiz.name}</strong>. يرجى سداد رسوم الاشتراك السنوي البالغة <strong>20$</strong> لتنشيط حسابك وظهور منشأتك فوراً للعملاء على المنصة.</p>
+                        <button id="payActivateBtn" class="btn btn-primary" style="margin-top:1rem; align-self:flex-start; display:flex; align-items:center; gap:0.5rem; justify-content:center; width:100%; max-width:280px; padding:0.8rem; border-radius:12px; background:var(--primary); color:white; border:none; cursor:pointer; font-weight:700;">
+                            <i class="fa-solid fa-credit-card"></i> دفع الاشتراك وتنشيط المنشأة ($20)
+                        </button>
+                    `;
+                } else if (myBiz.status === 'active') {
+                    statusText = 'شريك نشط بالمنصة';
+                    statusColor = '#10b981'; // Green
+                    statusIcon = 'fa-star';
+                    actionHtml = `<p style="font-size:0.9rem; color:var(--text-muted); margin:0; line-height:1.6;">منشأتك <strong>${myBiz.name}</strong> نشطة بالكامل وتظهر الآن لجميع الزبائن والزوار ويمكنهم حجز خدماتك مباشرة!</p>`;
+                } else {
+                    return; // Suppress showing if not relevant
+                }
+
+                card.innerHTML = `
+                    <div style="position:absolute; top:-20px; left:-20px; width:120px; height:120px; background:${statusColor}0f; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                        <i class="fa-solid ${statusIcon}" style="font-size:4rem; color:${statusColor}; opacity:0.15; transform: rotate(-15deg);"></i>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <div style="width:50px; height:50px; border-radius:12px; background:${statusColor}15; display:flex; align-items:center; justify-content:center; color:${statusColor}; font-size:1.5rem;">
+                            <i class="fa-solid ${statusIcon}"></i>
+                        </div>
+                        <div>
+                            <span style="font-size:0.8rem; font-weight:700; color:${statusColor}; text-transform:uppercase; letter-spacing:1px; background:${statusColor}10; padding:0.25rem 0.75rem; border-radius:20px; display:inline-block; margin-bottom:0.3rem;">شراكة Luxoria</span>
+                            <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:var(--text-main);">${statusText}</h3>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid rgba(229, 231, 235, 0.5); padding-top: 1.5rem; display:flex; flex-direction:column; gap:1rem;">
+                        ${actionHtml}
+                    </div>
+                `;
+
+                // Insert into the profile layout
+                const targetContainer = document.querySelector('.profile-grid') || 
+                                        document.querySelector('.profile-container') || 
+                                        document.querySelector('.container') || 
+                                        document.body.querySelector('main') || 
+                                        document.body;
+                                        
+                if (targetContainer) {
+                    targetContainer.appendChild(card);
+                }
+
+                // Bind Payment Action
+                const payBtn = card.querySelector('#payActivateBtn');
+                if (payBtn) {
+                    payBtn.addEventListener('click', async () => {
+                        payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة الدفع والتنشيط...';
+                        payBtn.disabled = true;
+
+                        // Simulate Payment Modal or direct processing
+                        setTimeout(async () => {
+                            try {
+                                await E7_DB.updateBusinessStatus(myBiz.id, 'active');
+                                alert("🎉 تهانينا! تم تأكيد دفع الرسوم بنجاح وتنشيط منشأتك بالكامل. أصبحت الآن ظاهرة لجميع زبائن Luxoria!");
+                                window.location.reload();
+                            } catch (err) {
+                                alert("⚠️ حدث خطأ أثناء الاتصال بالسيرفر لتنشيط الحساب. يرجى المحاولة مرة أخرى.");
+                                payBtn.innerHTML = '<i class="fa-solid fa-credit-card"></i> دفع الاشتراك وتنشيط المنشأة ($20)';
+                                payBtn.disabled = false;
+                            }
+                        }, 2000);
+                    });
+                }
+
+            } catch (e) {
+                console.error("Error loading partner status on profile:", e);
+            }
+        });
+    </script>
 </body>
 </html>

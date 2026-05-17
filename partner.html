@@ -309,6 +309,7 @@
             };
 
             try {
+                localStorage.setItem("myBusinessName", biz.name);
                 await E7_DB.saveBusiness(biz);
                 if (isAdminMode) {
                     alert("تمت إضافة المنشأة بنجاح ومجاناً كمسؤول!");
