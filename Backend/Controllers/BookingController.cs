@@ -21,6 +21,11 @@ namespace E7jezli.Server.Controllers
         public async Task<ActionResult<Booking>> Create([FromBody] Booking booking)
         {
             if (booking == null) return BadRequest("Invalid booking data.");
+            // Validate required fields
+            if (booking.BusinessId == 0 || booking.UserId == 0)
+                return BadRequest("BusinessId and UserId must be provided.");
+            if (string.IsNullOrWhiteSpace(booking.Service))
+                return BadRequest("Service description is required.");
             // الوضع الافتراضي هو انتظار موافقة الشريك
             booking.Status = "Pending";
             booking.BookingDate = DateTime.UtcNow;
