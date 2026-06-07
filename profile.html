@@ -80,7 +80,7 @@
             <div class="dashboard-card">
                 <h3><i class="fa-solid fa-shield-halved"></i> الأمان</h3>
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin: 1rem 0;">حسابك محمي بنظام التحقق الثنائي</p>
-                <button class="btn btn-outline" style="width: 100%; justify-content: center;">تغيير كلمة المرور</button>
+                <button class="btn btn-outline" style="width: 100%; justify-content: center;" onclick="promptChangePassword()">تغيير كلمة المرور</button>
                 <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem; background: #fee2e2; color: #dc2626; border: none;" onclick="logout()">تسجيل الخروج</button>
             </div>
         </div>
@@ -95,12 +95,24 @@
                 return;
             }
 
+            // تحديث نقاط وبيانات المستخدم من قاعدة البيانات
+            try {
+                const latestUser = await E7_DB.getUserProfile(profile.email);
+                if (latestUser) {
+                    profile.points = latestUser.points;
+                    profile.name = latestUser.fullName;
+                    localStorage.setItem('user_profile', JSON.stringify(profile));
+                }
+            } catch (e) {
+                console.error("Failed to fetch fresh user profile:", e);
+            }
+
             document.getElementById('userName').innerText = profile.name;
             document.getElementById('userEmail').innerText = profile.email;
             document.getElementById('userPoints').innerText = profile.points || 0;
 
-            // تحميل حجوزات المستخدم كنشاطات
-            const books = await E7_DB.getBookings();
+            // تحميل حجوزات المستخدم الحالي كنشاطات
+            const books = await E7_DB.getBookings(profile.email);
             const log = document.getElementById('activityLog');
             if (books.length === 0) {
                 log.innerHTML = '<p style="opacity: 0.5;">لا توجد حجوزات سابقة حالياً.</p>';
@@ -111,11 +123,37 @@
                             <strong>${b.businessName}</strong>
                             <p style="font-size: 0.8rem; color: var(--text-muted);">${b.service} - ${b.date}</p>
                         </div>
-                        <span class="badge-status status-${b.status}">${b.status === 'pending' ? 'بانتظار التأكيد' : 'مؤكد'}</span>
+                        <span class="badge-status status-${b.status || 'pending'}">${getStatusText(b.status)}</span>
                     </div>
                 `).join('');
             }
         });
+
+        function getStatusText(s) {
+            if (s === 'approved') return 'تم القبول';
+            if (s === 'rejected') return 'مرفوض';
+            if (s === 'cancel_requested') return 'طلب إلغاء معلق';
+            return 'قيد الانتظار';
+        }
+
+        async function promptChangePassword() {
+            const profile = JSON.parse(localStorage.getItem('user_profile'));
+            if (!profile) return;
+            const oldPassword = prompt("الرجاء إدخال كلمة المرور الحالية:");
+            if (!oldPassword) return;
+            const newPassword = prompt("الرجاء إدخال كلمة المرور الجديدة (6 خانات على الأقل):");
+            if (!newPassword) return;
+            if (newPassword.length < 6) {
+                alert("يجب أن تكون كلمة المرور الجديدة مكونة من 6 خانات على الأقل.");
+                return;
+            }
+            try {
+                await E7_DB.changePassword(profile.email, oldPassword, newPassword);
+                alert("تم تغيير كلمة المرور بنجاح.");
+            } catch (err) {
+                alert(err.message || "فشل تغيير كلمة المرور.");
+            }
+        }
 
         function logout() {
             localStorage.removeItem('user_profile');

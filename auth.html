@@ -63,6 +63,7 @@
         </div>
     </div>
 
+    <script src="js/api.js"></script>
     <script>
         function switchTab(type) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -77,25 +78,41 @@
             }
         }
 
-        function handleAuth(e, type) {
+        async function handleAuth(e, type) {
             e.preventDefault();
-            
-            if (type === 'register') {
-                const name = document.getElementById('regName').value;
-                const email = document.getElementById('regEmail').value;
-                localStorage.setItem('user_profile', JSON.stringify({ name: name, email: email, points: 150 }));
-                alert('تم إنشاء الحساب بنجاح! تم منحك 150 نقطة ولاء ترحيبية.');
-            } else if (type === 'login') {
-                const email = document.querySelector('#loginForm input[type="email"]').value;
-                localStorage.setItem('user_profile', JSON.stringify({ name: "مستخدم E7jezli", email: email, points: 100 }));
-            }
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...';
+            btn.disabled = true;
 
-            const redirectUrl = localStorage.getItem('redirect_after_login');
-            if (redirectUrl) {
-                localStorage.removeItem('redirect_after_login');
-                window.location.href = redirectUrl;
-            } else {
-                window.location.href = 'profile.html';
+            try {
+                if (type === 'register') {
+                    const name = document.getElementById('regName').value;
+                    const email = document.getElementById('regEmail').value;
+                    const password = document.getElementById('regPass').value;
+
+                    const user = await E7_DB.registerUser(name, email, password);
+                    localStorage.setItem('user_profile', JSON.stringify({ name: user.fullName, email: user.email, points: user.points }));
+                    alert('تم إنشاء الحساب بنجاح! تم منحك 150 نقطة ولاء ترحيبية.');
+                } else if (type === 'login') {
+                    const email = document.querySelector('#loginForm input[type="email"]').value;
+                    const password = document.querySelector('#loginForm input[type="password"]').value;
+
+                    const user = await E7_DB.loginUser(email, password);
+                    localStorage.setItem('user_profile', JSON.stringify({ name: user.fullName, email: user.email, points: user.points }));
+                }
+
+                const redirectUrl = localStorage.getItem('redirect_after_login');
+                if (redirectUrl) {
+                    localStorage.removeItem('redirect_after_login');
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.href = 'profile.html';
+                }
+            } catch (err) {
+                alert(err.message || 'حدث خطأ ما أثناء المصادقة.');
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
     </script>

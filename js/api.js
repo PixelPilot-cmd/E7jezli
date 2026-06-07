@@ -1,7 +1,9 @@
 // E7_DB Management System - PRODUCTION CLOUD VERSION
 // This system connects to the .NET Backend hosted on Render & PostgreSQL on Supabase
 
-const API_BASE_URL = "https://e7jezli.onrender.com/api";
+const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:5123/api"
+    : "https://e7jezli.onrender.com/api";
 
 const E7_DB = {
     // جلب كافة المشاريع من السحاب
@@ -16,10 +18,14 @@ const E7_DB = {
         }
     },
 
-    // جلب الحجوزات
-    getBookings: async () => {
+    // جلب الحجوزات مع إمكانية التصفية بالبريد الإلكتروني للزبون
+    getBookings: async (email) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/Bookings`);
+            let url = `${API_BASE_URL}/Bookings`;
+            if (email) {
+                url += `?email=${encodeURIComponent(email)}`;
+            }
+            const response = await fetch(url);
             if (!response.ok) return [];
             return await response.json();
         } catch (e) {
@@ -58,13 +64,16 @@ const E7_DB = {
     // تأكيد حجز جديد
     saveBooking: async (booking) => {
         try {
-            await fetch(`${API_BASE_URL}/Bookings`, {
+            const response = await fetch(`${API_BASE_URL}/Bookings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(booking)
             });
+            if (!response.ok) throw new Error("فشل إرسال طلب الحجز");
+            return await response.json();
         } catch (e) {
-            console.error("Booking failed");
+            console.error("Booking failed", e);
+            throw e;
         }
     },
 
@@ -120,5 +129,54 @@ const E7_DB = {
         } catch (e) {
             console.error("Failed to update business status");
         }
+    },
+
+    // تسجيل حساب مستخدم جديد
+    registerUser: async (fullName, email, password) => {
+        const response = await fetch(`${API_BASE_URL}/Auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullName, email, password })
+        });
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || "فشل تسجيل الحساب");
+        }
+        return await response.json();
+    },
+
+    // تسجيل دخول المستخدم
+    loginUser: async (email, password) => {
+        const response = await fetch(`${API_BASE_URL}/Auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+        }
+        return await response.json();
+    },
+
+    // جلب ملف المستخدم الشخصي لتحديث النقاط
+    getUserProfile: async (email) => {
+        const response = await fetch(`${API_BASE_URL}/Auth/profile?email=${encodeURIComponent(email)}`);
+        if (!response.ok) return null;
+        return await response.json();
+    },
+
+    // تغيير كلمة المرور للمستخدم
+    changePassword: async (email, oldPassword, newPassword) => {
+        const response = await fetch(`${API_BASE_URL}/Auth/change-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, oldPassword, newPassword })
+        });
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || "فشل تغيير كلمة المرور");
+        }
+        return await response.json();
     }
 };

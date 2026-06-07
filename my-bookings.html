@@ -103,7 +103,26 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const list = document.getElementById('myBookingsList');
-            const bookings = await E7_DB.getBookings();
+            const profile = JSON.parse(localStorage.getItem('user_profile'));
+            if (!profile) {
+                list.innerHTML = `
+                    <div style="text-align:center; padding: 5rem 2rem; background:white; border-radius:25px; border: 1px solid var(--border);">
+                        <i class="fa-solid fa-lock" style="font-size:3.5rem; color:var(--primary); opacity:0.1; margin-bottom:1.5rem; display:block;"></i>
+                        <h2 style="font-size: 1.5rem;">يرجى تسجيل الدخول أولاً</h2>
+                        <p style="color:var(--text-muted);">تحتاج لتسجيل الدخول لمشاهدة حجوزاتك الشخصية.</p>
+                        <a href="auth.html" class="btn btn-primary" style="display:inline-flex; margin-top:1.5rem;">تسجيل الدخول الآن</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // تحقق من وجود معامل نجاح الحجز لعرض الإشعار
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true') {
+                showInfoModal("نجاح عملية الحجز 🎉", "تم إرسال طلب الحجز للمؤسسة بنجاح! يمكنك متابعة حالة طلبك وتحديثاته مباشرة من هذه الصفحة. بمجرد قبول الحجز ستحصل على نقاط ولاء إضافية.");
+            }
+
+            const bookings = await E7_DB.getBookings(profile.email);
 
             if (bookings.length === 0) {
                 list.innerHTML = `
@@ -130,7 +149,7 @@
                         <p style="font-size:0.75rem; color:var(--text-muted);">${book.service || 'حجز عام'}</p>
                     </div>
                     <div style="padding-right: 1rem; border-right: 1px solid var(--border);">
-                        ${book.status === 'approved' || book.status === 'pending' || !book.status ? `
+                        ${book.status === 'pending' || !book.status ? `
                             <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-color: #fee2e2; color: #dc2626;" onclick="requestCancel(${book.id})">إلغاء</button>
                         ` : `
                             <span style="color:var(--text-muted); font-size:0.8rem;">مغلق</span>
@@ -149,10 +168,20 @@
 
         async function requestCancel(id) {
             if (confirm("هل تريد تقديم طلب إلغاء لهذا الحجز؟")) {
-                // محاكاة طلب إلغاء
-                alert("تم إرسال طلب الإلغاء للإدارة.");
-                location.reload();
+                try {
+                    await E7_DB.updateBookingStatus(id, 'cancel_requested');
+                    alert("تم إرسال طلب إلغاء الحجز بنجاح للإدارة.");
+                    location.reload();
+                } catch (e) {
+                    alert("فشل إرسال طلب الإلغاء. يرجى المحاولة لاحقاً.");
+                }
             }
+        }
+
+        function showInfoModal(title, body) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = body;
+            document.getElementById('infoModal').style.display = 'flex';
         }
 
         function closeModal() {

@@ -18,9 +18,24 @@ namespace E7jezli.Server.Controllers
 
         // GET: api/Bookings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
+        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings([FromQuery] string? email)
         {
-            return await _context.Bookings.OrderByDescending(b => b.DateCreated).ToListAsync();
+            var query = _context.Bookings.AsQueryable();
+            if (!string.IsNullOrEmpty(email))
+            {
+                var normalizedEmail = email.Trim().ToLower();
+                query = query.Where(b => b.UserEmail.ToLower() == normalizedEmail);
+            }
+            return await query.OrderByDescending(b => b.DateCreated).ToListAsync();
+        }
+
+        // GET: api/Bookings/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Booking>> GetBooking(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null) return NotFound();
+            return booking;
         }
 
         // POST: api/Bookings
@@ -31,7 +46,7 @@ namespace E7jezli.Server.Controllers
             booking.Status = "pending"; // الحالة الافتراضية عند الحجز الجديد
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetBooking", new { id = booking.Id }, booking);
+            return CreatedAtAction(nameof(GetBooking), new { id = booking.Id }, booking);
         }
 
         // PATCH: api/Bookings/5/status
@@ -40,6 +55,17 @@ namespace E7jezli.Server.Controllers
         {
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
+
+            // نظام نقاط الولاء: إذا تم قبول الحجز وكان حالته السابقة غير مقبولة
+            if (booking.Status != "approved" && newStatus == "approved" && !string.IsNullOrEmpty(booking.UserEmail))
+            {
+                var emailNormalized = booking.UserEmail.Trim().ToLower();
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == emailNormalized);
+                if (user != null)
+                {
+                    user.Points += 50; // منح الزبون 50 نقطة ولاء حقيقية
+                }
+            }
 
             booking.Status = newStatus;
             await _context.SaveChangesAsync();
