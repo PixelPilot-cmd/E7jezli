@@ -141,6 +141,15 @@
             if (!profile) return;
             const oldPassword = prompt("الرجاء إدخال كلمة المرور الحالية:");
             if (!oldPassword) return;
+
+            // التحقق من صحة كلمة المرور الحالية أولاً قبل طلب كلمة المرور الجديدة
+            try {
+                await E7_DB.loginUser(profile.email, oldPassword);
+            } catch (err) {
+                alert("كلمة المرور الحالية غير صحيحة!");
+                return;
+            }
+
             const newPassword = prompt("الرجاء إدخال كلمة المرور الجديدة (6 خانات على الأقل):");
             if (!newPassword) return;
             if (newPassword.length < 6) {
