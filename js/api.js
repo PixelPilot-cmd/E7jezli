@@ -81,7 +81,10 @@ const E7_DB = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(booking)
             });
-            if (!response.ok) throw new Error("فشل إرسال طلب الحجز");
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`فشل طلب الحجز: ${response.status} ${errText}`);
+            }
             return await response.json();
         } catch (e) {
             console.error("Booking failed", e);

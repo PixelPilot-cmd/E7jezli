@@ -127,6 +127,22 @@
                     </div>
                 `).join('');
             }
+
+            // ==== Booking form ==== //
+            const formContainer = document.createElement('div');
+            formContainer.className = 'dashboard-card';
+            formContainer.style.marginTop = '2rem';
+            formContainer.innerHTML = `
+                <h3>إنشاء طلب حجز جديد</h3>
+                <select id="businessSelect" style="width:100%; padding:0.5rem; margin-bottom:0.5rem;"></select>
+                <input type="text" id="serviceInput" placeholder="الخدمة المطلوبة" style="width:100%; padding:0.5rem; margin-bottom:0.5rem;"/>
+                <textarea id="notesInput" placeholder="ملاحظات (اختياري)" style="width:100%; padding:0.5rem; margin-bottom:0.5rem;"></textarea>
+                <button class="btn btn-primary" style="width:100%;" onclick="submitBooking()">إرسال الحجز</button>
+            `;
+            const activityContainer = document.querySelector('.dashboard-card')?.parentNode;
+            if (activityContainer) activityContainer.appendChild(formContainer);
+            // Load businesses into select
+            loadBusinesses();
         });
 
         function getStatusText(s) {
@@ -166,6 +182,46 @@
         document.addEventListener("DOMContentLoaded", async () => {
             const myBizName = localStorage.getItem("myBusinessName");
             if (!myBizName) return;
+
+            // Helper to load businesses into the select dropdown
+            async function loadBusinesses() {
+                try {
+                    const businesses = await E7_DB.getBusinesses();
+                    const select = document.getElementById('businessSelect');
+                    if(select) {
+                        select.innerHTML = '<option value="">اختر منشأة</option>' +
+                            businesses.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+                    }
+                } catch (e) {
+                    console.error('Failed to load businesses', e);
+                }
+            }
+
+            // Submit a new booking
+            window.submitBooking = async function() {
+                const profile = JSON.parse(localStorage.getItem('user_profile'));
+                const businessId = parseInt(document.getElementById('businessSelect').value);
+                const service = document.getElementById('serviceInput').value.trim();
+                const notes = document.getElementById('notesInput').value.trim();
+                if (!businessId || !service) {
+                    alert('يرجى اختيار منشأة وتحديد الخدمة المطلوبة.');
+                    return;
+                }
+                const payload = {
+                    BusinessId: businessId,
+                    UserId: profile.id,
+                    Service: service,
+                    Notes: notes
+                };
+                try {
+                    await E7_DB.saveBooking(payload);
+                    alert('تم إرسال طلب الحجز بنجاح!');
+                    // Refresh activity log
+                    location.reload();
+                } catch (err) {
+                    alert(err.message || 'فشل إرسال طلب الحجز');
+                }
+            };
 
             // Ensure E7_DB is loaded
             if (typeof E7_DB === 'undefined') {

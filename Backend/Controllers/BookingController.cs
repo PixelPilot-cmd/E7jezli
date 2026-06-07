@@ -16,22 +16,31 @@ namespace E7jezli.Server.Controllers
             _context = context;
         }
 
-        // POST: api/Booking  (إنشاء طلب حجز)
+        // POST: api/Booking  (إنشاء طلب حجز) with robust error handling
         [HttpPost]
         public async Task<ActionResult<Booking>> Create([FromBody] Booking booking)
         {
-            if (booking == null) return BadRequest("Invalid booking data.");
-            // Validate required fields
-            if (booking.BusinessId == 0 || booking.UserId == 0)
-                return BadRequest("BusinessId and UserId must be provided.");
-            if (string.IsNullOrWhiteSpace(booking.Service))
-                return BadRequest("Service description is required.");
-            // الوضع الافتراضي هو انتظار موافقة الشريك
-            booking.Status = "Pending";
-            booking.BookingDate = DateTime.UtcNow;
-            _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
+            try
+            {
+                if (booking == null) return BadRequest("Invalid booking data.");
+                // Validate required fields
+                if (booking.BusinessId == 0 || booking.UserId == 0)
+                    return BadRequest("BusinessId and UserId must be provided.");
+                if (string.IsNullOrWhiteSpace(booking.Service))
+                    return BadRequest("Service description is required.");
+                // Default status is pending approval
+                booking.Status = "Pending";
+                booking.BookingDate = DateTime.UtcNow;
+                _context.Bookings.Add(booking);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
+            }
+            catch (Exception ex)
+            {
+                // Log exception to console (or proper logger in production)
+                Console.WriteLine($"Error creating booking: {ex.Message}");
+                return StatusCode(500, $"Server error: {ex.Message}");
+            }
         }
 
         // GET: api/Booking            (جلب كل الحجوزات أو تصفية)
