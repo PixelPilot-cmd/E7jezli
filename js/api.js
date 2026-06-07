@@ -421,32 +421,41 @@ const E7_DB = {
     updateBookingStatus: async (id, status) => {
         // تحديث محلي فوري
         const local = _getLocalBookings();
-        const idx = local.findIndex(b => b.id == id);
-        const wasCompleted = idx !== -1 && local[idx].status !== 'completed' && status === 'completed';
-        const userEmail = idx !== -1 ? local[idx].userEmail : null;
-
+        const idx = local.findIndex(b => (b.id || b.Id) == id);
+        
         if (idx !== -1) {
-            local[idx].status = status;
+            const booking = local[idx];
+            const wasCompleted = booking.status !== 'completed' && status === 'completed';
+            const userEmail = booking.userEmail;
+
+            booking.status = status;
             _saveLocalBookings(local);
+
+            // إضافة نقاط الولاء محلياً عند إتمام الحجز
+            if (wasCompleted && userEmail) {
+                E7_DB._addPoints(userEmail, 100);
+            }
         }
 
-        // إضافة نقاط الولاء محلياً عند إتمام الحجز
-        if (wasCompleted && userEmail) {
-            E7_DB._addPoints(userEmail, 100);
+        // محاولة تحديث السيرفر والانتظار لضمان المزامنة
+        try {
+            const res = await _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(status)
+            });
+            
+            // إذا فشل المسار الأول، جرب المسار البديل
+            if (!res || !res.ok) {
+                await _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(status)
+                });
+            }
+        } catch (e) {
+            console.error("Failed to sync booking status to server:", e);
         }
-
-        // محاولة تحديث السيرفر
-        _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(status)
-        }).catch(() => {});
-
-        _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(status)
-        }).catch(() => {});
     },
 
     deleteBooking: async (id) => {

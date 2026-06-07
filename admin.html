@@ -195,10 +195,10 @@
                             </div>
                             <div style="display:flex; gap:0.5rem;">
                                 ${b.status === 'pending' ? `
-                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
-                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
+                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id || b.Id}, 'approved')">قبول</button>
+                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id || b.Id}, 'rejected')">رفض</button>
                                 ` : ''}
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:gray; border-color:gray;" onclick="adminDeleteBooking(${b.id})"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:gray; border-color:gray;" onclick="adminDeleteBooking(${b.id || b.Id})"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                     `).join('');
@@ -212,18 +212,18 @@
                     partnerList.innerHTML = partners.map(p => `
                         <div class="data-card" style="border-right: 4px solid ${p.status === 'active' ? '#10b981' : p.status === 'approved' ? '#3b82f6' : '#f59e0b'};">
                             <div style="display:flex; align-items:center; gap:1rem;">
-                                <img src="${p.image || p.imageUrl || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                                <img src="${p.image || p.imageUrl || p.img || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
                                 <div>
                                     <strong>${p.name}</strong>
                                     <p style="font-size:0.8rem; color:var(--text-muted);">الحالة: ${p.status === 'active' ? 'نشط' : p.status === 'approved' ? 'بانتظار الدفع' : 'قيد المراجعة'}</p>
                                 </div>
                             </div>
                             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                ${p.status === 'pending' ? `<button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;" onclick="adminUpdatePartnerStatus(${p.id}, 'approved')">موافقة مبدئية</button>` : ''}
+                                ${p.status === 'pending' ? `<button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;" onclick="adminUpdatePartnerStatus(${p.id || p.Id}, 'approved')">موافقة مبدئية</button>` : ''}
                                 ${p.status === 'approved' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b; cursor:default;" disabled>بانتظار الدفع</button>
-                                <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="adminUpdatePartnerStatus(${p.id}, 'active')">تنشيط مباشر</button>` : ''}
-                                ${p.status === 'active' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;" onclick="adminUpdatePartnerStatus(${p.id}, 'pending')">إيقاف مؤقت</button>` : ''}
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeletePartner(${p.id})"><i class="fa-solid fa-trash"></i> حذف</button>
+                                <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="adminUpdatePartnerStatus(${p.id || p.Id}, 'active')">تنشيط مباشر</button>` : ''}
+                                ${p.status === 'active' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;" onclick="adminUpdatePartnerStatus(${p.id || p.Id}, 'pending')">إيقاف مؤقت</button>` : ''}
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeletePartner(${p.id || p.Id})"><i class="fa-solid fa-trash"></i> حذف</button>
                             </div>
                         </div>
                     `).join('');

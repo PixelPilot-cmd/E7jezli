@@ -208,10 +208,10 @@
                             </div>
                             <div style="display:flex; flex-direction:column; gap:0.5rem; margin-right:1.5rem;">
                                 ${b.status === 'pending' ? `
-                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#10b981;" onclick="updateMyBooking(${b.id}, 'approved')"><i class="fa-solid fa-check"></i> قبول الحجز</button>
-                                    <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#ef4444; border-color:#ef4444;" onclick="updateMyBooking(${b.id}, 'rejected')"><i class="fa-solid fa-xmark"></i> رفض واعتذار</button>
+                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#10b981;" onclick="updateMyBooking(${b.id || b.Id}, 'approved')"><i class="fa-solid fa-check"></i> قبول الحجز</button>
+                                    <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#ef4444; border-color:#ef4444;" onclick="updateMyBooking(${b.id || b.Id}, 'rejected')"><i class="fa-solid fa-xmark"></i> رفض واعتذار</button>
                                 ` : b.status === 'approved' ? `
-                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#3b82f6;" onclick="updateMyBooking(${b.id}, 'completed')"><i class="fa-solid fa-circle-check"></i> إتمام الحجز (+100 نقطة)</button>
+                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#3b82f6;" onclick="updateMyBooking(${b.id || b.Id}, 'completed')"><i class="fa-solid fa-circle-check"></i> إتمام الحجز (+100 نقطة)</button>
                                 ` : b.status === 'completed' ? `
                                     <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#10b981; border-color:#10b981;" disabled><i class="fa-solid fa-circle-check"></i> مكتمل ومغلق</button>
                                 ` : `
