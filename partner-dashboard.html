@@ -228,8 +228,19 @@
         }
 
         async function updateMyBooking(id, status) {
-            await E7_DB.updateBookingStatus(id, status);
-            loadPartnerDashboard(); // Refresh
+            const btn = event.currentTarget;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري...';
+            btn.disabled = true;
+
+            try {
+                await E7_DB.updateBookingStatus(id, status);
+                loadPartnerDashboard(); // Refresh after success
+            } catch (err) {
+                alert("⚠️ فشل تحديث حالة الحجز. يرجى المحاولة مرة أخرى.");
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

@@ -390,9 +390,24 @@ const E7_DB = {
         const res = await _tryFetch(url);
 
         if (res && res.ok) {
-            const serverBookings = await res.json();
+            let serverBookings = await res.json();
+            
+            // توحيد البيانات (Normalization) لضمان عمل camelCase
+            serverBookings = serverBookings.map(b => ({
+                id: b.id || b.Id,
+                businessName: b.businessName || b.BusinessName,
+                businessImage: b.businessImage || b.BusinessImage,
+                service: b.service || b.Service,
+                price: b.price || b.Price,
+                time: b.time || b.Time,
+                date: b.date || b.Date,
+                userEmail: b.userEmail || b.UserEmail,
+                status: b.status || b.Status,
+                dateCreated: b.dateCreated || b.DateCreated
+            }));
+
             // دمج مع البيانات المحلية غير المزامنة
-            const local = _getLocalBookings().filter(b => b._localOnly && b.userEmail === email);
+            const local = _getLocalBookings().filter(lb => lb._localOnly && (!email || lb.userEmail === email));
             const merged = [...serverBookings];
             local.forEach(lb => {
                 if (!merged.find(sb => sb.id === lb.id)) merged.push(lb);
@@ -423,38 +438,37 @@ const E7_DB = {
         const local = _getLocalBookings();
         const idx = local.findIndex(b => (b.id || b.Id) == id);
         
+        let userEmail = null;
         if (idx !== -1) {
             const booking = local[idx];
-            const wasCompleted = booking.status !== 'completed' && status === 'completed';
-            const userEmail = booking.userEmail;
-
+            userEmail = booking.userEmail || booking.UserEmail;
             booking.status = status;
+            booking.Status = status;
             _saveLocalBookings(local);
-
-            // إضافة نقاط الولاء محلياً عند إتمام الحجز
-            if (wasCompleted && userEmail) {
-                E7_DB._addPoints(userEmail, 100);
-            }
         }
 
         // محاولة تحديث السيرفر والانتظار لضمان المزامنة
         try {
-            const res = await _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, {
+            const options = {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(status)
-            });
+            };
+
+            const res = await _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, options);
             
             // إذا فشل المسار الأول، جرب المسار البديل
             if (!res || !res.ok) {
-                await _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(status)
-                });
+                await _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, options);
+            }
+
+            // إضافة نقاط الولاء عند النجاح فقط إذا كانت الحالة "completed"
+            if (status === 'completed' && userEmail) {
+                E7_DB._addPoints(userEmail, 100);
             }
         } catch (e) {
             console.error("Failed to sync booking status to server:", e);
+            throw e; // إعادة رمي الخطأ ليتم معالجته في الواجهة
         }
     },
 
