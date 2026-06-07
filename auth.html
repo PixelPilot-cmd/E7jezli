@@ -93,7 +93,7 @@
                     const password = document.getElementById('regPass').value;
 
                     const user = await E7_DB.registerUser(name, email, password);
-                    localStorage.setItem('user_profile', JSON.stringify({ name: user.fullName, email: user.email, points: user.points }));
+                    localStorage.setItem('user_profile', JSON.stringify({ id: user.id, name: user.fullName, email: user.email, points: user.points }));
                     alert('تم إنشاء الحساب بنجاح! تم منحك 150 نقطة ولاء ترحيبية.');
                 } else if (type === 'login') {
                     const email = document.querySelector('#loginForm input[type="email"]').value;

@@ -153,14 +153,32 @@
             const fullService = `رقم الحجز: ${bookingId} | النوع: ${type} | الغرض: ${purpose} | جوال: ${phone}`;
 
             const profile = JSON.parse(localStorage.getItem('user_profile'));
+            
+            // Ensure we have the user's id
+            let userId = profile ? profile.id : null;
+            if (!userId && profile && profile.email) {
+                try {
+                    const freshUser = await E7_DB.getUserProfile(profile.email);
+                    if (freshUser && freshUser.id) {
+                        userId = freshUser.id;
+                        profile.id = freshUser.id;
+                        localStorage.setItem('user_profile', JSON.stringify(profile));
+                    }
+                } catch (ignored) {}
+            }
+            if (!userId) {
+                alert("يرجى تسجيل الدخول أولاً.");
+                localStorage.setItem('redirect_after_login', window.location.href);
+                window.location.href = 'auth.html';
+                return;
+            }
+
             const booking = { 
-                businessName: currentBiz.name, 
-                service: fullService, 
-                price: 0, 
-                time: time, 
-                date: date, 
-                businessImage: currentBiz.img || currentBiz.imageUrl,
-                userEmail: profile ? profile.email : ""
+                BusinessId: currentBiz.id,
+                UserId: userId,
+                Service: fullService,
+                Notes: `التاريخ: ${date} | الوقت: ${time} | المنشأة: ${currentBiz.name}`,
+                Price: 0
             };
 
             try {
@@ -169,7 +187,8 @@
                     window.location.href = 'my-bookings.html?success=true';
                 }, 1000);
             } catch (err) {
-                alert("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة لاحقاً.");
+                console.error("Booking error:", err);
+                alert("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة لاحقاً.\n" + (err.message || ""));
                 btn.innerHTML = 'تأكيد وتقديم الطلب';
                 btn.disabled = false;
             }

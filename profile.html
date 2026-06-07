@@ -99,6 +99,7 @@
             try {
                 const latestUser = await E7_DB.getUserProfile(profile.email);
                 if (latestUser) {
+                    profile.id = latestUser.id;
                     profile.points = latestUser.points;
                     profile.name = latestUser.fullName;
                     localStorage.setItem('user_profile', JSON.stringify(profile));
@@ -179,59 +180,68 @@
         }
     </script>
     <script>
+        // Helper to load businesses into the select dropdown
+        async function loadBusinesses() {
+            try {
+                const businesses = await E7_DB.getBusinesses();
+                const select = document.getElementById('businessSelect');
+                if(select) {
+                    select.innerHTML = '<option value="">اختر منشأة</option>' +
+                        businesses.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+                }
+            } catch (e) {
+                console.error('Failed to load businesses', e);
+            }
+        }
+
+        // Submit a new booking from profile page
+        async function submitBooking() {
+            const profile = JSON.parse(localStorage.getItem('user_profile'));
+            const businessId = parseInt(document.getElementById('businessSelect').value);
+            const service = document.getElementById('serviceInput').value.trim();
+            const notes = document.getElementById('notesInput').value.trim();
+            if (!businessId || !service) {
+                alert('يرجى اختيار منشأة وتحديد الخدمة المطلوبة.');
+                return;
+            }
+            // Ensure we have the user's id
+            let userId = profile ? profile.id : null;
+            if (!userId && profile && profile.email) {
+                try {
+                    const freshUser = await E7_DB.getUserProfile(profile.email);
+                    if (freshUser && freshUser.id) {
+                        userId = freshUser.id;
+                        profile.id = freshUser.id;
+                        localStorage.setItem('user_profile', JSON.stringify(profile));
+                    }
+                } catch (ignored) {}
+            }
+            if (!userId) {
+                alert('يرجى تسجيل الدخول أولاً.');
+                return;
+            }
+            const payload = {
+                BusinessId: businessId,
+                UserId: userId,
+                Service: service,
+                Notes: notes
+            };
+            try {
+                await E7_DB.saveBooking(payload);
+                alert('تم إرسال طلب الحجز بنجاح!');
+                location.reload();
+            } catch (err) {
+                console.error("Booking error:", err);
+                alert(err.message || 'فشل إرسال طلب الحجز');
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", async () => {
+            // Load businesses dropdown for the booking form
+            await loadBusinesses();
+
             const myBizName = localStorage.getItem("myBusinessName");
             if (!myBizName) return;
-
-            // Helper to load businesses into the select dropdown
-            async function loadBusinesses() {
-                try {
-                    const businesses = await E7_DB.getBusinesses();
-                    const select = document.getElementById('businessSelect');
-                    if(select) {
-                        select.innerHTML = '<option value="">اختر منشأة</option>' +
-                            businesses.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-                    }
-                } catch (e) {
-                    console.error('Failed to load businesses', e);
-                }
-            }
-
-            // Submit a new booking
-            window.submitBooking = async function() {
-                const profile = JSON.parse(localStorage.getItem('user_profile'));
-                const businessId = parseInt(document.getElementById('businessSelect').value);
-                const service = document.getElementById('serviceInput').value.trim();
-                const notes = document.getElementById('notesInput').value.trim();
-                if (!businessId || !service) {
-                    alert('يرجى اختيار منشأة وتحديد الخدمة المطلوبة.');
-                    return;
-                }
-                const payload = {
-                    BusinessId: businessId,
-                    UserId: profile.id,
-                    Service: service,
-                    Notes: notes
-                };
-                try {
-                    await E7_DB.saveBooking(payload);
-                    alert('تم إرسال طلب الحجز بنجاح!');
-                    // Refresh activity log
-                    location.reload();
-                } catch (err) {
-                    alert(err.message || 'فشل إرسال طلب الحجز');
-                }
-            };
-
-            // Ensure E7_DB is loaded
-            if (typeof E7_DB === 'undefined') {
-                await new Promise((resolve) => {
-                    const s = document.createElement('script');
-                    s.src = 'js/api.js';
-                    s.onload = resolve;
-                    document.head.appendChild(s);
-                });
-            }
 
             try {
                 const businesses = await E7_DB.getBusinesses();
