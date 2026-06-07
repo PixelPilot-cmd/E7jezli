@@ -24,13 +24,13 @@ namespace E7jezli.Server.Controllers
             {
                 if (booking == null) return BadRequest("Invalid booking data.");
                 // Validate required fields
-                if (booking.BusinessId == 0 || booking.UserId == 0)
-                    return BadRequest("BusinessId and UserId must be provided.");
+                if (string.IsNullOrWhiteSpace(booking.BusinessName) || string.IsNullOrWhiteSpace(booking.UserEmail))
+                    return BadRequest("BusinessName and UserEmail must be provided.");
                 if (string.IsNullOrWhiteSpace(booking.Service))
                     return BadRequest("Service description is required.");
                 // Default status is pending approval
-                booking.Status = "Pending";
-                booking.BookingDate = DateTime.UtcNow;
+                booking.Status = "pending";
+                booking.DateCreated = DateTime.UtcNow;
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
@@ -44,14 +44,36 @@ namespace E7jezli.Server.Controllers
         }
 
         // GET: api/Booking            (جلب كل الحجوزات أو تصفية)
-        // يمكن تمرير businessId أو userId كمعاملات استعلام
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetAll([FromQuery] int? businessId, [FromQuery] int? userId)
+        public async Task<ActionResult<IEnumerable<Booking>>> GetAll([FromQuery] string? email, [FromQuery] int? userId, [FromQuery] string? businessName)
         {
             var query = _context.Bookings.AsQueryable();
-            if (businessId.HasValue) query = query.Where(b => b.BusinessId == businessId.Value);
-            if (userId.HasValue) query = query.Where(b => b.UserId == userId.Value);
-            var list = await query.OrderByDescending(b => b.BookingDate).ToListAsync();
+            
+            if (!string.IsNullOrEmpty(email))
+            {
+                var normalizedEmail = email.Trim().ToLower();
+                query = query.Where(b => b.UserEmail.ToLower() == normalizedEmail);
+            }
+            else if (userId.HasValue)
+            {
+                var user = await _context.Users.FindAsync(userId.Value);
+                if (user != null)
+                {
+                    var normalizedEmail = user.Email.Trim().ToLower();
+                    query = query.Where(b => b.UserEmail.ToLower() == normalizedEmail);
+                }
+                else
+                {
+                    return Ok(new List<Booking>());
+                }
+            }
+
+            if (!string.IsNullOrEmpty(businessName))
+            {
+                query = query.Where(b => b.BusinessName.ToLower() == businessName.Trim().ToLower());
+            }
+
+            var list = await query.OrderByDescending(b => b.DateCreated).ToListAsync();
             return Ok(list);
         }
 
@@ -70,6 +92,17 @@ namespace E7jezli.Server.Controllers
         {
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
+
+            // Loyalty points: if status switches to completed, award 100 points
+            if (booking.Status != "completed" && status == "completed")
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == booking.UserEmail.ToLower());
+                if (user != null)
+                {
+                    user.Points += 100;
+                }
+            }
+
             booking.Status = status;
             await _context.SaveChangesAsync();
             return NoContent();

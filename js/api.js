@@ -44,6 +44,22 @@ const E7_DB = {
             return [];
         }
     },
+
+    // جلب كافة الحجوزات مع تصفية اختيارية بالبريد الإلكتروني
+    getBookings: async (email) => {
+        try {
+            let url = `${API_BASE_URL}/Bookings`;
+            if (email) {
+                url += `?email=${encodeURIComponent(email)}`;
+            }
+            const response = await fetch(url);
+            if (!response.ok) return [];
+            return await response.json();
+        } catch (e) {
+            console.error("Failed to fetch bookings:", e);
+            return [];
+        }
+    },
     
     // إضافة مشروع جديد للسحاب
     saveBusiness: async (biz) => {
@@ -208,6 +224,20 @@ const E7_DB = {
         if (!response.ok) {
             const errText = await response.text();
             throw new Error(errText || "فشل إعادة تعيين كلمة المرور");
+        }
+        return await response.json();
+    },
+
+    // استبدال 1000 نقطة ولاء
+    redeemPoints: async (email) => {
+        const response = await fetch(`${API_BASE_URL}/Auth/redeem-points`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || "فشل استبدال النقاط");
         }
         return await response.json();
     },

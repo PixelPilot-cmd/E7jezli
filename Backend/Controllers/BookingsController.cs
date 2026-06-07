@@ -24,9 +24,9 @@ namespace E7jezli.Server.Controllers
             if (!string.IsNullOrEmpty(email))
             {
                 var normalizedEmail = email.Trim().ToLower();
-                query = query.Where(b => _context.Users.Any(u => u.Id == b.UserId && u.Email.ToLower() == normalizedEmail));
+                query = query.Where(b => b.UserEmail.ToLower() == normalizedEmail);
             }
-            return await query.OrderByDescending(b => b.BookingDate).ToListAsync();
+            return await query.OrderByDescending(b => b.DateCreated).ToListAsync();
         }
 
         // GET: api/Bookings/5
@@ -42,7 +42,7 @@ namespace E7jezli.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Booking>> PostBooking(Booking booking)
         {
-            booking.BookingDate = DateTime.UtcNow;
+            booking.DateCreated = DateTime.UtcNow;
             booking.Status = "pending"; // الحالة الافتراضية عند الحجز الجديد
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
@@ -56,13 +56,13 @@ namespace E7jezli.Server.Controllers
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
 
-            // نظام نقاط الولاء: إذا تم قبول الحجز وكان حالته السابقة غير مقبولة
-            if (booking.Status != "approved" && newStatus == "approved")
+            // نظام نقاط الولاء: إذا تم إتمام الحجز
+            if (booking.Status != "completed" && newStatus == "completed")
             {
-                var user = await _context.Users.FindAsync(booking.UserId);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == booking.UserEmail.ToLower());
                 if (user != null)
                 {
-                    user.Points += 50; // منح الزبون 50 نقطة ولاء حقيقية
+                    user.Points += 100; // منح الزبون 100 نقطة ولاء حقيقية
                 }
             }
 

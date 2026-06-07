@@ -136,6 +136,33 @@ namespace E7jezli.Server.Controllers
             return Ok(new { message = "تمت إعادة تعيين كلمة المرور بنجاح." });
         }
 
+        // POST: api/Auth/redeem-points
+        [HttpPost("redeem-points")]
+        public async Task<IActionResult> RedeemPoints([FromBody] RedeemPointsDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+            {
+                return BadRequest("البريد الإلكتروني مطلوب.");
+            }
+
+            var emailNormalized = dto.Email.Trim().ToLower();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == emailNormalized);
+            if (user == null)
+            {
+                return NotFound("المستخدم غير موجود.");
+            }
+
+            if (user.Points < 1000)
+            {
+                return BadRequest("رصيد نقاطك غير كافٍ. تحتاج إلى 1000 نقطة على الأقل.");
+            }
+
+            user.Points -= 1000;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { points = user.Points, message = "تم استبدال النقاط بنجاح!" });
+        }
+
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
@@ -170,5 +197,10 @@ namespace E7jezli.Server.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class RedeemPointsDto
+    {
+        public string Email { get; set; } = string.Empty;
     }
 }

@@ -174,11 +174,14 @@
             }
 
             const booking = { 
-                BusinessId: currentBiz.id,
-                UserId: userId,
-                Service: fullService,
-                Notes: `التاريخ: ${date} | الوقت: ${time} | المنشأة: ${currentBiz.name}`,
-                Price: 0
+                businessName: currentBiz.name,
+                businessImage: currentBiz.img || currentBiz.imageUrl || "",
+                service: fullService,
+                price: 0,
+                time: time,
+                date: date,
+                userEmail: profile.email,
+                status: "pending"
             };
 
             try {

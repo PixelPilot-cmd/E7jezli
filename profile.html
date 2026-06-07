@@ -113,7 +113,7 @@
             document.getElementById('userPoints').innerText = profile.points || 0;
 
             // تحميل حجوزات المستخدم الحالي كنشاطات
-            const books = await E7_DB.getBookingsByUser(profile.id);
+            const books = await E7_DB.getBookings(profile.email);
             const log = document.getElementById('activityLog');
             if (books.length === 0) {
                 log.innerHTML = '<p style="opacity: 0.5;">لا توجد حجوزات سابقة حالياً.</p>';
@@ -144,11 +144,43 @@
             if (activityContainer) activityContainer.appendChild(formContainer);
             // Load businesses into select
             loadBusinesses();
+
+            // ==== Loyalty Store ==== //
+            const storeContainer = document.createElement('div');
+            storeContainer.className = 'dashboard-card';
+            storeContainer.style.marginTop = '2rem';
+            storeContainer.style.background = 'linear-gradient(135deg, #f0fdf4, #e8f5e9)';
+            storeContainer.style.border = '1px solid #a7f3d0';
+            
+            let storeContentHTML = `
+                <h3 style="color:#065f46;"><i class="fa-solid fa-gift"></i> متجر مكافآت الولاء (Luxoria Store)</h3>
+                <p style="font-size:0.85rem; color:#047857; margin-bottom:1rem;">استبدل 1000 نقطة بكوبون هدية عينية مجانية (مثل قهوة، وجبة، أو قسيمة خدمة) من أي منشأة من اختيارك!</p>
+            `;
+
+            if ((profile.points || 0) >= 1000) {
+                storeContentHTML += `
+                    <select id="rewardBusinessSelect" style="width:100%; padding:0.8rem; margin-bottom:1rem; border-radius:10px; border:1px solid #a7f3d0; outline:none; font-weight:600;"></select>
+                    <button class="btn btn-primary" style="width:100%; background:#10b981; border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);" onclick="redeemLoyaltyReward()">استبدل 1000 نقطة الآن 🎉</button>
+                `;
+            } else {
+                storeContentHTML += `
+                    <div style="background:rgba(6, 95, 70, 0.05); padding:1rem; border-radius:12px; border:1px dashed #a7f3d0; text-align:center;">
+                        <span style="font-size:1.1rem; font-weight:800; color:#065f46;">رصيدك غير كافٍ للاستبدال</span>
+                        <p style="font-size:0.8rem; color:#047857; margin-top:0.3rem;">تحتاج إلى 1000 نقطة ولاء. رصيدك الحالي هو <strong>${profile.points || 0}</strong> نقطة. اجمع النقاط من خلال إتمام الحجوزات (+100 نقطة لكل حجز مكتمل).</p>
+                    </div>
+                `;
+            }
+            storeContainer.innerHTML = storeContentHTML;
+            if (activityContainer) activityContainer.appendChild(storeContainer);
+            if ((profile.points || 0) >= 1000) {
+                loadRewardBusinesses();
+            }
         });
 
         function getStatusText(s) {
             if (s === 'approved') return 'تم القبول';
             if (s === 'rejected') return 'مرفوض';
+            if (s === 'completed') return 'مكتمل';
             if (s === 'cancel_requested') return 'طلب إلغاء معلق';
             return 'قيد الانتظار';
         }
@@ -178,6 +210,71 @@
             localStorage.removeItem('user_profile');
             window.location.href = 'index.html';
         }
+
+        async function redeemLoyaltyReward() {
+            const profile = JSON.parse(localStorage.getItem('user_profile'));
+            const businessId = parseInt(document.getElementById('rewardBusinessSelect').value);
+            if (!businessId) {
+                alert('يرجى اختيار منشأة لاسترداد الكوبون منها.');
+                return;
+            }
+            if (confirm("هل أنت متأكد من استبدال 1000 نقطة بكوبون هدية من المنشأة المحددة؟")) {
+                try {
+                    // 1. Call API to deduct points
+                    const result = await E7_DB.redeemPoints(profile.email);
+                    
+                    // 2. Fetch business details
+                    let bizName = "منشأة غير معروفة";
+                    let bizImage = "";
+                    const businesses = await E7_DB.getBusinesses();
+                    const matchedBiz = businesses.find(b => b.id == businessId);
+                    if (matchedBiz) {
+                        bizName = matchedBiz.name;
+                        bizImage = matchedBiz.img || matchedBiz.imageUrl || "";
+                    }
+
+                    // Generate a unique reward code
+                    const rewardCode = "RWD-" + Math.floor(100000 + Math.random() * 900000);
+                    
+                    // 3. Create the booking entry (special coupon)
+                    const payload = {
+                        businessName: bizName,
+                        businessImage: bizImage,
+                        service: `🎁 كوبون جائزة مجانية (مكافأة 1000 نقطة) | كود الاسترداد: ${rewardCode}`,
+                        price: 0,
+                        time: "فوري",
+                        date: new Date().toISOString().split('T')[0],
+                        userEmail: profile.email,
+                        status: "approved" // Pre-approved, ready for merchant to deliver
+                    };
+
+                    await E7_DB.saveBooking(payload);
+
+                    // Update local storage points
+                    profile.points = result.points;
+                    localStorage.setItem('user_profile', JSON.stringify(profile));
+
+                    alert(`🎉 تم الاستبدال بنجاح! كود الكوبون الخاص بك هو: ${rewardCode}\nلقد تم خصم 1000 نقطة ولاء من رصيدك، وتجد الكوبون في قائمة نشاطاتك وحجوزاتك.`);
+                    location.reload();
+                } catch (err) {
+                    console.error("Redemption error:", err);
+                    alert(err.message || "فشل استبدال النقاط.");
+                }
+            }
+        }
+
+        async function loadRewardBusinesses() {
+            try {
+                const businesses = await E7_DB.getBusinesses();
+                const select = document.getElementById('rewardBusinessSelect');
+                if (select) {
+                    select.innerHTML = '<option value="">اختر منشأة لاسترداد المكافأة</option>' +
+                        businesses.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+                }
+            } catch (e) {
+                console.error('Failed to load businesses for rewards', e);
+            }
+        }
     </script>
     <script>
         // Helper to load businesses into the select dropdown
@@ -204,28 +301,38 @@
                 alert('يرجى اختيار منشأة وتحديد الخدمة المطلوبة.');
                 return;
             }
-            // Ensure we have the user's id
-            let userId = profile ? profile.id : null;
-            if (!userId && profile && profile.email) {
-                try {
-                    const freshUser = await E7_DB.getUserProfile(profile.email);
-                    if (freshUser && freshUser.id) {
-                        userId = freshUser.id;
-                        profile.id = freshUser.id;
-                        localStorage.setItem('user_profile', JSON.stringify(profile));
-                    }
-                } catch (ignored) {}
-            }
-            if (!userId) {
+            if (!profile || !profile.email) {
                 alert('يرجى تسجيل الدخول أولاً.');
                 return;
             }
+
+            // Fetch business info to get its name and image
+            let bizName = "منشأة غير معروفة";
+            let bizImage = "";
+            try {
+                const businesses = await E7_DB.getBusinesses();
+                const matchedBiz = businesses.find(b => b.id == businessId);
+                if (matchedBiz) {
+                    bizName = matchedBiz.name;
+                    bizImage = matchedBiz.img || matchedBiz.imageUrl || "";
+                }
+            } catch (e) {
+                console.error("Error fetching business details:", e);
+            }
+
+            const fullService = service + (notes ? ` | ملاحظات: ${notes}` : "");
+
             const payload = {
-                BusinessId: businessId,
-                UserId: userId,
-                Service: service,
-                Notes: notes
+                businessName: bizName,
+                businessImage: bizImage,
+                service: fullService,
+                price: 0,
+                time: "غير محدد",
+                date: new Date().toISOString().split('T')[0],
+                userEmail: profile.email,
+                status: "pending"
             };
+
             try {
                 await E7_DB.saveBooking(payload);
                 alert('تم إرسال طلب الحجز بنجاح!');

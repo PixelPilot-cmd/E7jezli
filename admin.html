@@ -183,14 +183,21 @@
                     bookingList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد حجوزات حقيقية في قاعدة البيانات حتى الآن.</p>';
                 } else {
                     bookingList.innerHTML = bookings.map(b => `
-                        <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : '#f59e0b'};">
+                        <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'rejected' ? '#ef4444' : '#f59e0b'};">
                             <div style="text-align: right;">
-                                <strong>${b.businessName}</strong>
+                                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
+                                    <span style="font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'approved' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'rejected' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
+                                        ${b.status === 'approved' ? 'مقبول' : b.status === 'completed' ? 'مكتمل' : b.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
+                                    </span>
+                                    <strong>${b.businessName}</strong>
+                                </div>
                                 <p style="font-size:0.8rem; color:var(--text-muted);">${b.date} - ${b.service}</p>
                             </div>
                             <div style="display:flex; gap:0.5rem;">
-                                ${b.status !== 'approved' ? `<button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>` : ''}
-                                ${b.status !== 'rejected' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>` : ''}
+                                ${b.status === 'pending' ? `
+                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id}, 'approved')">قبول</button>
+                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id}, 'rejected')">رفض</button>
+                                ` : ''}
                                 <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:gray; border-color:gray;" onclick="adminDeleteBooking(${b.id})"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>

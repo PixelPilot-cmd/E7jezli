@@ -233,6 +233,7 @@ body { background: var(--bg-main); color: var(--text-main); direction: rtl; over
 .status-pending { background: #fef3c7; color: #d97706; }
 .status-approved { background: #dcfce7; color: #16a34a; }
 .status-rejected { background: #fee2e2; color: #dc2626; }
+.status-completed { background: #dbeafe; color: #1d4ed8; }
 .status-cancel_requested { background: #f1f5f9; color: #64748b; border: 1px dashed #cbd5e1; }
 /* --- RESPONSIVE DESIGN --- */
 
