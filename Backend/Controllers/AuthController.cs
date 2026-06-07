@@ -114,6 +114,28 @@ namespace E7jezli.Server.Controllers
             return Ok(new { message = "تم تغيير كلمة المرور بنجاح." });
         }
 
+        // POST: api/Auth/reset-password
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.NewPassword))
+            {
+                return BadRequest("جميع الحقول مطلوبة.");
+            }
+
+            var emailNormalized = dto.Email.Trim().ToLower();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == emailNormalized);
+            if (user == null)
+            {
+                return NotFound("المستخدم غير موجود.");
+            }
+
+            user.PasswordHash = HashPassword(dto.NewPassword);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "تمت إعادة تعيين كلمة المرور بنجاح." });
+        }
+
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
@@ -141,6 +163,12 @@ namespace E7jezli.Server.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string OldPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordDto
+    {
+        public string Email { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
     }
 }

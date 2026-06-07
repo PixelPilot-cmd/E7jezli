@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نسيت كلمة المرور | E7jezli</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .auth-container { max-width: 450px; margin: 5rem auto; padding: 2rem; background: white; border-radius: 30px; box-shadow: var(--shadow-soft); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input { width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; outline: none; }
+    </style>
+</head>
+<body style="background: var(--bg-main);">
+    <div class="container">
+        <div class="auth-container">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <a href="index.html" class="logo"><img src="img/logo.png" alt="E7jezli" style="height: 60px;"></a>
+            </div>
+            <h2 style="text-align:center; margin-bottom:1.5rem;">إعادة تعيين كلمة المرور</h2>
+            <form id="resetForm" class="auth-form active" onsubmit="handleReset(event)">
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="resetEmail" required placeholder="example@mail.com">
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور الجديدة (6 خانات على الأقل)</label>
+                    <input type="password" id="resetNewPass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1.2rem;">إعادة تعيين</button>
+            </form>
+            <p style="text-align:center; margin-top:1rem;">
+                <a href="auth.html" style="color: var(--primary); text-decoration:none;">العودة لتسجيل الدخول</a>
+            </p>
+        </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script>
+        async function handleReset(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const original = btn.innerText;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...';
+            btn.disabled = true;
+            try {
+                const email = document.getElementById('resetEmail').value.trim();
+                const newPass = document.getElementById('resetNewPass').value;
+                if (newPass.length < 6) {
+                    alert('يجب أن تكون كلمة المرور الجديدة مكونة من 6 خانات على الأقل.');
+                    return;
+                }
+                await E7_DB.resetPassword(email, newPass);
+                alert('تمت إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول.');
+                window.location.href = 'auth.html';
+            } catch (err) {
+                alert(err.message || 'حدث خطأ أثناء إعادة تعيين كلمة المرور.');
+            } finally {
+                btn.innerText = original;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

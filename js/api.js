@@ -159,14 +159,17 @@ const E7_DB = {
         return await response.json();
     },
 
-    // جلب ملف المستخدم الشخصي لتحديث النقاط
+    // جلب ملف تعريف المستخدم
     getUserProfile: async (email) => {
         const response = await fetch(`${API_BASE_URL}/Auth/profile?email=${encodeURIComponent(email)}`);
-        if (!response.ok) return null;
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || "فشل جلب بيانات المستخدم");
+        }
         return await response.json();
     },
 
-    // تغيير كلمة المرور للمستخدم
+    // تغيير كلمة المرور
     changePassword: async (email, oldPassword, newPassword) => {
         const response = await fetch(`${API_BASE_URL}/Auth/change-password`, {
             method: 'POST',
@@ -178,5 +181,19 @@ const E7_DB = {
             throw new Error(errText || "فشل تغيير كلمة المرور");
         }
         return await response.json();
-    }
+    },
+
+    // إعادة تعيين كلمة المرور (من دون كلمة قديمة)
+    resetPassword: async (email, newPassword) => {
+        const response = await fetch(`${API_BASE_URL}/Auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, newPassword })
+        });
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || "فشل إعادة تعيين كلمة المرور");
+        }
+        return await response.json();
+    },
 };
