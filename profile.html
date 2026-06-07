@@ -112,7 +112,7 @@
             document.getElementById('userPoints').innerText = profile.points || 0;
 
             // تحميل حجوزات المستخدم الحالي كنشاطات
-            const books = await E7_DB.getBookings(profile.email);
+            const books = await E7_DB.getBookingsByUser(profile.id);
             const log = document.getElementById('activityLog');
             if (books.length === 0) {
                 log.innerHTML = '<p style="opacity: 0.5;">لا توجد حجوزات سابقة حالياً.</p>';

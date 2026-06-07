@@ -18,10 +18,22 @@ const E7_DB = {
         }
     },
 
-    // جلب الحجوزات مع إمكانية التصفية بالبريد الإلكتروني للزبون
-    getBookings: async (email) => {
+    // جلب الحجوزات حسب معرف المستخدم (UserId)
+    getBookingsByUser: async (userId) => {
         try {
-            const url = `${API_BASE_URL}/Booking`;
+            const url = `${API_BASE_URL}/Booking?userId=${userId}`;
+            const response = await fetch(url);
+            if (!response.ok) return [];
+            return await response.json();
+        } catch (e) {
+            return [];
+        }
+    },
+
+    // (اختياري) جلب الحجوزات حسب البريد الإلكتروني إذا كان الـ API يدعم ذلك
+    getBookingsByEmail: async (email) => {
+        try {
+            let url = `${API_BASE_URL}/Booking`;
             if (email) {
                 url += `?email=${encodeURIComponent(email)}`;
             }
