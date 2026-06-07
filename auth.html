@@ -100,7 +100,10 @@
                     const password = document.querySelector('#loginForm input[type="password"]').value;
 
                     const user = await E7_DB.loginUser(email, password);
-                    localStorage.setItem('user_profile', JSON.stringify({ name: user.fullName, email: user.email, points: user.points }));
+                    // حفظ علم الشريك في ملف التعريف
+                    localStorage.setItem('user_profile', JSON.stringify({ name: user.fullName, email: user.email, points: user.points, isPartner: user.isPartner ?? user.IsPartner }));
+                    // لا يوجد منع للدخول؛ الشركاء سيشاهدون لوحة التحكم داخل profile.html
+
                 }
 
                 const redirectUrl = localStorage.getItem('redirect_after_login');

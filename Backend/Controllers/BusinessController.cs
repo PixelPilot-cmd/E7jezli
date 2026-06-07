@@ -66,3 +66,15 @@ namespace E7jezli.Server.Controllers
         }
     }
 }
+
+        // GET: api/Business/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Business>> GetBusiness(int id)
+        {
+            var business = await _context.Businesses.FindAsync(id);
+            if (business == null)
+            {
+                return NotFound("المؤسسة غير موجودة.");
+            }
+            return Ok(business);
+        }
