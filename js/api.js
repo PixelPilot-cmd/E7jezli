@@ -435,7 +435,7 @@ const E7_DB = {
     },
 
     updateBookingStatus: async (id, status) => {
-        // 1. تحديث محلي فوري لضمان تجربة مستخدم سريعة
+        // 1. تحديث محلي فوري أولاً
         const local = _getLocalBookings();
         const idx = local.findIndex(b => (b.id || b.Id) == id);
         
@@ -447,38 +447,27 @@ const E7_DB = {
             booking.Status = status;
             _saveLocalBookings(local);
             
-            // إضافة نقاط الولاء محلياً فوراً إذا تم الإتمام
             if (status === 'completed' && userEmail) {
                 E7_DB._addPoints(userEmail, 100);
             }
         }
 
-        // 2. محاولة تحديث السيرفر (مع وقت انتظار طويل للاستيقاظ)
-        try {
-            const options = {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(status)
-            };
+        // 2. مزامنة صامتة مع السيرفر
+        const options = {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(status)
+        };
 
-            // ننتظر حتى 45 ثانية لاستيقاظ السيرفر
-            let res = await _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, options, 45000);
+        // نرسل الطلب ولا ننتظر الرد (Background Sync) لضمان عدم تعليق الواجهة
+        // ولكننا سنقوم بمحاولة واحدة "صعبة" للتأكد من استيقاظ السيرفر
+        _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, options, 45000).then(res => {
             if (!res || !res.ok) {
-                res = await _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, options, 45000);
+                _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, options, 45000);
             }
+        });
 
-            // إذا فشل التحديث تماماً على السيرفر، وكان الحجز ليس محلياً فقط
-            if ((!res || !res.ok) && id < 1000000000000) { 
-                throw new Error(res ? `Server error: ${res.status}` : "Server timeout (Sleeping)");
-            }
-            
-            return true;
-        } catch (e) {
-            console.error("Sync error:", e);
-            // لا نلقي الخطأ إذا كان الحجز محلياً فقط (لأنه سينجح محلياً على أي حال)
-            if (id < 1000000000000) throw e; 
-            return true;
-        }
+        return true; // نعود بالنجاح دائماً لأن التحديث المحلي تم
     },
 
     deleteBooking: async (id) => {

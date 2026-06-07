@@ -88,10 +88,15 @@ namespace E7jezli.Server.Controllers
 
         // PATCH: api/Booking/{id}/status   (موافقة أو رفض الشريك)
         [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(int id, [FromBody] string status)
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] object statusObj)
         {
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
+
+            // Extract string from object if needed (to handle different JSON formats)
+            string status = statusObj?.ToString() ?? "";
+            if (status.StartsWith("\"") && status.EndsWith("\""))
+                status = status.Substring(1, status.Length - 2);
 
             // Loyalty points: if status switches to completed, award 100 points
             if (booking.Status != "completed" && status == "completed")
