@@ -64,8 +64,6 @@ namespace E7jezli.Server.Controllers
 
             return NoContent();
         }
-    }
-}
 
         // GET: api/Business/{id}
         [HttpGet("{id}")]
@@ -78,3 +76,5 @@ namespace E7jezli.Server.Controllers
             }
             return Ok(business);
         }
+    }
+}
