@@ -21,7 +21,7 @@ const E7_DB = {
     // جلب الحجوزات مع إمكانية التصفية بالبريد الإلكتروني للزبون
     getBookings: async (email) => {
         try {
-            let url = `${API_BASE_URL}/Bookings`;
+            const url = `${API_BASE_URL}/Booking`;
             if (email) {
                 url += `?email=${encodeURIComponent(email)}`;
             }
@@ -64,7 +64,7 @@ const E7_DB = {
     // تأكيد حجز جديد
     saveBooking: async (booking) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/Bookings`, {
+            const response = await fetch(`${API_BASE_URL}/Booking`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(booking)
@@ -99,7 +99,7 @@ const E7_DB = {
     // تحديث حالة الحجز
     updateBookingStatus: async (id, status) => {
         try {
-            await fetch(`${API_BASE_URL}/Bookings/${id}/status`, {
+            await fetch(`${API_BASE_URL}/Booking/${id}/status`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(status)
@@ -112,7 +112,7 @@ const E7_DB = {
     // حذف حجز من السحاب
     deleteBooking: async (id) => {
         try {
-            await fetch(`${API_BASE_URL}/Bookings/${id}`, { method: 'DELETE' });
+            await fetch(`${API_BASE_URL}/Booking/${id}`, { method: 'DELETE' });
         } catch (e) {
             console.error("Delete booking failed");
         }
