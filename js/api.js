@@ -434,7 +434,7 @@ const E7_DB = {
     },
 
     updateBookingStatus: async (id, status) => {
-        // تحديث محلي فوري
+        // تحديث محلي فوري أولاً لضمان سرعة الاستجابة
         const local = _getLocalBookings();
         const idx = local.findIndex(b => (b.id || b.Id) == id);
         
@@ -447,7 +447,7 @@ const E7_DB = {
             _saveLocalBookings(local);
         }
 
-        // محاولة تحديث السيرفر والانتظار لضمان المزامنة
+        // محاولة تحديث السيرفر
         try {
             const options = {
                 method: 'PATCH',
@@ -455,20 +455,26 @@ const E7_DB = {
                 body: JSON.stringify(status)
             };
 
-            const res = await _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, options);
-            
-            // إذا فشل المسار الأول، جرب المسار البديل
+            // جرب كلا المسارين الممكنين للسيرفر
+            let res = await _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, options);
             if (!res || !res.ok) {
-                await _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, options);
+                res = await _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, options);
             }
 
-            // إضافة نقاط الولاء عند النجاح فقط إذا كانت الحالة "completed"
+            // إذا فشل التحديث تماماً على السيرفر، ارفع استثناءً
+            if (!res || !res.ok) {
+                throw new Error("Server update failed");
+            }
+
+            // إضافة نقاط الولاء عند النجاح الفعلي فقط
             if (status === 'completed' && userEmail) {
                 E7_DB._addPoints(userEmail, 100);
             }
+            
+            return true;
         } catch (e) {
-            console.error("Failed to sync booking status to server:", e);
-            throw e; // إعادة رمي الخطأ ليتم معالجته في الواجهة
+            console.error("Critical error updating status:", e);
+            throw e; 
         }
     },
 

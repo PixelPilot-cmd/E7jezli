@@ -208,10 +208,10 @@
                             </div>
                             <div style="display:flex; flex-direction:column; gap:0.5rem; margin-right:1.5rem;">
                                 ${b.status === 'pending' ? `
-                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#10b981;" onclick="updateMyBooking(${b.id || b.Id}, 'approved')"><i class="fa-solid fa-check"></i> قبول الحجز</button>
-                                    <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#ef4444; border-color:#ef4444;" onclick="updateMyBooking(${b.id || b.Id}, 'rejected')"><i class="fa-solid fa-xmark"></i> رفض واعتذار</button>
+                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#10b981;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'approved')"><i class="fa-solid fa-check"></i> قبول الحجز</button>
+                                    <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#ef4444; border-color:#ef4444;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'rejected')"><i class="fa-solid fa-xmark"></i> رفض واعتذار</button>
                                 ` : b.status === 'approved' ? `
-                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#3b82f6;" onclick="updateMyBooking(${b.id || b.Id}, 'completed')"><i class="fa-solid fa-circle-check"></i> إتمام الحجز (+100 نقطة)</button>
+                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#3b82f6;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'completed')"><i class="fa-solid fa-circle-check"></i> إتمام الحجز (+100 نقطة)</button>
                                 ` : b.status === 'completed' ? `
                                     <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#10b981; border-color:#10b981;" disabled><i class="fa-solid fa-circle-check"></i> مكتمل ومغلق</button>
                                 ` : `
@@ -227,17 +227,17 @@
             }
         }
 
-        async function updateMyBooking(id, status) {
-            const btn = event.currentTarget;
+        async function updateMyBooking(btn, id, status) {
             const originalHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري...';
             btn.disabled = true;
 
             try {
                 await E7_DB.updateBookingStatus(id, status);
-                loadPartnerDashboard(); // Refresh after success
+                // نجاح التحديث
+                await loadPartnerDashboard(); 
             } catch (err) {
-                alert("⚠️ فشل تحديث حالة الحجز. يرجى المحاولة مرة أخرى.");
+                alert("⚠️ لم نتمكن من تحديث الحالة على السيرفر. يرجى التأكد من اتصال الإنترنت أو المحاولة لاحقاً.");
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
             }
