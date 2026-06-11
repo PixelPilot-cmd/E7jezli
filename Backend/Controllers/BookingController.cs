@@ -16,36 +16,57 @@ namespace E7jezli.Server.Controllers
             _context = context;
         }
 
-        // POST: api/Booking  (إنشاء طلب حجز) with robust error handling
+        // POST: api/Booking  (إنشاء طلب حجز مع فحص التضارب والسعة)
         [HttpPost]
         public async Task<ActionResult<Booking>> Create([FromBody] Booking booking)
         {
             try
             {
-                if (booking == null) return BadRequest("Invalid booking data.");
+                if (booking == null) return BadRequest("بيانات الحجز غير صحيحة.");
+                
                 // Validate required fields
-                if (string.IsNullOrWhiteSpace(booking.BusinessName) || string.IsNullOrWhiteSpace(booking.UserEmail))
-                    return BadRequest("BusinessName and UserEmail must be provided.");
+                if (booking.BusinessId <= 0 || string.IsNullOrWhiteSpace(booking.UserEmail))
+                    return BadRequest("BusinessId و UserEmail مطلوبان.");
                 if (string.IsNullOrWhiteSpace(booking.Service))
-                    return BadRequest("Service description is required.");
-                // Default status is pending approval
+                    return BadRequest("وصف الخدمة مطلوب.");
+                if (booking.StartTime >= booking.EndTime)
+                    return BadRequest("وقت البدء يجب أن يكون قبل وقت الانتهاء.");
+
+                // Get business details
+                var business = await _context.Businesses.FindAsync(booking.BusinessId);
+                if (business == null)
+                    return NotFound("المؤسسة غير موجودة.");
+
+                // Check capacity
+                if (booking.NumberOfPeople > business.Capacity)
+                    return BadRequest($"عدد الأشخاص يتجاوز السعة القصوى لهذه المؤسسة ({business.Capacity}).");
+
+                // Check for booking conflicts based on service type
+                var hasConflict = await CheckBookingConflict(booking.BusinessId, booking.StartTime, booking.EndTime, business.ServiceType);
+                if (hasConflict)
+                    return BadRequest("عذراً، هذا الموعد محجوز بالفعل. يرجى اختيار وقت آخر.");
+
+                // Set booking details
+                booking.BusinessName = business.Name;
+                booking.BusinessImage = business.ImageUrl;
                 booking.Status = "pending";
                 booking.DateCreated = DateTime.UtcNow;
+
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
+
                 return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
             }
             catch (Exception ex)
             {
-                // Log exception to console (or proper logger in production)
                 Console.WriteLine($"Error creating booking: {ex.Message}");
-                return StatusCode(500, $"Server error: {ex.Message}");
+                return StatusCode(500, $"خطأ في السيرفر: {ex.Message}");
             }
         }
 
         // GET: api/Booking            (جلب كل الحجوزات أو تصفية)
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetAll([FromQuery] string? email, [FromQuery] int? userId, [FromQuery] string? businessName)
+        public async Task<ActionResult<IEnumerable<Booking>>> GetAll([FromQuery] string? email, [FromQuery] int? businessId)
         {
             var query = _context.Bookings.AsQueryable();
             
@@ -54,23 +75,10 @@ namespace E7jezli.Server.Controllers
                 var normalizedEmail = email.Trim().ToLower();
                 query = query.Where(b => b.UserEmail.ToLower() == normalizedEmail);
             }
-            else if (userId.HasValue)
-            {
-                var user = await _context.Users.FindAsync(userId.Value);
-                if (user != null)
-                {
-                    var normalizedEmail = user.Email.Trim().ToLower();
-                    query = query.Where(b => b.UserEmail.ToLower() == normalizedEmail);
-                }
-                else
-                {
-                    return Ok(new List<Booking>());
-                }
-            }
 
-            if (!string.IsNullOrEmpty(businessName))
+            if (businessId.HasValue)
             {
-                query = query.Where(b => b.BusinessName.ToLower() == businessName.Trim().ToLower());
+                query = query.Where(b => b.BusinessId == businessId.Value);
             }
 
             var list = await query.OrderByDescending(b => b.DateCreated).ToListAsync();
@@ -93,20 +101,10 @@ namespace E7jezli.Server.Controllers
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
 
-            // Extract string from object if needed (to handle different JSON formats)
+            // Extract string from object if needed
             string status = statusObj?.ToString() ?? "";
             if (status.StartsWith("\"") && status.EndsWith("\""))
                 status = status.Substring(1, status.Length - 2);
-
-            // Loyalty points: if status switches to completed, award 100 points
-            if (booking.Status != "completed" && status == "completed")
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == booking.UserEmail.ToLower());
-                if (user != null)
-                {
-                    user.Points += 100;
-                }
-            }
 
             booking.Status = status;
             await _context.SaveChangesAsync();
@@ -122,6 +120,37 @@ namespace E7jezli.Server.Controllers
             _context.Bookings.Remove(booking);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        // Helper method to check for booking conflicts
+        private async Task<bool> CheckBookingConflict(int businessId, DateTime startTime, DateTime endTime, string serviceType)
+        {
+            var existingBookings = await _context.Bookings
+                .Where(b => b.BusinessId == businessId && 
+                           b.Status != "cancelled" && 
+                           b.Status != "rejected")
+                .ToListAsync();
+
+            foreach (var existing in existingBookings)
+            {
+                // Check for time overlap
+                if (startTime < existing.EndTime && endTime > existing.StartTime)
+                {
+                    // For wedding halls and similar venues, check if it's on the same day
+                    if (serviceType == "wedding_hall" || serviceType == "hotel")
+                    {
+                        if (startTime.Date == existing.StartTime.Date)
+                            return true;
+                    }
+                    // For restaurants, coffee shops, etc., check exact time overlap
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -3,403 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>انضم كشريك | E7jezli</title>
+    <title>المؤسسات | إحجزلي في رام الله</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <style>
-        .partner-hero { padding: 5rem 0; text-align: center; background: var(--primary-light); }
-        .form-container { max-width: 600px; margin: -3rem auto 5rem; background: white; padding: 3rem; border-radius: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; color: var(--text-main); }
-        .form-group input, .form-group select { width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); outline: none; }
+        .info-container { max-width: 600px; margin: 5rem auto; padding: 3rem; background: white; border-radius: 30px; box-shadow: var(--shadow-soft); text-align: center; }
+        .info-icon { font-size: 4rem; color: var(--primary); margin-bottom: 2rem; }
     </style>
 </head>
-<body>
-
+<body style="background: var(--bg-main);">
     <header class="header">
         <div class="container nav-wrapper">
-            <a href="index.html" class="logo"><img src="img/logo.png" alt="E7jezli"></a>
+            <a href="index.html" class="logo"><img src="img/logo.png" alt="إحجزلي في رام الله"></a>
             <a href="index.html" class="btn btn-outline">العودة للرئيسية</a>
         </div>
     </header>
 
-    <div class="partner-hero">
-        <div class="container">
-            <h1>كن شريكاً في قصة نجاحنا</h1>
-            <p>انضم إلى مئات �        </div>
-    </div>
-
-    <!-- Payment Modal -->
-    <div class="modal-overlay" id="paymentModal">
-        <div class="modal-content" style="max-width: 450px; padding: 2rem;">
-            <span class="modal-close" onclick="closePaymentModal()">&times;</span>
-            <h3 style="margin-bottom:1rem;"><i class="fa-solid fa-credit-card" style="color:var(--primary);"></i> بوابة الدفع الآمنة</h3>
-            <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--text-muted);">تنشيط المنشأة واشتراكها شهرياً بقيمة <strong style="color:var(--primary); font-size:1.2rem;">20$</strong></p>
-            
-            <form id="paymentForm">
-                <div class="form-group" style="text-align: right;">
-                    <label style="font-size:0.85rem;">اسم صاحب البطاقة</label>
-                    <input type="text" placeholder="مثال: أحمد محمد" required style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
-                </div>
-                <div class="form-group" style="text-align: right;">
-                    <label style="font-size:0.85rem;">رقم البطاقة (Visa / Mastercard)</label>
-                    <input type="text" placeholder="4000 1234 5678 9010" required maxlength="19" style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
-                </div>
-                <div style="display:flex; gap:1rem; margin-bottom:1.5rem;">
-                    <div style="flex:1; text-align: right;">
-                        <label style="font-size:0.85rem;">تاريخ الانتهاء</label>
-                        <input type="text" placeholder="MM/YY" required maxlength="5" style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
-                    </div>
-                    <div style="flex:1; text-align: right;">
-                        <label style="font-size:0.85rem;">الرمز السري (CVV)</label>
-                        <input type="password" placeholder="123" required maxlength="3" style="width:100%; padding:0.8rem; border:1px solid var(--border); border-radius:10px;">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:1rem;">تأكيد الدفع والتنشيط ($20)</button>
-            </form>
+    <div class="info-container">
+        <i class="fa-solid fa-building info-icon"></i>
+        <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem;">إضافة المؤسسات</h1>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.8;">
+            نظام إضافة المؤسسات تغير. الآن، فقط الأدمن يمكنه إضافة المؤسسات الجديدة مع بيانات الدخول.
+        </p>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; line-height: 1.8;">
+            إذا كنت تمتلك مؤسسة وتريد إضافتها إلى المنصة، يرجى التواصل مع الإدارة.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="business-login.html" class="btn btn-primary" style="padding: 1rem 2rem;">دخول المؤسسات</a>
+            <a href="admin.html" class="btn btn-outline" style="padding: 1rem 2rem;">لوحة الإدارة</a>
         </div>
     </div>
-
-    <main class="container" style="margin-top: 2rem; margin-bottom: 5rem;">
-        <!-- Tabs Section -->
-        <div class="partner-tabs" style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem; max-width:700px; margin-left:auto; margin-right:auto;">
-            <button class="btn btn-primary" id="tabRegisterBtn" onclick="switchPartnerTab('register')" style="flex:1; justify-content:center; height: 50px;">تقديم طلب جديد</button>
-            <button class="btn btn-outline" id="tabPaymentBtn" onclick="switchPartnerTab('payment')" style="flex:1; justify-content:center; height: 50px;">استكمال الدفع للطلبات المقبولة</button>
-        </div>
-
-        <!-- Tab 1: Registration Form -->
-        <div id="registerTab" class="form-container" style="max-width: 700px; padding: 2.5rem; display: block; margin: 0 auto;">
-            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; text-align: center;">تقديم طلب انضمام كشريك</h2>
-            <form id="partnerForm">
-                <div class="form-group">
-                    <label>اسم المنشأة / العمل</label>
-                    <input type="text" id="bizName" placeholder="مثال: صالون الفخامة" required>
-                </div>
-                
-                <div style="display: flex; gap: 1rem;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>المدينة (مدن الضفة الغربية)</label>
-                        <select id="bizCity" required>
-                            <option value="رام الله">رام الله</option>
-                            <option value="بيت لحم">بيت لحم</option>
-                            <option value="الخليل">الخليل</option>
-                            <option value="طولكرم">طولكرم</option>
-                            <option value="جنين">جنين</option>
-                            <option value="نابلس">نابلس</option>
-                            <option value="سلفيت">سلفيت</option>
-                            <option value="قلقيلية">قلقيلية</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>التصنيف</label>
-                        <select id="bizCat" required onchange="handleCategoryChange()">
-                            <option value="مطاعم">مطاعم</option>
-                            <option value="coffe">coffe</option>
-                            <option value="صالات افراح">صالات افراح</option>
-                            <option value="نوادي رياضية">نوادي رياضية</option>
-                            <option value="ملاعب كرة قدم">ملاعب كرة قدم</option>
-                            <option value="صالات ترفيهية">صالات ترفيهية</option>
-                            <option value="شركات توصيل">شركات توصيل</option>
-                            <option value="فنادق">فنادق</option>
-                            <option value="عيادات تجميلية">عيادات تجميلية</option>
-                            <option value="صالونات نسائية">صالونات نسائية</option>
-                            <option value="صالونات رجالية">صالونات رجالية</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Custom Fields container based on category selection -->
-                <div id="customFieldsContainer" style="background:#f8fafc; padding:1.5rem; border-radius:15px; margin-bottom:1.5rem; display:none;"></div>
-
-                <div class="form-group">
-                    <label>نبذة تعريفية عن المنشأة</label>
-                    <textarea id="bizDesc" placeholder="اكتب نبذة تعريفية قصيرة تظهر للزبائن..." rows="3" style="width:100%; padding:1rem; border-radius:12px; border:1px solid var(--border); outline:none; resize:none;" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>تحميل صور المنشأة (يمكنك اختيار حتى 3 صور)</label>
-                    <input type="file" id="bizImages" accept="image/*" multiple style="padding: 0.5rem;" required>
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem;">الصورة الأولى ستكون الغلاف الأساسي والـ 2 المتبقية في التفاصيل.</p>
-                </div>
-
-                <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1.5rem;">
-                    <h3 style="font-size:1.1rem; margin-bottom:1rem;"><i class="fa-solid fa-share-nodes" style="color:var(--primary);"></i> روابط التواصل الاجتماعي (اختياري)</h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> فيسبوك</label>
-                            <input type="url" id="fbLink" placeholder="https://facebook.com/yourpage">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fa-brands fa-instagram" style="color:#E4405F;"></i> انستغرام</label>
-                            <input type="url" id="igLink" placeholder="https://instagram.com/yourpage">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> رقم الواتساب</label>
-                        <input type="text" id="waLink" placeholder="مثال: +970599000000">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; height:60px; margin-top:1rem; font-size:1.1rem;">تقديم طلب الانضمام</button>
-            </form>
-        </div>
-
-        <!-- Tab 2: Complete Payment Form -->
-        <div id="paymentTab" class="form-container" style="max-width: 700px; padding: 2.5rem; display: none; margin: 0 auto;">
-            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; text-align: center;"><i class="fa-solid fa-credit-card" style="color:var(--primary);"></i> استكمال الدفع للشركاء المقبولين</h2>
-            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:2rem; text-align: center;">إذا قمت بتقديم طلب انضمام ووافق عليه الآدمن، اكتب اسم منشأتك أدناه لاستكمال الدفع وتنشيط حسابك فوراً.</p>
-            
-            <div class="form-group" style="margin-bottom: 2rem;">
-            <label></label>
-            <div style="display:flex; gap:0.5rem;">
-                <input type="text" id="searchBizName" placeholder="" style="flex:1; padding:0.8rem; border-radius:12px; border:1px solid var(--border); outline:none;">
-                <button class="btn btn-primary" onclick="searchApprovedPartner()" style="padding:0 2rem; border-radius: 12px; height: 50px;">تحقق وبحث</button>
-            </div>
-        </div>
-
-            <!-- Status Result Box -->
-            <div id="partnerStatusResult" style="padding: 1.5rem; border-radius: 15px; background: var(--bg-main); border: 1px solid var(--border); display: none; text-align: right;"></div>
-        </div>
-    </main>
 
     <footer class="footer">
         <div class="container" style="text-align:center; padding: 2rem 0;">
-            <p style="color:var(--text-muted);">جميع الحقوق محفوظة © 2026 إحجزلي</p>
+            <p style="color:var(--text-muted);">جميع الحقوق محفوظة © 2026 إحجزلي في رام الله</p>
         </div>
     </footer>
-
-    <script src="js/api.js"></script>
-    <script>
-        let uploadedImages = [];
-        let selectedBusinessIdToPay = null;
-
-        // Tab Switching
-        function switchPartnerTab(tab) {
-            if (tab === 'register') {
-                document.getElementById('registerTab').style.display = 'block';
-                document.getElementById('paymentTab').style.display = 'none';
-                document.getElementById('tabRegisterBtn').className = 'btn btn-primary';
-                document.getElementById('tabPaymentBtn').className = 'btn btn-outline';
-            } else {
-                document.getElementById('registerTab').style.display = 'none';
-                document.getElementById('paymentTab').style.display = 'block';
-                document.getElementById('tabRegisterBtn').className = 'btn btn-outline';
-                document.getElementById('tabPaymentBtn').className = 'btn btn-primary';
-            }
-        }
-
-        // Compress and convert files to base64
-        document.getElementById('bizImages').addEventListener('change', function(e) {
-            uploadedImages = [];
-            const files = Array.from(e.target.files).slice(0, 3);
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const max_size = 800;
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        if (width > height) {
-                            if (width > max_size) {
-                                height *= max_size / width;
-                                width = max_size;
-                            }
-                        } else {
-                            if (height > max_size) {
-                                width *= max_size / height;
-                                height = max_size;
-                            }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        uploadedImages.push(compressedBase64);
-                    };
-                    img.src = evt.target.result;
-                }
-                reader.readAsDataURL(file);
-            });
-        });
-
-        function handleCategoryChange() {
-            const cat = document.getElementById('bizCat').value;
-            const container = document.getElementById('customFieldsContainer');
-            container.innerHTML = '';
-            
-            if (cat === 'صالات ترفيهية') {
-                container.style.display = 'block';
-                container.innerHTML = `
-                    <h4 style="margin-bottom:0.8rem; font-size:0.95rem; color:var(--primary);">تفاصيل صالة الترفيه</h4>
-                    <div class="form-group" style="margin:0;">
-                        <label style="font-size:0.8rem;">نوع الخدمة / الألعاب المتوفرة</label>
-                        <input type="text" id="extraServiceType" placeholder="مثال: ألعاب واقع افتراضي، بولينج، بلياردو" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
-                    </div>
-                `;
-            } else if (cat === 'شركات توصيل') {
-                container.style.display = 'block';
-                container.innerHTML = `
-                    <h4 style="margin-bottom:0.8rem; font-size:0.95rem; color:var(--primary);">تفاصيل التوصيل</h4>
-                    <div style="display:flex; gap:1rem;">
-                        <div class="form-group" style="flex:1; margin:0;">
-                            <label style="font-size:0.8rem;">نوع التوصيل</label>
-                            <input type="text" id="extraDelivType" placeholder="مثال: طعام، طرود، أجهزة" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
-                        </div>
-                        <div class="form-group" style="flex:1; margin:0;">
-                            <label style="font-size:0.8rem;">وقت التوصيل</label>
-                            <input type="text" id="extraDelivTime" placeholder="مثال: 24 ساعة، صباحي" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-top:1rem; margin-bottom:0;">
-                        <label style="font-size:0.8rem;">أماكن ومناطق التوصيل</label>
-                        <input type="text" id="extraDelivPlace" placeholder="مثال: داخل المدينة، كافة أنحاء الضفة" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border);">
-                    </div>
-                `;
-            } else {
-                container.style.display = 'none';
-            }
-        }
-
-        // Check if admin is adding
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdminMode = urlParams.get('admin') === 'true';
-        
-        if (isAdminMode) {
-            const submitBtn = document.querySelector('#partnerForm button[type="submit"]');
-            if (submitBtn) submitBtn.innerText = "إضافة المنشأة كمسؤول (مجاناً)";
-        }
-
-        // Register Partner Submit Action (NO INITIAL PAYMENT!)
-        document.getElementById('partnerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
-            btn.disabled = true;
-
-            const extraServicesData = {};
-            const cat = document.getElementById('bizCat').value;
-            if (cat === 'صالات ترفيهية') {
-                extraServicesData.serviceType = document.getElementById('extraServiceType').value;
-            } else if (cat === 'شركات توصيل') {
-                extraServicesData.deliveryType = document.getElementById('extraDelivType').value;
-                extraServicesData.deliveryTime = document.getElementById('extraDelivTime').value;
-                extraServicesData.deliveryPlace = document.getElementById('extraDelivPlace').value;
-            }
-
-            const bizName = document.getElementById('bizName').value.trim();
-            const biz = {
-                name: bizName,
-                location: document.getElementById('bizCity').value,
-                category: cat,
-                img: uploadedImages[0] || "https://images.unsplash.com/photo-1521791136064-7986c2959210?auto=format&fit=crop&w=800",
-                secondaryImages: uploadedImages.slice(1).join(','),
-                description: document.getElementById('bizDesc').value,
-                extraServices: JSON.stringify(extraServicesData),
-                social: {
-                    fb: document.getElementById('fbLink').value,
-                    ig: document.getElementById('igLink').value,
-                    wa: document.getElementById('waLink').value
-                },
-                status: isAdminMode ? "active" : "pending" // Admin added is active directly, regular is pending
-            };
-
-            try {
-                localStorage.setItem("myBusinessName", biz.name);
-                await E7_DB.saveBusiness(biz);
-                if (isAdminMode) {
-                    alert("تمت إضافة المنشأة بنجاح ومجاناً كمسؤول!");
-                    window.location.href = "admin.html";
-                } else {
-                    alert("🎉 تم إرسال طلب الانضمام بنجاح! طلبك الآن قيد المراجعة والدراسة من قبل الإدارة. بمجرد الموافقة، يمكنك العودة لهذه الصفحة لاستكمال الدفع وتنشيط حسابك.");
-                    window.location.reload();
-                }
-            } catch (err) {
-                alert("⚠️ لم نتمكن من الاتصال بالسيرفر السحابي. قد يكون السيرفر في وضع النوم (استيقاظه يستغرق 30 ثانية لأول مرة). يرجى الضغط مرة أخرى بعد قليل للتأكيد.");
-                btn.innerHTML = isAdminMode ? 'إضافة المنشأة كمسؤول (مجاناً)' : 'تقديم طلب الانضمام';
-                btn.disabled = false;
-            }
-        });
-
-        // Search for Approved Partner in Tab 2
-        async function searchApprovedPartner() {
-            const query = document.getElementById('searchBizName').value.trim().toLowerCase();
-            const resultBox = document.getElementById('partnerStatusResult');
-            
-            if (!query) return alert("يرجى كتابة اسم المنشأة للبحث");
-
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري البحث والتحقق...';
-
-            try {
-                const businesses = await E7_DB.getBusinesses();
-                const matched = businesses.find(b => b.name.trim().toLowerCase() === query);
-
-                if (!matched) {
-                    resultBox.innerHTML = `
-                        <p style="color:#ef4444; font-weight:700;"><i class="fa-solid fa-circle-xmark"></i> لم يتم العثور على منشأة بهذا الاسم!</p>
-                        <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">يرجى التأكد من كتابة الاسم تماماً كما سجلته في نموذج طلب الانضمام.</p>
-                    `;
-                    return;
-                }
-
-                selectedBusinessIdToPay = matched.id;
-
-                if (matched.status === 'pending') {
-                    resultBox.innerHTML = `
-                        <p style="color:#f59e0b; font-weight:800; font-size:1.1rem;"><i class="fa-solid fa-clock"></i> طلبك قيد المراجعة والدراسة</p>
-                        <p style="color:var(--text-muted); margin-top:0.5rem; font-size:0.9rem;">شريكنا العزيز <strong>${matched.name}</strong>، طلب انضمامك لا يزال قيد الدراسة والمراجعة من قبل الإدارة. يرجى التحقق مرة أخرى لاحقاً.</p>
-                    `;
-                } else if (matched.status === 'approved') {
-                    resultBox.innerHTML = `
-                        <p style="color:#10b981; font-weight:800; font-size:1.1rem;"><i class="fa-solid fa-circle-check"></i> تهانينا! تمت الموافقة على طلبك</p>
-                        <p style="color:var(--text-muted); margin-top:0.5rem; font-size:0.9rem;">طلبك للمنشأة <strong>${matched.name}</strong> مقبول وجاهز للتنشيط! يرجى استكمال عملية الدفع بقيمة <strong>20$</strong> لتنشيط حسابك وظهوره فوراً على المنصة للزبائن.</p>
-                        <button class="btn btn-primary" onclick="openPaymentModal()" style="margin-top:1rem; width:100%; justify-content:center;">دفع الاشتراك وتنشيط المنشأة ($20)</button>
-                    `;
-                } else if (matched.status === 'active') {
-                    resultBox.innerHTML = `
-                        <p style="color:#10b981; font-weight:800; font-size:1.1rem;"><i class="fa-solid fa-circle-check"></i> حسابك نشط بالفعل!</p>
-                        <p style="color:var(--text-muted); margin-top:0.5rem; font-size:0.9rem;">منشأتك <strong>${matched.name}</strong> نشطة ومتاحة لحجوزات الزبائن وتظهر على المنصة بشكل كامل. شكراً لانضمامك إلينا!</p>
-                    `;
-                }
-            } catch (err) {
-                resultBox.innerHTML = '<p style="color:#ef4444;">حدث خطأ أثناء الاتصال بالسيرفر. يرجى المحاولة لاحقاً.</p>';
-            }
-        }
-
-        function openPaymentModal() {
-            document.getElementById('paymentModal').style.display = 'flex';
-        }
-
-        function closePaymentModal() {
-            document.getElementById('paymentModal').style.display = 'none';
-        }
-
-        // Handle Payment Submit (Visa) & Activate Partner Status in DB
-        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payBtn = e.target.querySelector('button');
-            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأكيد الدفع والتنشيط...';
-            payBtn.disabled = true;
-
-            try {
-                // Update business status to active in cloud DB
-                await E7_DB.updateBusinessStatus(selectedBusinessIdToPay, "active");
-                alert("🎉 تم تأكيد الدفع وتنشيط منشأتك بنجاح! أصبحت منشأتك تظهر للزبائن الآن ويمكنهم الحجز عندك.");
-                closePaymentModal();
-                window.location.href = "index.html";
-            } catch (err) {
-                alert("⚠️ حدث خطأ أثناء الاتصال بالسيرفر لتنشيط الحساب. يرجى المحاولة مرة أخرى.");
-                payBtn.innerHTML = 'تأكيد الدفع والتنشيط ($20)';
-                payBtn.disabled = false;
-            }
-        });
-    </script>
 </body>
 </html>
 

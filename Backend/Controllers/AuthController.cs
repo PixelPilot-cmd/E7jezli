@@ -4,6 +4,9 @@ using E7jezli.Server.Data;
 using E7jezli.Server.Models;
 using System.Security.Cryptography;
 using System.Text;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace E7jezli.Server.Controllers
 {
@@ -12,10 +15,40 @@ namespace E7jezli.Server.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(AppDbContext context)
+        public AuthController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+        }
+
+        private string GenerateJwtToken(int userId, string email, string role = "user")
+        {
+            var jwtKey = _configuration["Jwt:Key"] ?? "YourSuperSecretKeyForE7jezliRamallah2026!@#";
+            var jwtIssuer = _configuration["Jwt:Issuer"] ?? "E7jezliRamallah";
+            var jwtAudience = _configuration["Jwt:Audience"] ?? "E7jezliUsers";
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(ClaimTypes.Role, role),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: jwtIssuer,
+                audience: jwtAudience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         // POST: api/Auth/register
@@ -38,14 +71,15 @@ namespace E7jezli.Server.Controllers
                 FullName = dto.FullName.Trim(),
                 Email = emailNormalized,
                 PasswordHash = HashPassword(dto.Password),
-                Points = 150, // 150 points welcome gift
+                PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty,
                 DateCreated = DateTime.UtcNow
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok(user);
+            var token = GenerateJwtToken(user.Id, user.Email);
+            return Ok(new { user.Id, user.FullName, user.Email, user.PhoneNumber, Token = token });
         }
 
         // POST: api/Auth/login
@@ -65,7 +99,28 @@ namespace E7jezli.Server.Controllers
                 return Unauthorized("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
             }
 
-            return Ok(user);
+            var token = GenerateJwtToken(user.Id, user.Email);
+            return Ok(new { user.Id, user.FullName, user.Email, user.PhoneNumber, Token = token });
+        }
+
+        // POST: api/Auth/business-login
+        [HttpPost("business-login")]
+        public async Task<IActionResult> BusinessLogin([FromBody] BusinessLoginDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
+            {
+                return BadRequest("اسم المستخدم وكلمة المرور مطلوبة.");
+            }
+
+            var business = await _context.Businesses.FirstOrDefaultAsync(b => b.Username == dto.Username);
+
+            if (business == null || business.PasswordHash != HashPassword(dto.Password))
+            {
+                return Unauthorized("اسم المستخدم أو كلمة المرور غير صحيحة.");
+            }
+
+            var token = GenerateJwtToken(business.Id, business.Username, "business");
+            return Ok(new { business.Id, business.Name, business.Username, business.Category, business.ServiceType, business.Capacity, Token = token });
         }
 
         // GET: api/Auth/profile
@@ -136,33 +191,6 @@ namespace E7jezli.Server.Controllers
             return Ok(new { message = "تمت إعادة تعيين كلمة المرور بنجاح." });
         }
 
-        // POST: api/Auth/redeem-points
-        [HttpPost("redeem-points")]
-        public async Task<IActionResult> RedeemPoints([FromBody] RedeemPointsDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.Email))
-            {
-                return BadRequest("البريد الإلكتروني مطلوب.");
-            }
-
-            var emailNormalized = dto.Email.Trim().ToLower();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == emailNormalized);
-            if (user == null)
-            {
-                return NotFound("المستخدم غير موجود.");
-            }
-
-            if (user.Points < 1000)
-            {
-                return BadRequest("رصيد نقاطك غير كافٍ. تحتاج إلى 1000 نقطة على الأقل.");
-            }
-
-            user.Points -= 1000;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { points = user.Points, message = "تم استبدال النقاط بنجاح!" });
-        }
-
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
@@ -171,6 +199,26 @@ namespace E7jezli.Server.Controllers
                 return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
             }
         }
+
+        // POST: api/Auth/admin-login
+        [HttpPost("admin-login")]
+        public IActionResult AdminLogin([FromBody] AdminLoginDto dto)
+        {
+            var adminPassword = _configuration["AdminPassword"] ?? "Ramallah@2026!AdminSecure";
+            
+            if (dto.Password != adminPassword)
+            {
+                return Unauthorized("كلمة المرور غير صحيحة.");
+            }
+
+            var token = GenerateJwtToken(0, "admin@e7jezli-ramallah.com", "admin");
+            return Ok(new { Token = token, Message = "تم تسجيل الدخول بنجاح" });
+        }
+    }
+
+    public class AdminLoginDto
+    {
+        public string Password { get; set; } = string.Empty;
     }
 
     public class RegisterDto
@@ -178,11 +226,18 @@ namespace E7jezli.Server.Controllers
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
     }
 
     public class LoginDto
     {
         public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class BusinessLoginDto
+    {
+        public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }
 
@@ -197,10 +252,5 @@ namespace E7jezli.Server.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
-    }
-
-    public class RedeemPointsDto
-    {
-        public string Email { get; set; } = string.Empty;
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة | E7jezli</title>
+    <title>لوحة الإدارة | إحجزلي في رام الله</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <style>
@@ -87,7 +87,8 @@
             <ul class="admin-nav">
                 <li><a onclick="showSection('stats', this)" class="nav-item active"><i class="fa-solid fa-chart-line"></i> الإحصائيات</a></li>
                 <li><a onclick="showSection('bookings', this)" class="nav-item"><i class="fa-solid fa-calendar-check"></i> الحجوزات</a></li>
-                <li><a onclick="showSection('partners', this)" class="nav-item"><i class="fa-solid fa-users"></i> الشركاء</a></li>
+                <li><a onclick="showSection('businesses', this)" class="nav-item"><i class="fa-solid fa-building"></i> المؤسسات</a></li>
+                <li><a onclick="showSection('add-business', this)" class="nav-item"><i class="fa-solid fa-plus-circle"></i> إضافة مؤسسة</a></li>
                 <li><a onclick="adminLogout()" style="margin-top: 5rem; color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a></li>
             </ul>
         </aside>
@@ -112,13 +113,100 @@
                 <div id="adminBookingList"></div>
             </div>
 
-            <!-- Partners Section -->
-            <div id="partnersSection" class="admin-section">
+            <!-- Businesses Section -->
+            <div id="businessesSection" class="admin-section">
                 <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
-                    <h1 style="font-size: 1.5rem; font-weight: 800;">إدارة الشركاء</h1>
-                    <a href="partner.html?admin=true" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> إضافة شريك</a>
+                    <h1 style="font-size: 1.5rem; font-weight: 800;">إدارة المؤسسات</h1>
                 </header>
-                <div id="adminPartnerList"></div>
+                <div id="adminBusinessList"></div>
+            </div>
+
+            <!-- Add Business Section -->
+            <div id="add-businessSection" class="admin-section">
+                <header style="margin-bottom: 2rem;">
+                    <h1 style="font-size: 1.5rem; font-weight: 800;">إضافة مؤسسة جديدة</h1>
+                </header>
+                <div style="background: white; padding: 2rem; border-radius: 20px; border: 1px solid var(--border);">
+                    <form id="addBusinessForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">اسم المؤسسة *</label>
+                            <input type="text" id="bizName" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">التصنيف *</label>
+                            <select id="bizCategory" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                                <option value="">اختر التصنيف</option>
+                                <option value="مطاعم">مطاعم</option>
+                                <option value="coffe">coffe</option>
+                                <option value="صالات افراح">صالات افراح</option>
+                                <option value="نوادي رياضية">نوادي رياضية</option>
+                                <option value="ملاعب كرة قدم">ملاعب كرة قدم</option>
+                                <option value="صالات ترفيهية">صالات ترفيهية</option>
+                                <option value="شركات توصيل">شركات توصيل</option>
+                                <option value="فنادق">فنادق</option>
+                                <option value="عيادات تجميلية">عيادات تجميلية</option>
+                                <option value="صالونات نسائية">صالونات نسائية</option>
+                                <option value="صالونات رجالية">صالونات رجالية</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">نوع الخدمة *</label>
+                            <select id="bizServiceType" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                                <option value="">اختر نوع الخدمة</option>
+                                <option value="wedding_hall">قاعة أفراح</option>
+                                <option value="restaurant">مطعم</option>
+                                <option value="coffee_shop">كوفي شوب</option>
+                                <option value="gym">نادي رياضي</option>
+                                <option value="sports_field">ملعب كرة قدم</option>
+                                <option value="entertainment_center">صالة ترفيهية</option>
+                                <option value="delivery_company">شركة توصيل</option>
+                                <option value="hotel">فندق</option>
+                                <option value="beauty_clinic">عيادة تجميلية</option>
+                                <option value="womens_salon">صالون نسائي</option>
+                                <option value="mens_salon">صالون رجالي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">السعة (عدد الأشخاص) *</label>
+                            <input type="number" id="bizCapacity" required min="1" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">اسم المستخدم للمؤسسة *</label>
+                            <input type="text" id="bizUsername" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">كلمة المرور *</label>
+                            <input type="password" id="bizPassword" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">رقم الهاتف *</label>
+                            <input type="tel" id="bizPhone" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">رابط الصورة</label>
+                            <input type="url" id="bizImage" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">الوصف</label>
+                            <textarea id="bizDescription" rows="3" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;"></textarea>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">رابط فيسبوك (اختياري)</label>
+                            <input type="url" id="bizFacebook" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">رابط إنستغرام (اختياري)</label>
+                            <input type="url" id="bizInstagram" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">رابط واتساب (اختياري)</label>
+                            <input type="url" id="bizWhatsapp" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">إضافة المؤسسة</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </main>
     </div>
@@ -126,15 +214,42 @@
     <script src="js/api.js"></script>
     <script>
         // Authentication Logic
-        function checkAdminLogin() {
+        async function checkAdminLogin() {
             const pwd = document.getElementById('adminPwd').value;
-            if (pwd === "mma") {
-                sessionStorage.setItem('isAdmin', 'true');
-                document.getElementById('adminLogin').style.display = 'none';
-                document.getElementById('adminLayoutContent').style.display = 'flex';
-                loadAdminData();
-            } else {
-                document.getElementById('loginError').style.display = 'block';
+            const btn = document.querySelector('#adminLogin button');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/Auth/admin-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    sessionStorage.setItem('isAdmin', 'true');
+                    sessionStorage.setItem('adminToken', data.Token);
+                    document.getElementById('adminLogin').style.display = 'none';
+                    document.getElementById('adminLayoutContent').style.display = 'flex';
+                    loadAdminData();
+                } else {
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            } catch (err) {
+                // Fallback to client-side validation if server is unavailable
+                if (pwd === "Ramallah@2026!AdminSecure") {
+                    sessionStorage.setItem('isAdmin', 'true');
+                    document.getElementById('adminLogin').style.display = 'none';
+                    document.getElementById('adminLayoutContent').style.display = 'flex';
+                    loadAdminData();
+                } else {
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            } finally {
+                btn.innerHTML = 'دخول';
+                btn.disabled = false;
             }
         }
 
@@ -164,39 +279,75 @@
         const toggleBtn = document.getElementById('adminMenuToggle');
         if(toggleBtn) toggleBtn.onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
 
+        // Business Form Handler
+        document.getElementById('addBusinessForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإضافة...';
+            btn.disabled = true;
+
+            try {
+                const businessData = {
+                    name: document.getElementById('bizName').value,
+                    category: document.getElementById('bizCategory').value,
+                    serviceType: document.getElementById('bizServiceType').value,
+                    capacity: parseInt(document.getElementById('bizCapacity').value),
+                    username: document.getElementById('bizUsername').value,
+                    password: document.getElementById('bizPassword').value,
+                    phoneNumber: document.getElementById('bizPhone').value,
+                    imageUrl: document.getElementById('bizImage').value,
+                    description: document.getElementById('bizDescription').value,
+                    facebookLink: document.getElementById('bizFacebook').value,
+                    instagramLink: document.getElementById('bizInstagram').value,
+                    whatsappLink: document.getElementById('bizWhatsapp').value
+                };
+
+                await E7_DB.createBusiness(businessData);
+                alert('تم إضافة المؤسسة بنجاح!');
+                document.getElementById('addBusinessForm').reset();
+                loadAdminData();
+                showSection('businesses');
+            } catch (err) {
+                alert('حدث خطأ: ' + (err.message || 'فشل في إضافة المؤسسة'));
+            } finally {
+                btn.innerHTML = 'إضافة المؤسسة';
+                btn.disabled = false;
+            }
+        });
+
         // Data Management
         async function loadAdminData() {
             try {
                 document.getElementById('adminBookingList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر وجلب البيانات...</p></div>';
-                document.getElementById('adminPartnerList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر وجلب البيانات...</p></div>';
+                document.getElementById('adminBusinessList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر وجلب البيانات...</p></div>';
                 
                 let bookings = await E7_DB.getBookings();
-                let partners = await E7_DB.getBusinesses();
+                let businesses = await E7_DB.getBusinesses();
 
                 document.getElementById('totalCount').innerText = bookings.length;
                 document.getElementById('pendingCount').innerText = bookings.filter(b => b.status === 'pending').length;
-                document.getElementById('partnerCount').innerText = partners.length;
+                document.getElementById('partnerCount').innerText = businesses.length;
 
                 // Render Bookings
                 const bookingList = document.getElementById('adminBookingList');
                 if (bookings.length === 0) {
-                    bookingList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد حجوزات حقيقية في قاعدة البيانات حتى الآن.</p>';
+                    bookingList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد حجوزات حالياً.</p>';
                 } else {
                     bookingList.innerHTML = bookings.map(b => `
-                        <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'rejected' ? '#ef4444' : '#f59e0b'};">
+                        <div class="data-card" style="border-right: 4px solid ${b.status === 'confirmed' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'cancelled' ? '#ef4444' : '#f59e0b'};">
                             <div style="text-align: right;">
                                 <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-                                    <span style="font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'approved' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'rejected' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
-                                        ${b.status === 'approved' ? 'مقبول' : b.status === 'completed' ? 'مكتمل' : b.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
+                                    <span style="font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'confirmed' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'cancelled' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
+                                        ${b.status === 'confirmed' ? 'مؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'cancelled' ? 'ملغي' : 'قيد المراجعة'}
                                     </span>
                                     <strong>${b.businessName}</strong>
                                 </div>
-                                <p style="font-size:0.8rem; color:var(--text-muted);">${b.date} - ${b.service}</p>
+                                <p style="font-size:0.8rem; color:var(--text-muted);">${b.service} - ${new Date(b.startTime).toLocaleDateString('ar-SA')}</p>
                             </div>
                             <div style="display:flex; gap:0.5rem;">
                                 ${b.status === 'pending' ? `
-                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id || b.Id}, 'approved')">قبول</button>
-                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id || b.Id}, 'rejected')">رفض</button>
+                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id || b.Id}, 'confirmed')">تأكيد</button>
+                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id || b.Id}, 'cancelled')">رفض</button>
                                 ` : ''}
                                 <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:gray; border-color:gray;" onclick="adminDeleteBooking(${b.id || b.Id})"><i class="fa-solid fa-trash"></i></button>
                             </div>
@@ -204,26 +355,22 @@
                     `).join('');
                 }
 
-                // Render Partners
-                const partnerList = document.getElementById('adminPartnerList');
-                if (partners.length === 0) {
-                    partnerList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد شركاء في قاعدة البيانات حتى الآن.</p>';
+                // Render Businesses
+                const businessList = document.getElementById('adminBusinessList');
+                if (businesses.length === 0) {
+                    businessList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد مؤسسات في قاعدة البيانات حتى الآن.</p>';
                 } else {
-                    partnerList.innerHTML = partners.map(p => `
-                        <div class="data-card" style="border-right: 4px solid ${p.status === 'active' ? '#10b981' : p.status === 'approved' ? '#3b82f6' : '#f59e0b'};">
+                    businessList.innerHTML = businesses.map(p => `
+                        <div class="data-card" style="border-right: 4px solid ${p.status === 'active' ? '#10b981' : '#f59e0b'};">
                             <div style="display:flex; align-items:center; gap:1rem;">
-                                <img src="${p.image || p.imageUrl || p.img || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                                <img src="${p.imageUrl || p.img || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
                                 <div>
                                     <strong>${p.name}</strong>
-                                    <p style="font-size:0.8rem; color:var(--text-muted);">الحالة: ${p.status === 'active' ? 'نشط' : p.status === 'approved' ? 'بانتظار الدفع' : 'قيد المراجعة'}</p>
+                                    <p style="font-size:0.8rem; color:var(--text-muted);">${p.category} - السعة: ${p.capacity}</p>
                                 </div>
                             </div>
                             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                ${p.status === 'pending' ? `<button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;" onclick="adminUpdatePartnerStatus(${p.id || p.Id}, 'approved')">موافقة مبدئية</button>` : ''}
-                                ${p.status === 'approved' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b; cursor:default;" disabled>بانتظار الدفع</button>
-                                <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="adminUpdatePartnerStatus(${p.id || p.Id}, 'active')">تنشيط مباشر</button>` : ''}
-                                ${p.status === 'active' ? `<button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;" onclick="adminUpdatePartnerStatus(${p.id || p.Id}, 'pending')">إيقاف مؤقت</button>` : ''}
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeletePartner(${p.id || p.Id})"><i class="fa-solid fa-trash"></i> حذف</button>
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteBusiness(${p.id || p.Id})"><i class="fa-solid fa-trash"></i> حذف</button>
                             </div>
                         </div>
                     `).join('');
@@ -239,11 +386,6 @@
             loadAdminData();
         }
 
-        async function adminUpdatePartnerStatus(id, status) {
-            await E7_DB.updateBusinessStatus(id, status);
-            loadAdminData();
-        }
-
         async function adminDeleteBooking(id) {
             if(confirm("هل أنت متأكد من حذف هذا الحجز نهائياً؟")) {
                 await E7_DB.deleteBooking(id);
@@ -251,8 +393,8 @@
             }
         }
 
-        async function adminDeletePartner(id) {
-            if(confirm("تحذير: سيتم حذف هذا الشريك من قاعدة البيانات بالكامل. هل أنت متأكد؟")) {
+        async function adminDeleteBusiness(id) {
+            if(confirm("تحذير: سيتم حذف هذه المؤسسة من قاعدة البيانات بالكامل. هل أنت متأكد؟")) {
                 await E7_DB.deleteBusiness(id);
                 loadAdminData();
             }

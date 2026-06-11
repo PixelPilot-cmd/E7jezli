@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة المؤسسة | إحجزلي في رام الله</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        :root { --business-sidebar: #1e293b; }
+        body { background: #f8fafc; }
+        .business-layout { display: flex; min-height: 100vh; }
+        .business-sidebar { 
+            width: 260px; background: var(--business-sidebar); color: white; 
+            padding: 2rem 1.5rem; transition: 0.3s; position: sticky; top: 0; height: 100vh;
+        }
+        .business-nav { list-style: none; padding: 0; }
+        .business-nav li { margin-bottom: 0.5rem; }
+        .business-nav a { 
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; 
+            color: white; text-decoration: none; border-radius: 10px; transition: 0.3s; 
+        }
+        .business-nav a:hover, .business-nav a.active { background: rgba(255,255,255,0.1); }
+        .business-main { flex: 1; padding: 2rem; }
+        .business-section { display: none; }
+        .business-section.active { display: block; }
+        .stat-card { 
+            background: white; padding: 1.5rem; border-radius: 15px; 
+            border: 1px solid var(--border); display: flex; align-items: center; gap: 1rem;
+        }
+        .stat-card i { font-size: 1.5rem; color: var(--primary); }
+        .stat-card h3 { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+        .stat-card p { margin: 0; font-size: 1.5rem; font-weight: 800; }
+        .data-card { 
+            background: white; padding: 1.5rem; border-radius: 15px; 
+            border: 1px solid var(--border); margin-bottom: 1rem; display: flex; 
+            justify-content: space-between; align-items: center;
+        }
+        @media (max-width: 991px) {
+            .business-layout { flex-direction: column; }
+            .business-sidebar { position: fixed; right: -260px; z-index: 1000; }
+            .business-sidebar.active { right: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loginRequired" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-main);">
+        <div style="text-align: center;">
+            <i class="fa-solid fa-lock" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h2>يجب تسجيل الدخول أولاً</h2>
+            <a href="business-login.html" class="btn btn-primary" style="margin-top: 1rem;">تسجيل الدخول</a>
+        </div>
+    </div>
+
+    <div class="business-layout" style="display: none;" id="businessLayout">
+        <aside class="business-sidebar" id="businessSidebar">
+            <div class="logo" style="justify-content: center; margin-bottom: 2rem;">
+                <img src="img/logo.png" alt="إحجزلي في رام الله" style="height: 50px; filter: brightness(0) invert(1);">
+            </div>
+            <ul class="business-nav">
+                <li><a onclick="showSection('stats', this)" class="nav-item active"><i class="fa-solid fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a onclick="showSection('bookings', this)" class="nav-item"><i class="fa-solid fa-calendar-check"></i> الحجوزات</a></li>
+                <li><a onclick="businessLogout()" style="margin-top: 5rem; color: #f87171;"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a></li>
+            </ul>
+        </aside>
+
+        <main class="business-main">
+            <!-- Stats Section -->
+            <div id="statsSection" class="business-section active">
+                <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h1 style="font-size: 1.5rem; font-weight: 800;">إحصائيات المؤسسة</h1>
+                    <span id="businessName" style="color: var(--text-muted);"></span>
+                </header>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div class="stat-card"><i class="fa-solid fa-calendar-check"></i><h3>إجمالي الحجوزات</h3><p id="totalBookings">0</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-clock"></i><h3>حجوزات معلقة</h3><p id="pendingBookings">0</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-check-circle"></i><h3>حجوزات مؤكدة</h3><p id="confirmedBookings">0</p></div>
+                    <div class="stat-card"><i class="fa-solid fa-circle-check"></i><h3>حجوزات مكتملة</h3><p id="completedBookings">0</p></div>
+                </div>
+            </div>
+
+            <!-- Bookings Section -->
+            <div id="bookingsSection" class="business-section">
+                <header style="margin-bottom: 2rem;">
+                    <h1 style="font-size: 1.5rem; font-weight: 800;">إدارة الحجوزات</h1>
+                </header>
+                <div id="businessBookingList"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Check if business is logged in
+        function checkBusinessLogin() {
+            const business = JSON.parse(localStorage.getItem('business_session'));
+            if (!business) {
+                document.getElementById('loginRequired').style.display = 'flex';
+                document.getElementById('businessLayout').style.display = 'none';
+                return false;
+            }
+            document.getElementById('loginRequired').style.display = 'none';
+            document.getElementById('businessLayout').style.display = 'flex';
+            document.getElementById('businessName').innerText = business.name;
+            loadBusinessData(business.id);
+            return true;
+        }
+
+        function businessLogout() {
+            localStorage.removeItem('business_session');
+            window.location.href = 'business-login.html';
+        }
+
+        window.onload = checkBusinessLogin;
+
+        // Navigation Logic
+        function showSection(id, element) {
+            document.querySelectorAll('.business-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            const target = document.getElementById(id + 'Section');
+            if(target) target.classList.add('active');
+            if(element) element.classList.add('active');
+            if(window.innerWidth < 992) document.getElementById('businessSidebar').classList.remove('active');
+        }
+
+        // Data Management
+        async function loadBusinessData(businessId) {
+            try {
+                const bookings = await E7_DB.getBookingsByBusiness(businessId);
+
+                document.getElementById('totalBookings').innerText = bookings.length;
+                document.getElementById('pendingBookings').innerText = bookings.filter(b => b.status === 'pending').length;
+                document.getElementById('confirmedBookings').innerText = bookings.filter(b => b.status === 'confirmed').length;
+                document.getElementById('completedBookings').innerText = bookings.filter(b => b.status === 'completed').length;
+
+                // Render Bookings
+                const bookingList = document.getElementById('businessBookingList');
+                if (bookings.length === 0) {
+                    bookingList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد حجوزات حالياً.</p>';
+                } else {
+                    bookingList.innerHTML = bookings.map(b => `
+                        <div class="data-card" style="border-right: 4px solid ${b.status === 'confirmed' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'cancelled' ? '#ef4444' : '#f59e0b'};">
+                            <div style="text-align: right;">
+                                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
+                                    <span style="font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'confirmed' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'cancelled' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
+                                        ${b.status === 'confirmed' ? 'مؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'cancelled' ? 'ملغي' : 'قيد المراجعة'}
+                                    </span>
+                                    <strong>${b.userName || 'زبون'}</strong>
+                                </div>
+                                <p style="font-size:0.8rem; color:var(--text-muted);">${b.service} - ${new Date(b.startTime).toLocaleDateString('ar-SA')} ${new Date(b.startTime).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}</p>
+                                <p style="font-size:0.8rem; color:var(--text-muted);">عدد الأشخاص: ${b.numberOfPeople} - الهاتف: ${b.userPhoneNumber}</p>
+                            </div>
+                            <div style="display:flex; gap:0.5rem;">
+                                ${b.status === 'pending' ? `
+                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateBookingStatus(${b.id || b.Id}, 'confirmed')">تأكيد</button>
+                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateBookingStatus(${b.id || b.Id}, 'cancelled')">رفض</button>
+                                ` : ''}
+                                ${b.status === 'confirmed' ? `
+                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;" onclick="updateBookingStatus(${b.id || b.Id}, 'completed')">إكمال</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error("Failed to load business data:", err);
+                document.getElementById('businessBookingList').innerHTML = '<p style="text-align:center; color:red;">حدث خطأ أثناء جلب البيانات.</p>';
+            }
+        }
+
+        async function updateBookingStatus(id, status) {
+            await E7_DB.updateBookingStatus(id, status);
+            const business = JSON.parse(localStorage.getItem('business_session'));
+            loadBusinessData(business.id);
+        }
+    </script>
+</body>
+</html>

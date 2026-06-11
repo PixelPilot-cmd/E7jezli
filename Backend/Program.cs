@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using E7jezli.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +15,35 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 3. Enable CORS (Allow Frontend to talk to Backend)
+// 3. Configure JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "YourSuperSecretKeyForE7jezliRamallah2026!@#";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "E7jezliRamallah";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "E7jezliUsers";
+
+// Add admin password to configuration
+var adminPassword = builder.Configuration["AdminPassword"] ?? "Ramallah@2026!AdminSecure";
+builder.Configuration["AdminPassword"] = adminPassword;
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+
+// 4. Enable CORS (Allow Frontend to talk to Backend)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -26,7 +57,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 4. Configure the HTTP request pipeline.
+// 5. Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -38,6 +69,7 @@ app.UseHttpsRedirection();
 // Use CORS Policy
 app.UseCors("AllowAll");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

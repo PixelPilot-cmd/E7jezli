@@ -56,16 +56,6 @@ namespace E7jezli.Server.Controllers
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
 
-            // نظام نقاط الولاء: إذا تم إتمام الحجز
-            if (booking.Status != "completed" && newStatus == "completed")
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == booking.UserEmail.ToLower());
-                if (user != null)
-                {
-                    user.Points += 100; // منح الزبون 100 نقطة ولاء حقيقية
-                }
-            }
-
             booking.Status = newStatus;
             await _context.SaveChangesAsync();
             return NoContent();

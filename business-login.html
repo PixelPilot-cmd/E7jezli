@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دخول المؤسسات | إحجزلي في رام الله</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .business-login-container { max-width: 450px; margin: 5rem auto; padding: 2rem; background: white; border-radius: 30px; box-shadow: var(--shadow-soft); }
+        .login-header { text-align: center; margin-bottom: 2rem; }
+        .login-header img { height: 60px; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-dark); }
+        .form-group input { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px; font-size: 1rem; }
+        .form-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(90, 185, 241, 0.1); }
+        .btn-login { width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; }
+        .back-link { text-align: center; margin-top: 1.5rem; }
+        .back-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body style="background: var(--bg-main);">
+    <div class="business-login-container">
+        <div class="login-header">
+            <img src="img/logo.png" alt="إحجزلي في رام الله">
+            <h2 style="font-weight: 800; color: var(--text-dark);">دخول المؤسسات</h2>
+            <p style="color: var(--text-muted);">أدخل بيانات الدخول الخاصة بمؤسستك</p>
+        </div>
+
+        <form id="businessLoginForm">
+            <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="bizUsername" required placeholder="أدخل اسم المستخدم">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="bizPassword" required placeholder="أدخل كلمة المرور">
+            </div>
+            <button type="submit" class="btn btn-primary btn-login">تسجيل الدخول</button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">العودة للصفحة الرئيسية</a>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.getElementById('businessLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تسجيل الدخول...';
+            btn.disabled = true;
+
+            try {
+                const username = document.getElementById('bizUsername').value;
+                const password = document.getElementById('bizPassword').value;
+
+                const business = await E7_DB.loginBusiness(username, password);
+                alert('تم تسجيل الدخول بنجاح!');
+                window.location.href = 'business-dashboard.html';
+            } catch (err) {
+                alert(err.message || 'حدث خطأ أثناء تسجيل الدخول');
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

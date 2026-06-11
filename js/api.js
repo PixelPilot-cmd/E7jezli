@@ -1,5 +1,5 @@
 // ============================================================
-// E7jezli - نظام إدارة البيانات الهجين
+// إحجزلي في رام الله - نظام إدارة البيانات الهجين
 // يعمل محلياً بالكامل + يزامن مع السيرفر السحابي عند الإمكان
 // ============================================================
 
@@ -58,7 +58,7 @@ const E7_DB = {
     // AUTH - تسجيل / دخول / بروفايل / كلمة مرور
     // ─────────────────────────────────────────────
 
-    registerUser: async (fullName, email, password) => {
+    registerUser: async (fullName, email, password, phoneNumber) => {
         const emailNorm = email.trim().toLowerCase();
         const users = _getUsers();
 
@@ -72,8 +72,7 @@ const E7_DB = {
             fullName: fullName.trim(),
             email: emailNorm,
             passwordHash: _hash(password),
-            points: 150,
-            isPartner: false,
+            phoneNumber: phoneNumber?.trim() || '',
             dateCreated: new Date().toISOString()
         };
 
@@ -85,7 +84,7 @@ const E7_DB = {
         _tryFetch(`${API_BASE_URL}/Auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fullName: newUser.fullName, email: newUser.email, password })
+            body: JSON.stringify({ fullName: newUser.fullName, email: newUser.email, password, phoneNumber: newUser.phoneNumber })
         }).then(async res => {
             if (res && res.ok) {
                 const serverUser = await res.json().catch(() => null);
@@ -121,8 +120,7 @@ const E7_DB = {
                 fullName: serverUser.fullName,
                 email: emailNorm,
                 passwordHash: _hash(password),
-                points: serverUser.points || 0,
-                isPartner: serverUser.isPartner || serverUser.IsPartner || false,
+                phoneNumber: serverUser.phoneNumber || '',
                 dateCreated: serverUser.dateCreated || new Date().toISOString()
             };
             if (idx !== -1) { users[idx] = { ...users[idx], ...localUser }; }
@@ -140,6 +138,24 @@ const E7_DB = {
         return user;
     },
 
+    // تسجيل دخول المؤسسات
+    loginBusiness: async (username, password) => {
+        const res = await _tryFetch(`${API_BASE_URL}/Auth/business-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (res && res.ok) {
+            const business = await res.json();
+            // حفظ في localStorage
+            localStorage.setItem('business_session', JSON.stringify(business));
+            return business;
+        }
+
+        throw new Error("اسم المستخدم أو كلمة المرور غير صحيحة.");
+    },
+
     getUserProfile: async (email) => {
         const emailNorm = email.trim().toLowerCase();
 
@@ -151,8 +167,8 @@ const E7_DB = {
             const users = _getUsers();
             const idx = users.findIndex(u => u.email === emailNorm);
             if (idx !== -1) {
-                users[idx].points = serverUser.points || users[idx].points;
                 users[idx].fullName = serverUser.fullName || users[idx].fullName;
+                users[idx].phoneNumber = serverUser.phoneNumber || users[idx].phoneNumber;
                 _saveUsers(users);
                 return { ...users[idx], ...serverUser };
             }
@@ -218,52 +234,6 @@ const E7_DB = {
         return { message: "تمت إعادة تعيين كلمة المرور بنجاح." };
     },
 
-    redeemPoints: async (email) => {
-        const emailNorm = email.trim().toLowerCase();
-
-        // حاول السيرفر
-        const res = await _tryFetch(`${API_BASE_URL}/Auth/redeem-points`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: emailNorm })
-        });
-        if (res && res.ok) {
-            const result = await res.json();
-            const users = _getUsers();
-            const idx = users.findIndex(u => u.email === emailNorm);
-            if (idx !== -1) { users[idx].points = result.points; _saveUsers(users); }
-            return result;
-        }
-
-        // fallback محلي
-        const users = _getUsers();
-        const idx = users.findIndex(u => u.email === emailNorm);
-        if (idx === -1) throw new Error("المستخدم غير موجود.");
-        if ((users[idx].points || 0) < 1000) throw new Error("رصيد نقاطك غير كافٍ. تحتاج إلى 1000 نقطة على الأقل.");
-        users[idx].points -= 1000;
-        _saveUsers(users);
-        return { points: users[idx].points, message: "تم استبدال النقاط بنجاح!" };
-    },
-
-    // تحديث نقاط المستخدم محلياً (يُستدعى بعد إتمام الحجز)
-    _addPoints: (email, amount) => {
-        const emailNorm = email.trim().toLowerCase();
-        const users = _getUsers();
-        const idx = users.findIndex(u => u.email === emailNorm);
-        if (idx !== -1) {
-            users[idx].points = (users[idx].points || 0) + amount;
-            _saveUsers(users);
-            // حدّث localStorage الجلسة
-            const profile = JSON.parse(localStorage.getItem('user_profile') || 'null');
-            if (profile && profile.email === emailNorm) {
-                profile.points = users[idx].points;
-                localStorage.setItem('user_profile', JSON.stringify(profile));
-            }
-            return users[idx].points;
-        }
-        return 0;
-    },
-
     // ─────────────────────────────────────────────
     // BUSINESSES - المنشآت
     // ─────────────────────────────────────────────
@@ -286,26 +256,12 @@ const E7_DB = {
         } catch { return null; }
     },
 
-    saveBusiness: async (biz) => {
-        const payload = {
-            name: biz.name,
-            location: biz.location,
-            category: biz.category,
-            imageUrl: biz.img,
-            facebookLink: biz.social?.fb,
-            instagramLink: biz.social?.ig,
-            whatsappLink: biz.social?.wa,
-            description: biz.description,
-            secondaryImages: biz.secondaryImages,
-            extraServices: biz.extraServices,
-            rating: 5.0,
-            status: "pending"
-        };
-
+    // إضافة مؤسسة جديدة (من قبل الأدمن)
+    createBusiness: async (businessData) => {
         const res = await _tryFetch(`${API_BASE_URL}/Business`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(businessData)
         });
 
         if (res && res.ok) {
@@ -317,12 +273,7 @@ const E7_DB = {
             return saved;
         }
 
-        // fallback: حفظ محلي
-        const localBiz = { ...payload, id: Date.now(), img: biz.img };
-        const local = _getLocalBusinesses();
-        local.push(localBiz);
-        _saveLocalBusinesses(local);
-        return localBiz;
+        throw new Error("فشل في إضافة المؤسسة");
     },
 
     deleteBusiness: async (id) => {
@@ -396,13 +347,16 @@ const E7_DB = {
             // توحيد البيانات (Normalization) لضمان عمل camelCase
             serverBookings = serverBookings.map(b => ({
                 id: b.id || b.Id,
+                businessId: b.businessId || b.BusinessId,
                 businessName: b.businessName || b.BusinessName,
                 businessImage: b.businessImage || b.BusinessImage,
                 service: b.service || b.Service,
-                price: b.price || b.Price,
-                time: b.time || b.Time,
-                date: b.date || b.Date,
+                startTime: b.startTime || b.StartTime,
+                endTime: b.endTime || b.EndTime,
+                numberOfPeople: b.numberOfPeople || b.NumberOfPeople,
                 userEmail: b.userEmail || b.UserEmail,
+                userName: b.userName || b.UserName,
+                userPhoneNumber: b.userPhoneNumber || b.UserPhoneNumber,
                 status: b.status || b.Status,
                 dateCreated: b.dateCreated || b.DateCreated
             }));
@@ -424,10 +378,28 @@ const E7_DB = {
         return local.filter(b => b.userEmail?.toLowerCase() === email.toLowerCase());
     },
 
-    getBookingsByUser: async (userId) => {
-        const res = await _tryFetch(`${API_BASE_URL}/Booking?userId=${userId}`);
-        if (res && res.ok) return await res.json();
-        return _getLocalBookings().filter(b => b.userId == userId);
+    getBookingsByBusiness: async (businessId) => {
+        const res = await _tryFetch(`${API_BASE_URL}/Bookings?businessId=${businessId}`);
+        if (res && res.ok) {
+            let serverBookings = await res.json();
+            serverBookings = serverBookings.map(b => ({
+                id: b.id || b.Id,
+                businessId: b.businessId || b.BusinessId,
+                businessName: b.businessName || b.BusinessName,
+                businessImage: b.businessImage || b.BusinessImage,
+                service: b.service || b.Service,
+                startTime: b.startTime || b.StartTime,
+                endTime: b.endTime || b.EndTime,
+                numberOfPeople: b.numberOfPeople || b.NumberOfPeople,
+                userEmail: b.userEmail || b.UserEmail,
+                userName: b.userName || b.UserName,
+                userPhoneNumber: b.userPhoneNumber || b.UserPhoneNumber,
+                status: b.status || b.Status,
+                dateCreated: b.dateCreated || b.DateCreated
+            }));
+            return serverBookings;
+        }
+        return _getLocalBookings().filter(b => b.businessId == businessId);
     },
 
     getBookingsByEmail: async (email) => {
@@ -439,17 +411,10 @@ const E7_DB = {
         const local = _getLocalBookings();
         const idx = local.findIndex(b => (b.id || b.Id) == id);
         
-        let userEmail = null;
         if (idx !== -1) {
-            const booking = local[idx];
-            userEmail = booking.userEmail || booking.UserEmail;
-            booking.status = status;
-            booking.Status = status;
+            local[idx].status = status;
+            local[idx].Status = status;
             _saveLocalBookings(local);
-            
-            if (status === 'completed' && userEmail) {
-                E7_DB._addPoints(userEmail, 100);
-            }
         }
 
         // 2. مزامنة صامتة مع السيرفر
@@ -459,15 +424,13 @@ const E7_DB = {
             body: JSON.stringify(status)
         };
 
-        // نرسل الطلب ولا ننتظر الرد (Background Sync) لضمان عدم تعليق الواجهة
-        // ولكننا سنقوم بمحاولة واحدة "صعبة" للتأكد من استيقاظ السيرفر
         _tryFetch(`${API_BASE_URL}/Booking/${id}/status`, options, 45000).then(res => {
             if (!res || !res.ok) {
                 _tryFetch(`${API_BASE_URL}/Bookings/${id}/status`, options, 45000);
             }
         });
 
-        return true; // نعود بالنجاح دائماً لأن التحديث المحلي تم
+        return true;
     },
 
     deleteBooking: async (id) => {

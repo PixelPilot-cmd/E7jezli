@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملفي الشخصي | E7jezli</title>
+    <title>ملفي الشخصي | إحجزلي في رام الله</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <style>
@@ -55,21 +55,14 @@
                 <div>
                     <h1 id="userName" style="font-size: 2rem; font-weight: 800;">مرحباً بك!</h1>
                     <p id="userEmail" style="color: var(--text-muted);"></p>
+                    <p id="userPhone" style="color: var(--text-muted);"></p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="container" style="margin-top: 2rem;">
-        <div class="loyalty-card">
-            <div>
-                <h3 style="margin-bottom: 0.5rem;">رصيد نقاط الولاء</h3>
-                <p style="opacity: 0.9;">استبدل نقاطك بخصومات حقيقية في حجوزاتك القادمة</p>
-            </div>
-            <div class="points-badge"><span id="userPoints">0</span> <i class="fa-solid fa-gem"></i></div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 3rem;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
             <div class="dashboard-card">
                 <h3 style="margin-bottom: 2rem;"><i class="fa-solid fa-clock-rotate-left"></i> آخر النشاطات</h3>
                 <div id="activityLog">
@@ -95,13 +88,13 @@
                 return;
             }
 
-            // تحديث نقاط وبيانات المستخدم من قاعدة البيانات
+            // تحديث بيانات المستخدم من قاعدة البيانات
             try {
                 const latestUser = await E7_DB.getUserProfile(profile.email);
                 if (latestUser) {
                     profile.id = latestUser.id;
-                    profile.points = latestUser.points;
                     profile.name = latestUser.fullName;
+                    profile.phoneNumber = latestUser.phoneNumber;
                     localStorage.setItem('user_profile', JSON.stringify(profile));
                 }
             } catch (e) {
@@ -110,7 +103,7 @@
 
             document.getElementById('userName').innerText = profile.name;
             document.getElementById('userEmail').innerText = profile.email;
-            document.getElementById('userPoints').innerText = profile.points || 0;
+            document.getElementById('userPhone').innerText = profile.phoneNumber || 'غير محدد';
 
             // تحميل حجوزات المستخدم الحالي كنشاطات
             const books = await E7_DB.getBookings(profile.email);
@@ -122,66 +115,18 @@
                     <div style="padding: 1rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
                         <div>
                             <strong>${b.businessName}</strong>
-                            <p style="font-size: 0.8rem; color: var(--text-muted);">${b.service} - ${b.date}</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">${b.service} - ${new Date(b.startTime).toLocaleDateString('ar-SA')}</p>
                         </div>
                         <span class="badge-status status-${b.status || 'pending'}">${getStatusText(b.status)}</span>
                     </div>
                 `).join('');
             }
-
-            // ==== Booking form ==== //
-            const formContainer = document.createElement('div');
-            formContainer.className = 'dashboard-card';
-            formContainer.style.marginTop = '2rem';
-            formContainer.innerHTML = `
-                <h3>إنشاء طلب حجز جديد</h3>
-                <select id="businessSelect" style="width:100%; padding:0.5rem; margin-bottom:0.5rem;"></select>
-                <input type="text" id="serviceInput" placeholder="الخدمة المطلوبة" style="width:100%; padding:0.5rem; margin-bottom:0.5rem;"/>
-                <textarea id="notesInput" placeholder="ملاحظات (اختياري)" style="width:100%; padding:0.5rem; margin-bottom:0.5rem;"></textarea>
-                <button class="btn btn-primary" style="width:100%;" onclick="submitBooking()">إرسال الحجز</button>
-            `;
-            const activityContainer = document.querySelector('.dashboard-card')?.parentNode;
-            if (activityContainer) activityContainer.appendChild(formContainer);
-            // Load businesses into select
-            loadBusinesses();
-
-            // ==== Loyalty Store ==== //
-            const storeContainer = document.createElement('div');
-            storeContainer.className = 'dashboard-card';
-            storeContainer.style.marginTop = '2rem';
-            storeContainer.style.background = 'linear-gradient(135deg, #f0fdf4, #e8f5e9)';
-            storeContainer.style.border = '1px solid #a7f3d0';
-            
-            let storeContentHTML = `
-                <h3 style="color:#065f46;"><i class="fa-solid fa-gift"></i> متجر مكافآت الولاء (Luxoria Store)</h3>
-                <p style="font-size:0.85rem; color:#047857; margin-bottom:1rem;">استبدل 1000 نقطة بكوبون هدية عينية مجانية (مثل قهوة، وجبة، أو قسيمة خدمة) من أي منشأة من اختيارك!</p>
-            `;
-
-            if ((profile.points || 0) >= 1000) {
-                storeContentHTML += `
-                    <select id="rewardBusinessSelect" style="width:100%; padding:0.8rem; margin-bottom:1rem; border-radius:10px; border:1px solid #a7f3d0; outline:none; font-weight:600;"></select>
-                    <button class="btn btn-primary" style="width:100%; background:#10b981; border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);" onclick="redeemLoyaltyReward()">استبدل 1000 نقطة الآن 🎉</button>
-                `;
-            } else {
-                storeContentHTML += `
-                    <div style="background:rgba(6, 95, 70, 0.05); padding:1rem; border-radius:12px; border:1px dashed #a7f3d0; text-align:center;">
-                        <span style="font-size:1.1rem; font-weight:800; color:#065f46;">رصيدك غير كافٍ للاستبدال</span>
-                        <p style="font-size:0.8rem; color:#047857; margin-top:0.3rem;">تحتاج إلى 1000 نقطة ولاء. رصيدك الحالي هو <strong>${profile.points || 0}</strong> نقطة. اجمع النقاط من خلال إتمام الحجوزات (+100 نقطة لكل حجز مكتمل).</p>
-                    </div>
-                `;
-            }
-            storeContainer.innerHTML = storeContentHTML;
-            if (activityContainer) activityContainer.appendChild(storeContainer);
-            if ((profile.points || 0) >= 1000) {
-                loadRewardBusinesses();
-            }
         });
 
         function getStatusText(s) {
-            if (s === 'approved') return 'تم القبول';
-            if (s === 'rejected') return 'مرفوض';
+            if (s === 'confirmed') return 'مؤكد';
             if (s === 'completed') return 'مكتمل';
-            if (s === 'cancel_requested') return 'طلب إلغاء معلق';
+            if (s === 'cancelled') return 'ملغي';
             return 'قيد الانتظار';
         }
 
