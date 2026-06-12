@@ -370,6 +370,8 @@
                                 </div>
                             </div>
                             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#3b82f6; border-color:#3b82f6;" onclick="showBusinessCredentials(${p.id || p.Id})"><i class="fa-solid fa-key"></i> بيانات الدخول</button>
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;" onclick="editBusiness(${p.id || p.Id})"><i class="fa-solid fa-edit"></i> تعديل</button>
                                 <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteBusiness(${p.id || p.Id})"><i class="fa-solid fa-trash"></i> حذف</button>
                             </div>
                         </div>
@@ -397,6 +399,61 @@
             if(confirm("تحذير: سيتم حذف هذه المؤسسة من قاعدة البيانات بالكامل. هل أنت متأكد؟")) {
                 await E7_DB.deleteBusiness(id);
                 loadAdminData();
+            }
+        }
+
+        async function showBusinessCredentials(id) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/Businesses/${id}/credentials`);
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(`بيانات دخول المؤسسة:\n\nاسم المستخدم: ${data.Username}\nكلمة المرور: ${data.Password}\n\n${data.Note}`);
+                } else {
+                    alert('فشل في جلب بيانات الدخول');
+                }
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        }
+
+        async function editBusiness(id) {
+            const business = (await E7_DB.getBusinesses()).find(b => (b.id || b.Id) === id);
+            if (!business) {
+                alert('المؤسسة غير موجودة');
+                return;
+            }
+
+            const newName = prompt('اسم المؤسسة الحالي:', business.name);
+            const newCategory = prompt('التصنيف الحالي:', business.category);
+            const newCapacity = prompt('السعة الحالية:', business.capacity);
+            const newPhone = prompt('رقم الهاتف الحالي:', business.phoneNumber);
+            const newUsername = prompt('اسم المستخدم الحالي:', business.username);
+            const newPassword = prompt('كلمة المرور الجديدة (اترك فارغاً للإبقاء على الحالية):');
+
+            if (newName || newCategory || newCapacity || newPhone || newUsername || newPassword) {
+                const updateData = {};
+                if (newName) updateData.name = newName;
+                if (newCategory) updateData.category = newCategory;
+                if (newCapacity) updateData.capacity = parseInt(newCapacity);
+                if (newPhone) updateData.phoneNumber = newPhone;
+                if (newUsername) updateData.username = newUsername;
+                if (newPassword) updateData.password = newPassword;
+
+                try {
+                    const res = await fetch(`${API_BASE_URL}/Businesses/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updateData)
+                    });
+                    if (res.ok) {
+                        alert('تم تحديث بيانات المؤسسة بنجاح!');
+                        loadAdminData();
+                    } else {
+                        alert('فشل في تحديث بيانات المؤسسة');
+                    }
+                } catch (err) {
+                    alert('حدث خطأ: ' + err.message);
+                }
             }
         }
     </script>
