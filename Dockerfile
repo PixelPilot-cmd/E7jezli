@@ -2,13 +2,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
 
-# Copy csproj and restore dependencies
-COPY Backend/*.csproj ./Backend/
-RUN dotnet restore Backend/*.csproj
+# Copy the project file and restore dependencies (explicit csproj name)
+COPY Backend/E7jezli.Server.csproj ./Backend/
+RUN dotnet restore Backend/E7jezli.Server.csproj
 
 # Copy the rest of the source code and publish
 COPY . .
-RUN dotnet publish Backend/*.csproj -c Release -o /app
+RUN dotnet publish Backend/E7jezli.Server.csproj -c Release -o /app
 
 # Runtime Stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
