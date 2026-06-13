@@ -61,71 +61,207 @@
             currentBiz = await E7_DB.getBusinessById(bizId);
 
             if (!currentBiz) {
-                document.getElementById('detailsMain').innerHTML = `<div style="text-align:center; padding: 10rem 0;"><h2>المشروع غير موجود</h2></div>`;
+                const detailsDiv = document.getElementById('detailsMain');
+                detailsDiv.textContent = '';
+                const emptyWrapper = document.createElement('div');
+                emptyWrapper.style.cssText = 'text-align:center; padding: 10rem 0;';
+                const emptyH2 = document.createElement('h2');
+                emptyH2.textContent = 'المشروع غير موجود';
+                emptyWrapper.appendChild(emptyH2);
+                detailsDiv.appendChild(emptyWrapper);
                 return;
             }
 
+            const detailsMain = document.getElementById('detailsMain');
+            detailsMain.textContent = '';
 
+            // Header Container
+            const bizHeader = document.createElement('div');
+            bizHeader.className = 'biz-header';
 
-            // Secondary Images HTML
-            let secondaryImgsHTML = '';
+            const h1 = document.createElement('h1');
+            h1.textContent = currentBiz.name;
+            bizHeader.appendChild(h1);
+
+            const pInfo = document.createElement('p');
+            const mapIcon = document.createElement('i');
+            mapIcon.className = 'fa-solid fa-location-dot';
+            mapIcon.style.color = 'var(--primary)';
+            pInfo.appendChild(mapIcon);
+            pInfo.appendChild(document.createTextNode(` فلسطين - ${currentBiz.location} (${currentBiz.category})`));
+            bizHeader.appendChild(pInfo);
+
+            detailsMain.appendChild(bizHeader);
+
+            // Grid Layout
+            const detailsGrid = document.createElement('div');
+            detailsGrid.className = 'details-grid';
+
+            // Content Area
+            const contentArea = document.createElement('section');
+            contentArea.className = 'content-area';
+
+            // Main Image Box
+            const mainImgBox = document.createElement('div');
+            mainImgBox.className = 'main-img-box';
+            const mainImg = document.createElement('img');
+            mainImg.src = currentBiz.img || currentBiz.imageUrl || 'img/logo.png';
+            mainImg.alt = currentBiz.name;
+            mainImgBox.appendChild(mainImg);
+            contentArea.appendChild(mainImgBox);
+
+            // About Box
+            const aboutBox = document.createElement('div');
+            aboutBox.style.cssText = 'background: white; padding: 2rem; border-radius: 20px; border: 1px solid var(--border);';
+            const aboutHeading = document.createElement('h3');
+            aboutHeading.textContent = 'عن المشروع';
+            aboutBox.appendChild(aboutHeading);
+            
+            const aboutPara = document.createElement('p');
+            aboutPara.style.cssText = 'color:var(--text-muted); line-height: 1.8; margin-top: 1rem;';
+            aboutPara.textContent = currentBiz.description || `هذا المشروع هو أحد شركاء منصة E7jezli الرسميين في مدينة ${currentBiz.location}.`;
+            aboutBox.appendChild(aboutPara);
+            contentArea.appendChild(aboutBox);
+
+            // Secondary Images
             if (currentBiz.secondaryImages) {
-                secondaryImgsHTML = `
-                    <div style="margin-top: 2rem;">
-                        <h4 style="margin-bottom:1rem;">صور إضافية للمنشأة</h4>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:1rem;">
-                            ${currentBiz.secondaryImages.split(',').map(imgSrc => `<img src="${imgSrc}" style="width:100%; height:120px; object-fit:cover; border-radius:12px; border:1px solid var(--border);">`).join('')}
-                        </div>
-                    </div>
-                `;
+                const secWrapper = document.createElement('div');
+                secWrapper.style.marginTop = '2rem';
+                
+                const secHeading = document.createElement('h4');
+                secHeading.style.marginBottom = '1rem';
+                secHeading.textContent = 'صور إضافية للمنشأة';
+                secWrapper.appendChild(secHeading);
+
+                const secGrid = document.createElement('div');
+                secGrid.style.cssText = 'display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:1rem;';
+
+                currentBiz.secondaryImages.split(',').forEach(imgSrc => {
+                    const secImg = document.createElement('img');
+                    secImg.src = imgSrc.trim();
+                    secImg.style.cssText = 'width:100%; height:120px; object-fit:cover; border-radius:12px; border:1px solid var(--border);';
+                    secGrid.appendChild(secImg);
+                });
+
+                secWrapper.appendChild(secGrid);
+                contentArea.appendChild(secWrapper);
             }
 
-            document.getElementById('detailsMain').innerHTML = `
-                <div class="biz-header">
-                    <h1>${currentBiz.name}</h1>
-                    <p><i class="fa-solid fa-location-dot" style="color:var(--primary);"></i> فلسطين - ${currentBiz.location} (${currentBiz.category})</p>
-                </div>
-                <div class="details-grid">
-                    <section class="content-area">
-                        <div class="main-img-box"><img src="${currentBiz.img || currentBiz.imageUrl}"></div>
-                        <div style="background: white; padding: 2rem; border-radius: 20px; border: 1px solid var(--border);">
-                            <h3>عن المشروع</h3>
-                            <p style="color:var(--text-muted); line-height: 1.8; margin-top: 1rem;">${currentBiz.description || `هذا المشروع هو أحد شركاء منصة E7jezli الرسميين في مدينة ${currentBiz.location}.`}</p>
-                        </div>
-                        ${secondaryImgsHTML}
-                    </section>
-                    <aside class="sidebar-area">
-                        <div class="booking-sidebar">
-                            <h4 style="margin-bottom:1.5rem; font-size:1.3rem;">تقديم طلب حجز جديد</h4>
-                            <form id="bookingForm" onsubmit="submitBooking(event)">
-                                <div style="margin-bottom: 1rem;">
-                                    <label style="font-weight:700; margin-bottom:0.5rem; display:block;">نوع الحجز</label>
-                                    <input type="text" id="b_type" required placeholder="مثال: خدمة تصوير، طاولة لشخصين..." style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
-                                </div>
-                                <div style="margin-bottom: 1rem;">
-                                    <label style="font-weight:700; margin-bottom:0.5rem; display:block;">الغرض من الحجز (تفاصيل)</label>
-                                    <textarea id="b_purpose" required placeholder="اكتب غرضك من الحجز أو تفاصيل إضافية" rows="3" style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none; resize:none;"></textarea>
-                                </div>
-                                <div style="display:flex; gap:1rem; margin-bottom: 1rem;">
-                                    <div style="flex:1;">
-                                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">تاريخ الحجز</label>
-                                        <input type="date" id="b_date" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
-                                    </div>
-                                    <div style="flex:1;">
-                                        <label style="font-weight:700; margin-bottom:0.5rem; display:block;">الوقت</label>
-                                        <input type="time" id="b_time" required style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
-                                    </div>
-                                </div>
-                                <div style="margin-bottom: 1.5rem;">
-                                    <label style="font-weight:700; margin-bottom:0.5rem; display:block;">رقم الجوال للتواصل</label>
-                                    <input type="tel" id="b_phone" required placeholder="059xxxxxxx" style="width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;">
-                                </div>
-                                <button type="submit" class="btn btn-primary" id="bookSubmitBtn" style="width:100%; justify-content:center; padding:1rem;">تأكيد وتقديم الطلب</button>
-                            </form>
-                        </div>
-                    </aside>
-                </div>
-            `;
+            detailsGrid.appendChild(contentArea);
+
+            // Sidebar Area (Form)
+            const sidebarArea = document.createElement('aside');
+            sidebarArea.className = 'sidebar-area';
+
+            const bookingSidebar = document.createElement('div');
+            bookingSidebar.className = 'booking-sidebar';
+
+            const sidebarHeading = document.createElement('h4');
+            sidebarHeading.style.cssText = 'margin-bottom:1.5rem; font-size:1.3rem;';
+            sidebarHeading.textContent = 'تقديم طلب حجز جديد';
+            bookingSidebar.appendChild(sidebarHeading);
+
+            // Form element
+            const bookingForm = document.createElement('form');
+            bookingForm.id = 'bookingForm';
+            bookingForm.onsubmit = submitBooking;
+
+            // Form field 1: Type
+            const field1 = document.createElement('div');
+            field1.style.marginBottom = '1rem';
+            const label1 = document.createElement('label');
+            label1.style.cssText = 'font-weight:700; margin-bottom:0.5rem; display:block;';
+            label1.textContent = 'نوع الحجز';
+            const input1 = document.createElement('input');
+            input1.type = 'text';
+            input1.id = 'b_type';
+            input1.required = true;
+            input1.placeholder = 'مثال: خدمة تصوير، طاولة لشخصين...';
+            input1.style.cssText = 'width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;';
+            field1.appendChild(label1);
+            field1.appendChild(input1);
+            bookingForm.appendChild(field1);
+
+            // Form field 2: Purpose
+            const field2 = document.createElement('div');
+            field2.style.marginBottom = '1rem';
+            const label2 = document.createElement('label');
+            label2.style.cssText = 'font-weight:700; margin-bottom:0.5rem; display:block;';
+            label2.textContent = 'الغرض من الحجز (تفاصيل)';
+            const textarea2 = document.createElement('textarea');
+            textarea2.id = 'b_purpose';
+            textarea2.required = true;
+            textarea2.placeholder = 'اكتب غرضك من الحجز أو تفاصيل إضافية';
+            textarea2.rows = 3;
+            textarea2.style.cssText = 'width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none; resize:none;';
+            field2.appendChild(label2);
+            field2.appendChild(textarea2);
+            bookingForm.appendChild(field2);
+
+            // Form fields row (Date / Time)
+            const fieldsRow = document.createElement('div');
+            fieldsRow.style.cssText = 'display:flex; gap:1rem; margin-bottom: 1rem;';
+
+            const colDate = document.createElement('div');
+            colDate.style.flex = '1';
+            const labelDate = document.createElement('label');
+            labelDate.style.cssText = 'font-weight:700; margin-bottom:0.5rem; display:block;';
+            labelDate.textContent = 'تاريخ الحجز';
+            const inputDate = document.createElement('input');
+            inputDate.type = 'date';
+            inputDate.id = 'b_date';
+            inputDate.required = true;
+            inputDate.style.cssText = 'width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;';
+            colDate.appendChild(labelDate);
+            colDate.appendChild(inputDate);
+            fieldsRow.appendChild(colDate);
+
+            const colTime = document.createElement('div');
+            colTime.style.flex = '1';
+            const labelTime = document.createElement('label');
+            labelTime.style.cssText = 'font-weight:700; margin-bottom:0.5rem; display:block;';
+            labelTime.textContent = 'الوقت';
+            const inputTime = document.createElement('input');
+            inputTime.type = 'time';
+            inputTime.id = 'b_time';
+            inputTime.required = true;
+            inputTime.style.cssText = 'width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;';
+            colTime.appendChild(labelTime);
+            colTime.appendChild(inputTime);
+            fieldsRow.appendChild(colTime);
+
+            bookingForm.appendChild(fieldsRow);
+
+            // Form field 3: Phone
+            const field3 = document.createElement('div');
+            field3.style.marginBottom = '1.5rem';
+            const label3 = document.createElement('label');
+            label3.style.cssText = 'font-weight:700; margin-bottom:0.5rem; display:block;';
+            label3.textContent = 'رقم الجوال للتواصل';
+            const input3 = document.createElement('input');
+            input3.type = 'tel';
+            input3.id = 'b_phone';
+            input3.required = true;
+            input3.placeholder = '059xxxxxxx';
+            input3.style.cssText = 'width:100%; padding:0.8rem; border-radius:10px; border:1px solid var(--border); outline:none;';
+            field3.appendChild(label3);
+            field3.appendChild(input3);
+            bookingForm.appendChild(field3);
+
+            // Submit button
+            const submitBtn = document.createElement('button');
+            submitBtn.type = 'submit';
+            submitBtn.className = 'btn btn-primary';
+            submitBtn.id = 'bookSubmitBtn';
+            submitBtn.style.cssText = 'width:100%; justify-content:center; padding:1rem;';
+            submitBtn.textContent = 'تأكيد وتقديم الطلب';
+            bookingForm.appendChild(submitBtn);
+
+            bookingSidebar.appendChild(bookingForm);
+            sidebarArea.appendChild(bookingSidebar);
+            detailsGrid.appendChild(sidebarArea);
+
+            detailsMain.appendChild(detailsGrid);
         });
 
         async function submitBooking(e) {
@@ -140,7 +276,10 @@
             }
 
             const btn = document.getElementById('bookSubmitBtn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري إرسال الطلب...';
+            btn.textContent = ' جاري إرسال الطلب...';
+            const spinner = document.createElement('i');
+            spinner.className = 'fa-solid fa-spinner fa-spin';
+            btn.prepend(spinner);
             btn.disabled = true;
 
             const type = document.getElementById('b_type').value;
@@ -184,14 +323,17 @@
 
             try {
                 await E7_DB.saveBooking(booking);
-                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> تم إرسال الطلب بنجاح!';
+                btn.textContent = ' تم إرسال الطلب بنجاح!';
+                const checkIcon = document.createElement('i');
+                checkIcon.className = 'fa-solid fa-circle-check';
+                btn.prepend(checkIcon);
                 setTimeout(() => {
                     window.location.href = 'my-bookings.html?success=true';
                 }, 1000);
             } catch (err) {
                 console.error("Booking error:", err);
                 alert("حدث خطأ أثناء إرسال الطلب: " + (err.message || "يرجى المحاولة لاحقاً."));
-                btn.innerHTML = 'تأكيد وتقديم الطلب';
+                btn.textContent = 'تأكيد وتقديم الطلب';
                 btn.disabled = false;
             }
         }

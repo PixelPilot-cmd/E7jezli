@@ -109,17 +109,30 @@
             const books = await E7_DB.getBookings(profile.email);
             const log = document.getElementById('activityLog');
             if (books.length === 0) {
-                log.innerHTML = '<p style="opacity: 0.5;">لا توجد حجوزات سابقة حالياً.</p>';
+                log.textContent = "لا توجد حجوزات سابقة حالياً.";
             } else {
-                log.innerHTML = books.slice(0, 5).map(b => `
-                    <div style="padding: 1rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-                        <div>
-                            <strong>${b.businessName}</strong>
-                            <p style="font-size: 0.8rem; color: var(--text-muted);">${b.service} - ${new Date(b.startTime).toLocaleDateString('ar-SA')}</p>
-                        </div>
-                        <span class="badge-status status-${b.status || 'pending'}">${getStatusText(b.status)}</span>
-                    </div>
-                `).join('');
+                log.textContent = "";
+                books.slice(0, 5).forEach(b => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.style.cssText = 'padding: 1rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;';
+
+                    const leftDiv = document.createElement('div');
+                    const strong = document.createElement('strong');
+                    strong.textContent = b.businessName;
+                    const p = document.createElement('p');
+                    p.style.cssText = 'font-size: 0.8rem; color: var(--text-muted);';
+                    p.textContent = `${b.service} - ${new Date(b.startTime).toLocaleDateString('ar-SA')}`;
+                    leftDiv.appendChild(strong);
+                    leftDiv.appendChild(p);
+
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = `badge-status status-${b.status || 'pending'}`;
+                    statusSpan.textContent = getStatusText(b.status);
+
+                    entryDiv.appendChild(leftDiv);
+                    entryDiv.appendChild(statusSpan);
+                    log.appendChild(entryDiv);
+                });
             }
         });
 
@@ -213,7 +226,7 @@
                 const businesses = await E7_DB.getBusinesses();
                 const select = document.getElementById('rewardBusinessSelect');
                 if (select) {
-                    select.innerHTML = '<option value="">اختر منشأة لاسترداد المكافأة</option>' +
+                    select.textContent = "اختر منشأة لاسترداد المكافأة";
                         businesses.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
                 }
             } catch (e) {
@@ -228,7 +241,7 @@
                 const businesses = await E7_DB.getBusinesses();
                 const select = document.getElementById('businessSelect');
                 if(select) {
-                    select.innerHTML = '<option value="">اختر منشأة</option>' +
+                    select.textContent = "اختر منشأة";
                         businesses.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
                 }
             } catch (e) {
@@ -332,49 +345,102 @@
                 let statusText = '';
                 let statusColor = '';
                 let statusIcon = '';
-                let actionHtml = '';
 
                 if (myBiz.status === 'pending') {
                     statusText = 'طلبك قيد المراجعة';
                     statusColor = '#f59e0b'; // Amber
                     statusIcon = 'fa-clock';
-                    actionHtml = `<p style="font-size:0.9rem; color:var(--text-muted); margin:0; line-height:1.6;">يسعدنا اهتمامك بالانضمام إلينا كشريك! طلبك الخاص بالمنشأة <strong>${myBiz.name}</strong> يخضع حالياً للمراجعة والتدقيق من قبل الإدارة وسنقوم بالرد عليك في أقرب وقت.</p>`;
                 } else if (myBiz.status === 'approved') {
                     statusText = 'تمت الموافقة! بانتظار تفعيل الاشتراك';
                     statusColor = '#3b82f6'; // Blue
                     statusIcon = 'fa-circle-check';
-                    actionHtml = `
-                        <p style="font-size:0.9rem; color:var(--text-muted); margin:0; line-height:1.6;">تهانينا! تمت الموافقة المبدئية على منشأتك <strong>${myBiz.name}</strong>. يرجى سداد رسوم الاشتراك السنوي البالغة <strong>20$</strong> لتنشيط حسابك وظهور منشأتك فوراً للعملاء على المنصة.</p>
-                        <button id="payActivateBtn" class="btn btn-primary" style="margin-top:1rem; align-self:flex-start; display:flex; align-items:center; gap:0.5rem; justify-content:center; width:100%; max-width:280px; padding:0.8rem; border-radius:12px; background:var(--primary); color:white; border:none; cursor:pointer; font-weight:700;">
-                            <i class="fa-solid fa-credit-card"></i> دفع الاشتراك وتنشيط المنشأة ($20)
-                        </button>
-                    `;
                 } else if (myBiz.status === 'active') {
                     statusText = 'شريك نشط بالمنصة';
                     statusColor = '#10b981'; // Green
                     statusIcon = 'fa-star';
-                    actionHtml = `<p style="font-size:0.9rem; color:var(--text-muted); margin:0; line-height:1.6;">منشأتك <strong>${myBiz.name}</strong> نشطة بالكامل وتظهر الآن لجميع الزبائن والزوار ويمكنهم حجز خدماتك مباشرة!</p>`;
                 } else {
                     return; // Suppress showing if not relevant
                 }
 
-                card.innerHTML = `
-                    <div style="position:absolute; top:-20px; left:-20px; width:120px; height:120px; background:${statusColor}0f; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                        <i class="fa-solid ${statusIcon}" style="font-size:4rem; color:${statusColor}; opacity:0.15; transform: rotate(-15deg);"></i>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:1rem;">
-                        <div style="width:50px; height:50px; border-radius:12px; background:${statusColor}15; display:flex; align-items:center; justify-content:center; color:${statusColor}; font-size:1.5rem;">
-                            <i class="fa-solid ${statusIcon}"></i>
-                        </div>
-                        <div>
-                            <span style="font-size:0.8rem; font-weight:700; color:${statusColor}; text-transform:uppercase; letter-spacing:1px; background:${statusColor}10; padding:0.25rem 0.75rem; border-radius:20px; display:inline-block; margin-bottom:0.3rem;">شراكة Luxoria</span>
-                            <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:var(--text-main);">${statusText}</h3>
-                        </div>
-                    </div>
-                    <div style="border-top: 1px solid rgba(229, 231, 235, 0.5); padding-top: 1.5rem; display:flex; flex-direction:column; gap:1rem;">
-                        ${actionHtml}
-                    </div>
-                `;
+                // Create inner content with safe elements
+                // Background icon wrapper
+                const bgIconWrapper = document.createElement('div');
+                bgIconWrapper.style.cssText = `position:absolute; top:-20px; left:-20px; width:120px; height:120px; background:${statusColor}0f; border-radius:50%; display:flex; align-items:center; justify-content:center;`;
+                const bgIcon = document.createElement('i');
+                bgIcon.className = `fa-solid ${statusIcon}`;
+                bgIcon.style.cssText = `font-size:4rem; color:${statusColor}; opacity:0.15; transform: rotate(-15deg);`;
+                bgIconWrapper.appendChild(bgIcon);
+                card.appendChild(bgIconWrapper);
+
+                // Main info header
+                const headerDiv = document.createElement('div');
+                headerDiv.style.cssText = 'display:flex; align-items:center; gap:1rem;';
+                
+                const iconBox = document.createElement('div');
+                iconBox.style.cssText = `width:50px; height:50px; border-radius:12px; background:${statusColor}15; display:flex; align-items:center; justify-content:center; color:${statusColor}; font-size:1.5rem;`;
+                const mainIcon = document.createElement('i');
+                mainIcon.className = `fa-solid ${statusIcon}`;
+                iconBox.appendChild(mainIcon);
+                headerDiv.appendChild(iconBox);
+
+                const titleBox = document.createElement('div');
+                const badge = document.createElement('span');
+                badge.style.cssText = `font-size:0.8rem; font-weight:700; color:${statusColor}; text-transform:uppercase; letter-spacing:1px; background:${statusColor}10; padding:0.25rem 0.75rem; border-radius:20px; display:inline-block; margin-bottom:0.3rem;`;
+                badge.textContent = 'شراكة Luxoria';
+                const title = document.createElement('h3');
+                title.style.cssText = 'margin:0; font-size:1.25rem; font-weight:800; color:var(--text-main);';
+                title.textContent = statusText;
+                titleBox.appendChild(badge);
+                titleBox.appendChild(title);
+                headerDiv.appendChild(titleBox);
+                card.appendChild(headerDiv);
+
+                // Action / details area
+                const contentDiv = document.createElement('div');
+                contentDiv.style.cssText = 'border-top: 1px solid rgba(229, 231, 235, 0.5); padding-top: 1.5rem; display:flex; flex-direction:column; gap:1rem;';
+                
+                const descriptionPara = document.createElement('p');
+                descriptionPara.style.cssText = 'font-size:0.9rem; color:var(--text-muted); margin:0; line-height:1.6;';
+                
+                if (myBiz.status === 'pending') {
+                    descriptionPara.textContent = `يسعدنا اهتمامك بالانضمام إلينا كشريك! طلبك الخاص بالمنشأة (`;
+                    const strongName = document.createElement('strong');
+                    strongName.textContent = myBiz.name;
+                    descriptionPara.appendChild(strongName);
+                    descriptionPara.appendChild(document.createTextNode(') يخضع حالياً للمراجعة والتدقيق من قبل الإدارة وسنقوم بالرد عليك في أقرب وقت.'));
+                    contentDiv.appendChild(descriptionPara);
+                } else if (myBiz.status === 'approved') {
+                    descriptionPara.textContent = `تهانينا! تمت الموافقة المبدئية على منشأتك (`;
+                    const strongName = document.createElement('strong');
+                    strongName.textContent = myBiz.name;
+                    descriptionPara.appendChild(strongName);
+                    descriptionPara.appendChild(document.createTextNode('). يرجى سداد رسوم الاشتراك السنوي البالغة ('));
+                    const strongFee = document.createElement('strong');
+                    strongFee.textContent = '20$';
+                    descriptionPara.appendChild(strongFee);
+                    descriptionPara.appendChild(document.createTextNode(') لتنشيط حسابك وظهور منشأتك فوراً للعملاء على المنصة.'));
+                    contentDiv.appendChild(descriptionPara);
+
+                    const payBtn = document.createElement('button');
+                    payBtn.id = 'payActivateBtn';
+                    payBtn.className = 'btn btn-primary';
+                    payBtn.style.cssText = 'margin-top:1rem; align-self:flex-start; display:flex; align-items:center; gap:0.5rem; justify-content:center; width:100%; max-width:280px; padding:0.8rem; border-radius:12px; background:var(--primary); color:white; border:none; cursor:pointer; font-weight:700;';
+                    
+                    const payIcon = document.createElement('i');
+                    payIcon.className = 'fa-solid fa-credit-card';
+                    payBtn.appendChild(payIcon);
+                    payBtn.appendChild(document.createTextNode(' دفع الاشتراك وتنشيط المنشأة ($20)'));
+                    contentDiv.appendChild(payBtn);
+                } else if (myBiz.status === 'active') {
+                    descriptionPara.textContent = `منشأتك (`;
+                    const strongName = document.createElement('strong');
+                    strongName.textContent = myBiz.name;
+                    descriptionPara.appendChild(strongName);
+                    descriptionPara.appendChild(document.createTextNode(') نشطة بالكامل وتظهر الآن لجميع الزبائن والزوار ويمكنهم حجز خدماتك مباشرة!'));
+                    contentDiv.appendChild(descriptionPara);
+                }
+                
+                card.appendChild(contentDiv);
 
                 // Insert into the profile layout
                 const targetContainer = document.querySelector('.profile-container') || 
@@ -390,7 +456,7 @@
                 const payBtn = card.querySelector('#payActivateBtn');
                 if (payBtn) {
                     payBtn.addEventListener('click', async () => {
-                        payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري معالجة الدفع والتنشيط...';
+                        payBtn.textContent = "جاري معالجة الدفع والتنشيط...";
                         payBtn.disabled = true;
 
                         // Simulate Payment Modal or direct processing
@@ -401,7 +467,7 @@
                                 window.location.reload();
                             } catch (err) {
                                 alert("⚠️ حدث خطأ أثناء الاتصال بالسيرفر لتنشيط الحساب. يرجى المحاولة مرة أخرى.");
-                                payBtn.innerHTML = '<i class="fa-solid fa-credit-card"></i> دفع الاشتراك وتنشيط المنشأة ($20)';
+                                payBtn.textContent = "دفع الاشتراك وتنشيط المنشأة ($20)";
                                 payBtn.disabled = false;
                             }
                         }, 2000);

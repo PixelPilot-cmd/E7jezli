@@ -50,7 +50,10 @@
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerText;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تسجيل الدخول...';
+            btn.textContent = ' جاري تسجيل الدخول...';
+            const spinner = document.createElement('i');
+            spinner.className = 'fa-solid fa-spinner fa-spin';
+            btn.prepend(spinner);
             btn.disabled = true;
 
             try {

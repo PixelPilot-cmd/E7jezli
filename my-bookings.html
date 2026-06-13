@@ -104,14 +104,39 @@
             const list = document.getElementById('myBookingsList');
             const profile = JSON.parse(localStorage.getItem('user_profile'));
             if (!profile) {
-                list.innerHTML = `
-                    <div style="text-align:center; padding: 5rem 2rem; background:white; border-radius:25px; border: 1px solid var(--border);">
-                        <i class="fa-solid fa-lock" style="font-size:3.5rem; color:var(--primary); opacity:0.1; margin-bottom:1.5rem; display:block;"></i>
-                        <h2 style="font-size: 1.5rem;">يرجى تسجيل الدخول أولاً</h2>
-                        <p style="color:var(--text-muted);">تحتاج لتسجيل الدخول لمشاهدة حجوزاتك الشخصية.</p>
-                        <a href="auth.html" class="btn btn-primary" style="display:inline-flex; margin-top:1.5rem;">تسجيل الدخول الآن</a>
-                    </div>
-                `;
+            // Render login prompt without innerHTML
+            const loginDiv = document.createElement('div');
+            loginDiv.style.textAlign = 'center';
+            loginDiv.style.padding = '5rem 2rem';
+            loginDiv.style.background = 'white';
+            loginDiv.style.borderRadius = '25px';
+            loginDiv.style.border = '1px solid var(--border)';
+
+            const lockIcon = document.createElement('i');
+            lockIcon.className = 'fa-solid fa-lock';
+            lockIcon.style.fontSize = '3.5rem';
+            lockIcon.style.color = 'var(--primary)';
+            lockIcon.style.opacity = '0.1';
+            lockIcon.style.marginBottom = '1.5rem';
+
+            const h2 = document.createElement('h2');
+            h2.style.fontSize = '1.5rem';
+            h2.textContent = 'يرجى تسجيل الدخول أولاً';
+
+            const p = document.createElement('p');
+            p.style.color = 'var(--text-muted)';
+            p.textContent = 'تحتاج لتسجيل الدخول لمشاهدة حجوزاتك الشخصية.';
+
+            const a = document.createElement('a');
+            a.href = 'auth.html';
+            a.className = 'btn btn-primary';
+            a.style.display = 'inline-flex';
+            a.style.marginTop = '1.5rem';
+            a.textContent = 'تسجيل الدخول الآن';
+
+            [lockIcon, h2, p, a].forEach(el => loginDiv.appendChild(el));
+            list.appendChild(loginDiv);
+            return;
                 return;
             }
 
@@ -124,38 +149,119 @@
             const bookings = await E7_DB.getBookings(profile.email);
 
             if (bookings.length === 0) {
-                list.innerHTML = `
-                    <div style="text-align:center; padding: 5rem 2rem; background:white; border-radius:25px; border: 1px solid var(--border);">
-                        <i class="fa-solid fa-calendar-xmark" style="font-size:3.5rem; color:var(--primary); opacity:0.1; margin-bottom:1.5rem; display:block;"></i>
-                        <h2 style="font-size: 1.5rem;">لا يوجد حجوزات حالياً</h2>
-                        <p style="color:var(--text-muted);">ابدأ باستكشاف الخدمات وقم بحجز موعدك الأول.</p>
-                        <a href="services.html" class="btn btn-primary" style="display:inline-flex; margin-top:1.5rem;">استكشف الخدمات الآن</a>
-                    </div>
-                `;
+            // Render empty bookings without innerHTML
+            const emptyDiv = document.createElement('div');
+            emptyDiv.style.textAlign = 'center';
+            emptyDiv.style.padding = '5rem 2rem';
+            emptyDiv.style.background = 'white';
+            emptyDiv.style.borderRadius = '25px';
+            emptyDiv.style.border = '1px solid var(--border)';
+
+            const emptyIcon = document.createElement('i');
+            emptyIcon.className = 'fa-solid fa-calendar-xmark';
+            emptyIcon.style.fontSize = '3.5rem';
+            emptyIcon.style.color = 'var(--primary)';
+            emptyIcon.style.opacity = '0.1';
+            emptyIcon.style.marginBottom = '1.5rem';
+
+            const emptyH2 = document.createElement('h2');
+            emptyH2.style.fontSize = '1.5rem';
+            emptyH2.textContent = 'لا يوجد حجوزات حالياً';
+
+            const emptyP = document.createElement('p');
+            emptyP.style.color = 'var(--text-muted)';
+            emptyP.textContent = 'ابدأ باستكشاف الخدمات وقم بحجز موعدك الأول.';
+
+            const emptyA = document.createElement('a');
+            emptyA.href = 'services.html';
+            emptyA.className = 'btn btn-primary';
+            emptyA.style.display = 'inline-flex';
+            emptyA.style.marginTop = '1.5rem';
+            emptyA.textContent = 'استكشف الخدمات الآن';
+
+            [emptyIcon, emptyH2, emptyP, emptyA].forEach(el => emptyDiv.appendChild(el));
+            list.appendChild(emptyDiv);
+            return;
                 return;
             }
 
-            list.innerHTML = bookings.map(book => `
-                <div class="booking-item" style="background:white; padding:1.5rem; border-radius:25px; border:1px solid var(--border); display:flex; gap:1.5rem; align-items:center; margin-bottom:1.5rem; box-shadow: var(--shadow-soft);">
-                    <img src="${book.img || book.businessImage || 'img/al-aqsa.png'}" style="width:80px; height:80px; border-radius:15px; object-fit:cover;">
-                    <div style="flex:1; text-align: right;">
-                        <span class="badge-status status-${book.status || 'pending'}">${getStatusText(book.status)}</span>
-                        <h3 style="font-size:1.1rem; margin:0.5rem 0; font-weight:700;">${book.businessName}</h3>
-                        <p style="color:var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-clock"></i> ${book.date} | ${book.time}</p>
-                    </div>
-                    <div style="text-align:left; min-width: 100px;">
-                        <p style="font-weight:800; font-size:0.9rem; color:var(--text-muted);"><i class="fa-solid fa-hashtag"></i> حجز مجدول</p>
-                        <p style="font-size:0.75rem; color:var(--text-muted);">${book.service || 'حجز عام'}</p>
-                    </div>
-                    <div style="padding-right: 1rem; border-right: 1px solid var(--border);">
-                        ${book.status === 'pending' || !book.status ? `
-                            <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem; border-color: #fee2e2; color: #dc2626;" onclick="requestCancel(${book.id})">إلغاء</button>
-                        ` : `
-                            <span style="color:var(--text-muted); font-size:0.8rem;">مغلق</span>
-                        `}
-                    </div>
-                </div>
-            `).join('');
+            list.textContent = '';
+        bookings.forEach(book => {
+            // Container for each booking item
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'booking-item';
+            itemDiv.style.cssText = 'background:white; padding:1.5rem; border-radius:25px; border:1px solid var(--border); display:flex; gap:1.5rem; align-items:center; margin-bottom:1.5rem; box-shadow: var(--shadow-soft);';
+
+            // Business image
+            const img = document.createElement('img');
+            img.src = book.img || book.businessImage || 'img/al-aqsa.png';
+            img.style.cssText = 'width:80px; height:80px; border-radius:15px; object-fit:cover;';
+
+            // Info section (status, name, date/time)
+            const infoDiv = document.createElement('div');
+            infoDiv.style.cssText = 'flex:1; text-align: right;';
+
+            const badge = document.createElement('span');
+            badge.className = `badge-status status-${book.status || 'pending'}`;
+            badge.textContent = getStatusText(book.status);
+
+            const h3 = document.createElement('h3');
+            h3.style.cssText = 'font-size:1.1rem; margin:0.5rem 0; font-weight:700;';
+            h3.textContent = book.businessName;
+
+            const dateP = document.createElement('p');
+            dateP.style.cssText = 'color:var(--text-muted); font-size: 0.85rem;';
+            const clockIcon = document.createElement('i');
+            clockIcon.className = 'fa-solid fa-clock';
+            dateP.appendChild(clockIcon);
+            dateP.append(` ${book.date} | ${book.time}`);
+
+            infoDiv.appendChild(badge);
+            infoDiv.appendChild(h3);
+            infoDiv.appendChild(dateP);
+
+            // Service info section
+            const serviceDiv = document.createElement('div');
+            serviceDiv.style.cssText = 'text-align:left; min-width: 100px;';
+
+            const serviceHeader = document.createElement('p');
+            serviceHeader.style.cssText = 'font-weight:800; font-size:0.9rem; color:var(--text-muted);';
+            const hashIcon = document.createElement('i');
+            hashIcon.className = 'fa-solid fa-hashtag';
+            serviceHeader.appendChild(hashIcon);
+            serviceHeader.append(' حجز مجدول');
+
+            const serviceP = document.createElement('p');
+            serviceP.style.cssText = 'font-size:0.75rem; color:var(--text-muted);';
+            serviceP.textContent = book.service || 'حجز عام';
+
+            serviceDiv.appendChild(serviceHeader);
+            serviceDiv.appendChild(serviceP);
+
+            // Action section (cancel button or closed label)
+            const actionDiv = document.createElement('div');
+            actionDiv.style.cssText = 'padding-right: 1rem; border-right: 1px solid var(--border);';
+            if (!book.status || book.status === 'pending') {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline';
+                btn.style.cssText = 'padding: 0.5rem 1rem; font-size: 0.8rem; border-color: #fee2e2; color: #dc2626;';
+                btn.textContent = 'إلغاء';
+                btn.onclick = () => requestCancel(book.id);
+                actionDiv.appendChild(btn);
+            } else {
+                const span = document.createElement('span');
+                span.style.cssText = 'color:var(--text-muted); font-size:0.8rem;';
+                span.textContent = 'مغلق';
+                actionDiv.appendChild(span);
+            }
+
+            // Assemble item
+            itemDiv.appendChild(img);
+            itemDiv.appendChild(infoDiv);
+            itemDiv.appendChild(serviceDiv);
+            itemDiv.appendChild(actionDiv);
+
+            list.appendChild(itemDiv);
         });
 
         function getStatusText(s) {

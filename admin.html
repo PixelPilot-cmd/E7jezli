@@ -58,7 +58,13 @@
         }
         .admin-section { display: none; }
         .admin-section.active { display: block; }
-    </style>
+        /* Toast styles */
+    .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 10000; }
+    .toast { background: rgba(0,0,0,0.85); color: #fff; padding: 0.75rem 1rem; margin-top: 0.5rem; border-radius: 8px; animation: fadeIn 0.3s; }
+    .toast-success { background: #10b981; }
+    .toast-error { background: #ef4444; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
 </head>
 <body>
 
@@ -184,7 +190,7 @@
                         </div>
                         <div style="grid-column: 1 / -1;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">رابط الصورة</label>
-                            <input type="url" id="bizImage" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
+                            <input type="file" id="bizImages" multiple accept="image/*" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 10px;">
                         </div>
                         <div style="grid-column: 1 / -1;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">الوصف</label>
@@ -208,7 +214,7 @@
                     </form>
                 </div>
             </div>
-        </main>
+            <div class="toast-container" id="toastContainer"></div>
     </div>
 
     <!-- Edit Business Modal -->
@@ -268,7 +274,10 @@
         async function checkAdminLogin() {
             const pwd = document.getElementById('adminPwd').value;
             const btn = document.querySelector('#adminLogin button');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+            btn.textContent = ' جاري التحقق...';
+            const spinner = document.createElement('i');
+            spinner.className = 'fa-solid fa-spinner fa-spin';
+            btn.prepend(spinner);
             btn.disabled = true;
 
             try {
@@ -299,7 +308,7 @@
                     document.getElementById('loginError').style.display = 'block';
                 }
             } finally {
-                btn.innerHTML = 'دخول';
+                btn.textContent = 'دخول';
                 btn.disabled = false;
             }
         }
@@ -330,11 +339,23 @@
         const toggleBtn = document.getElementById('adminMenuToggle');
         if(toggleBtn) toggleBtn.onclick = () => document.getElementById('adminSidebar').classList.toggle('active');
 
-        // Business Form Handler
+        // Toast helper
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
         document.getElementById('addBusinessForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإضافة...';
+            btn.textContent = ' جاري الإضافة...';
+            const spinner = document.createElement('i');
+            spinner.className = 'fa-solid fa-spinner fa-spin';
+            btn.prepend(spinner);
             btn.disabled = true;
 
             try {
@@ -346,31 +367,69 @@
                     username: document.getElementById('bizUsername').value,
                     password: document.getElementById('bizPassword').value,
                     phoneNumber: document.getElementById('bizPhone').value,
-                    imageUrl: document.getElementById('bizImage').value,
-                    description: document.getElementById('bizDescription').value,
-                    facebookLink: document.getElementById('bizFacebook').value,
-                    instagramLink: document.getElementById('bizInstagram').value,
-                    whatsappLink: document.getElementById('bizWhatsapp').value
                 };
+                // Upload images if any
+                let imageUrls = [];
+                const imageFiles = document.getElementById('bizImages').files;
+                if (imageFiles.length > 0) {
+                    const formData = new FormData();
+                    for (let i = 0; i < imageFiles.length; i++) {
+                        formData.append('images', imageFiles[i]);
+                    }
+                    const uploadRes = await fetch(`${API_BASE_URL}/Businesses/uploadImages`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (uploadRes.ok) {
+                        const data = await uploadRes.json(); // expecting { urls: [...] }
+                        imageUrls = data.urls || [];
+                    }
+                }
+                businessData.imageUrls = imageUrls;
+                // Additional fields
+                businessData.description = document.getElementById('bizDescription').value;
+                businessData.facebookLink = document.getElementById('bizFacebook').value;
+                businessData.instagramLink = document.getElementById('bizInstagram').value;
+                businessData.whatsappLink = document.getElementById('bizWhatsapp').value;
 
                 await E7_DB.createBusiness(businessData);
-                alert('تم إضافة المؤسسة بنجاح!');
+                showToast('تم إضافة المؤسسة بنجاح!', 'success');
                 document.getElementById('addBusinessForm').reset();
                 loadAdminData();
                 showSection('businesses');
             } catch (err) {
                 alert('حدث خطأ: ' + (err.message || 'فشل في إضافة المؤسسة'));
             } finally {
-                btn.innerHTML = 'إضافة المؤسسة';
+                btn.textContent = 'إضافة المؤسسة';
                 btn.disabled = false;
             }
         });
 
+        function showLoadingSpinner(elementId, text) {
+            const container = document.getElementById(elementId);
+            container.textContent = '';
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'text-align:center; padding:2rem;';
+            
+            const spinner = document.createElement('i');
+            spinner.className = 'fas fa-spinner fa-spin';
+            spinner.style.cssText = 'font-size:2rem; color:var(--primary);';
+            wrapper.appendChild(spinner);
+            
+            const p = document.createElement('p');
+            p.style.cssText = 'margin-top:1rem; color:var(--text-muted);';
+            p.textContent = text;
+            wrapper.appendChild(p);
+            
+            container.appendChild(wrapper);
+        }
+
         // Data Management
         async function loadAdminData() {
             try {
-                document.getElementById('adminBookingList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر وجلب البيانات...</p></div>';
-                document.getElementById('adminBusinessList').innerHTML = '<div style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary);"></i><p style="margin-top:1rem; color:var(--text-muted);">جاري الاتصال بالسيرفر وجلب البيانات...</p></div>';
+                showLoadingSpinner('adminBookingList', 'جاري الاتصال بالسيرفر وجلب البيانات...');
+                showLoadingSpinner('adminBusinessList', 'جاري الاتصال بالسيرفر وجلب البيانات...');
                 
                 let bookings = await E7_DB.getBookings();
                 let businesses = await E7_DB.getBusinesses();
@@ -381,63 +440,242 @@
 
                 // Render Bookings
                 const bookingList = document.getElementById('adminBookingList');
+                bookingList.textContent = '';
                 if (bookings.length === 0) {
-                    bookingList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد حجوزات حالياً.</p>';
+                    const emptyP = document.createElement('p');
+                    emptyP.style.cssText = 'text-align:center; color:var(--text-muted);';
+                    emptyP.textContent = 'لا توجد حجوزات حالياً.';
+                    bookingList.appendChild(emptyP);
                 } else {
-                    bookingList.innerHTML = bookings.map(b => `
-                        <div class="data-card" style="border-right: 4px solid ${b.status === 'confirmed' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'cancelled' ? '#ef4444' : '#f59e0b'};">
-                            <div style="text-align: right;">
-                                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-                                    <span style="font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'confirmed' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'cancelled' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
-                                        ${b.status === 'confirmed' ? 'مؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'cancelled' ? 'ملغي' : 'قيد المراجعة'}
-                                    </span>
-                                    <strong>${b.businessName}</strong>
-                                </div>
-                                <p style="font-size:0.8rem; color:var(--text-muted);">${b.service} - ${new Date(b.startTime).toLocaleDateString('ar-SA')}</p>
-                            </div>
-                            <div style="display:flex; gap:0.5rem;">
-                                ${b.status === 'pending' ? `
-                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateStatus(${b.id || b.Id}, 'confirmed')">تأكيد</button>
-                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateStatus(${b.id || b.Id}, 'cancelled')">رفض</button>
-                                ` : ''}
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:gray; border-color:gray;" onclick="adminDeleteBooking(${b.id || b.Id})"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                    `).join('');
+                    bookings.forEach(b => {
+                        const card = document.createElement('div');
+                        card.className = 'data-card';
+                        
+                        const statusColor = b.status === 'confirmed' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'cancelled' ? '#ef4444' : '#f59e0b';
+                        card.style.borderRight = `4px solid ${statusColor}`;
+
+                        // Info container
+                        const infoDiv = document.createElement('div');
+                        infoDiv.style.cssText = 'text-align: right;';
+
+                        // Header wrapper for status badge and partner name
+                        const headerDiv = document.createElement('div');
+                        headerDiv.style.cssText = 'display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;';
+
+                        // Badge span
+                        const statusBadge = document.createElement('span');
+                        statusBadge.style.cssText = `font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'confirmed' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'cancelled' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}`;
+                        statusBadge.textContent = b.status === 'confirmed' ? 'مؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'cancelled' ? 'ملغي' : 'قيد المراجعة';
+                        headerDiv.appendChild(statusBadge);
+
+                        // Partner name strong
+                        const partnerStrong = document.createElement('strong');
+                        partnerStrong.textContent = b.businessName;
+                        headerDiv.appendChild(partnerStrong);
+
+                        infoDiv.appendChild(headerDiv);
+
+                        // Service / Time details
+                        const detailsP = document.createElement('p');
+                        detailsP.style.cssText = 'font-size:0.8rem; color:var(--text-muted);';
+                        
+                        let dateStr = '';
+                        try {
+                            dateStr = new Date(b.startTime).toLocaleDateString('ar-SA');
+                        } catch (e) {
+                            dateStr = b.startTime || '';
+                        }
+                        detailsP.textContent = `${b.service} - ${dateStr}`;
+                        infoDiv.appendChild(detailsP);
+
+                        card.appendChild(infoDiv);
+
+                        // Actions wrapper
+                        const actionDiv = document.createElement('div');
+                        actionDiv.style.cssText = 'display:flex; gap:0.5rem;';
+
+                        const bookingId = b.id || b.Id;
+
+                        if (b.status === 'pending') {
+                            const confirmBtn = document.createElement('button');
+                            confirmBtn.className = 'btn btn-primary';
+                            confirmBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;';
+                            confirmBtn.onclick = function() { updateStatus(bookingId, 'confirmed'); };
+                            confirmBtn.textContent = 'تأكيد';
+                            actionDiv.appendChild(confirmBtn);
+
+                            const rejectBtn = document.createElement('button');
+                            rejectBtn.className = 'btn btn-outline';
+                            rejectBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;';
+                            rejectBtn.onclick = function() { updateStatus(bookingId, 'cancelled'); };
+                            rejectBtn.textContent = 'رفض';
+                            actionDiv.appendChild(rejectBtn);
+                        }
+
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'btn btn-outline';
+                        deleteBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; color:gray; border-color:gray;';
+                        deleteBtn.onclick = function() { adminDeleteBooking(bookingId); };
+                        
+                        const trashIcon = document.createElement('i');
+                        trashIcon.className = 'fa-solid fa-trash';
+                        deleteBtn.appendChild(trashIcon);
+                        actionDiv.appendChild(deleteBtn);
+
+                        card.appendChild(actionDiv);
+                        bookingList.appendChild(card);
+                    });
                 }
 
                 // Render Businesses
                 const businessList = document.getElementById('adminBusinessList');
+                businessList.textContent = '';
                 if (businesses.length === 0) {
-                    businessList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد مؤسسات في قاعدة البيانات حتى الآن.</p>';
+                    const emptyP = document.createElement('p');
+                    emptyP.style.cssText = 'text-align:center; color:var(--text-muted);';
+                    emptyP.textContent = 'لا توجد مؤسسات في قاعدة البيانات حتى الآن.';
+                    businessList.appendChild(emptyP);
                 } else {
-                    businessList.innerHTML = businesses.map(p => `
-                        <div class="data-card" style="border-right: 4px solid ${p.status === 'active' ? '#10b981' : '#f59e0b'};">
-                            <div style="display:flex; align-items:center; gap:1rem;">
-                                <img src="${p.imageUrl || p.img || 'img/logo.png'}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                                <div>
-                                    <strong>${p.name}</strong>
-                                    <p style="font-size:0.8rem; color:var(--text-muted);">${p.category} - السعة: ${p.capacity}</p>
-                                    <p style="font-size:0.75rem; color:#6b7280;">اسم المستخدم: ${p.username || 'غير محدد'} | كلمة السر: ${p.passwordHash || 'غير محدد'}</p>
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#3b82f6; border-color:#3b82f6;" onclick="showBusinessCredentials(${p.id || p.Id})"><i class="fa-solid fa-key"></i> عرض كلمة السر</button>
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;" onclick="editBusiness(${p.id || p.Id})"><i class="fa-solid fa-edit"></i> تعديل</button>
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteBusiness(${p.id || p.Id})"><i class="fa-solid fa-trash"></i> حذف</button>
-                            </div>
-                        </div>
-                    `).join('');
+                    businesses.forEach(p => {
+                        const card = document.createElement('div');
+                        card.className = 'data-card';
+                        
+                        const statusColor = p.status === 'active' ? '#10b981' : '#f59e0b';
+                        card.style.borderRight = `4px solid ${statusColor}`;
+
+                        // Content wrapper (image and text info)
+                        const contentDiv = document.createElement('div');
+                        contentDiv.style.cssText = 'display:flex; align-items:center; gap:1rem;';
+
+                        const imgContainer = document.createElement('div');
+                        imgContainer.style.cssText = 'display:flex; gap:0.5rem;';
+                        const images = p.imageUrls || (p.imageUrl ? [p.imageUrl] : []);
+                        if (images.length === 0) {
+                            const img = document.createElement('img');
+                            img.src = 'img/logo.png';
+                            img.style.cssText = 'width:40px; height:40px; border-radius:8px; object-fit:cover;';
+                            imgContainer.appendChild(img);
+                        } else {
+                            images.forEach(url => {
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.style.cssText = 'width:40px; height:40px; border-radius:8px; object-fit:cover;';
+                                imgContainer.appendChild(img);
+                            });
+                        }
+                        contentDiv.appendChild(imgContainer);
+
+                        const textDiv = document.createElement('div');
+                        
+                        const nameStrong = document.createElement('strong');
+                        nameStrong.textContent = p.name;
+                        textDiv.appendChild(nameStrong);
+
+                        const catP = document.createElement('p');
+                        catP.style.cssText = 'font-size:0.8rem; color:var(--text-muted);';
+                        catP.textContent = `${p.category} - السعة: ${p.capacity}`;
+                        textDiv.appendChild(catP);
+
+                        const credsP = document.createElement('p');
+                        credsP.style.cssText = 'font-size:0.75rem; color:#6b7280;';
+                        credsP.textContent = `اسم المستخدم: ${p.username || 'غير محدد'} | كلمة السر: ${p.passwordHash || 'غير محدد'}`;
+                        textDiv.appendChild(credsP);
+
+                        contentDiv.appendChild(textDiv);
+                        card.appendChild(contentDiv);
+
+                        // Actions wrapper
+                        const actionDiv = document.createElement('div');
+                        actionDiv.style.cssText = 'display:flex; gap:0.5rem; flex-wrap:wrap;';
+
+                        const bizId = p.id || p.Id;
+
+                        const credsBtn = document.createElement('button');
+                        credsBtn.className = 'btn btn-outline';
+                        credsBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; color:#3b82f6; border-color:#3b82f6;';
+                        credsBtn.onclick = function() { showBusinessCredentials(bizId); };
+                        const keyIcon = document.createElement('i');
+                        keyIcon.className = 'fa-solid fa-key';
+                        credsBtn.appendChild(keyIcon);
+                        credsBtn.appendChild(document.createTextNode(' عرض كلمة السر'));
+                        actionDiv.appendChild(credsBtn);
+
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'btn btn-outline';
+                        editBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;';
+                        editBtn.onclick = function() { editBusiness(bizId); };
+                        const editIcon = document.createElement('i');
+                        editIcon.className = 'fa-solid fa-edit';
+                        editBtn.appendChild(editIcon);
+                        editBtn.appendChild(document.createTextNode(' تعديل'));
+                        actionDiv.appendChild(editBtn);
+
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'btn btn-outline';
+                        deleteBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;';
+                        deleteBtn.onclick = function() { adminDeleteBusiness(bizId); };
+                        const trashIcon = document.createElement('i');
+                        trashIcon.className = 'fa-solid fa-trash';
+                        deleteBtn.appendChild(trashIcon);
+                        deleteBtn.appendChild(document.createTextNode(' حذف'));
+                        actionDiv.appendChild(deleteBtn);
+
+                        card.appendChild(actionDiv);
+                        businessList.appendChild(card);
+                    });
                 }
             } catch (err) {
                 console.error("Failed to load admin data:", err);
-                document.getElementById('adminBookingList').innerHTML = '<p style="text-align:center; color:red;">حدث خطأ أثناء جلب البيانات من السيرفر.</p>';
+                const errorPara = document.createElement('p');
+                errorPara.style.cssText = 'text-align:center; color:red;';
+                errorPara.textContent = 'حدث خطأ أثناء جلب البيانات من السيرفر.';
+                document.getElementById('adminBookingList').textContent = '';
+                document.getElementById('adminBookingList').appendChild(errorPara);
             }
         }
+        // Credentials Modal
+        const credModalHtml = `
+        <div id="credBizModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content" style="max-width:400px; text-align:right;">
+                <span class="modal-close" onclick="closeCredModal()" style="cursor:pointer;float:left;">&times;</span>
+                <h3 style="margin-bottom:1rem; color:var(--primary);">بيانات الدخول للمؤسسة</h3>
+                <p><strong>اسم المستخدم:</strong> <span id="credBizUsername"></span></p>
+                <p><strong>كلمة السر:</strong> <span id="credBizPassword" data-visible="false" data-real=""></span> <button id="togglePwdBtn" class="btn btn-outline" style="margin-left:0.5rem;" onclick="togglePasswordVisibility()">إظهار كلمة السر</button></p>
+                <button class="btn btn-primary" style="margin-top:1rem; width:100%;" onclick="closeCredModal()">إغلاق</button>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', credModalHtml);
+        // Ensure password stored for toggle
+
+        showBusinessCredentials = async function(id) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/Businesses/${id}/credentials`);
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('credBizUsername').textContent = data.Username;
+                    const pwdSpan = document.getElementById('credBizPassword');
+                    pwdSpan.dataset.real = data.Password;
+                    pwdSpan.textContent = '••••••••';
+                    pwdSpan.dataset.visible = 'false';
+                    document.getElementById('togglePwdBtn').textContent = 'إظهار كلمة السر';
+                    document.getElementById('credBizModal').style.display = 'flex';
+                } else {
+                    showToast('فشل في جلب بيانات الدخول', 'error');
+                }
+            } catch (err) {
+                showToast('حدث خطأ: ' + err.message, 'error');
+            }
+        };
 
         async function updateStatus(id, status) {
-            await E7_DB.updateBookingStatus(id, status);
-            loadAdminData();
+            try {
+                await E7_DB.updateBookingStatus(id, status);
+                showToast(status === 'confirmed' ? 'تم تأكيد الحجز' : 'تم رفض الحجز', 'success');
+                loadAdminData();
+            } catch (err) {
+                console.error('Error updating status:', err);
+                showToast('فشل في تحديث حالة الحجز', 'error');
+            }
         }
 
         async function adminDeleteBooking(id) {
@@ -454,18 +692,24 @@
             }
         }
 
-        async function showBusinessCredentials(id) {
-            try {
-                const res = await fetch(`${API_BASE_URL}/Businesses/${id}/credentials`);
-                if (res.ok) {
-                    const data = await res.json();
-                    alert(`بيانات دخول المؤسسة:\n\nاسم المستخدم: ${data.Username}\nكلمة المرور: ${data.Password}\n\n${data.Note}`);
-                } else {
-                    alert('فشل في جلب بيانات الدخول');
-                }
-            } catch (err) {
-                alert('حدث خطأ: ' + err.message);
+
+
+        function togglePasswordVisibility() {
+            const pwdElem = document.getElementById('credBizPassword');
+            if (pwdElem.dataset.visible === 'true') {
+                pwdElem.textContent = '••••••••';
+                pwdElem.dataset.visible = 'false';
+                document.getElementById('togglePwdBtn').textContent = 'إظهار كلمة السر';
+            } else {
+                // The real password is stored in a data attribute for toggle
+                pwdElem.textContent = pwdElem.dataset.real;
+                pwdElem.dataset.visible = 'true';
+                document.getElementById('togglePwdBtn').textContent = 'إخفاء كلمة السر';
             }
+        }
+
+        function closeCredModal() {
+            document.getElementById('credBizModal').style.display = 'none';
         }
 
         async function editBusiness(id) {
@@ -494,7 +738,10 @@
             e.preventDefault();
             const id = document.getElementById('editBizId').value;
             const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+            btn.textContent = ' جاري الحفظ...';
+            const spinner = document.createElement('i');
+            spinner.className = 'fa-solid fa-spinner fa-spin';
+            btn.prepend(spinner);
             btn.disabled = true;
 
             const updateData = {
@@ -523,7 +770,7 @@
             } catch (err) {
                 alert('حدث خطأ: ' + err.message);
             } finally {
-                btn.innerHTML = 'حفظ التعديلات';
+                btn.textContent = 'حفظ التعديلات';
                 btn.disabled = false;
             }
         });

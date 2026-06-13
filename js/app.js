@@ -43,37 +43,118 @@ function renderBusinesses(data) {
     const grid = document.getElementById('nearbyGrid');
     if (!grid) return;
 
+    grid.textContent = ''; // clear grid
+
     if (!data || data.length === 0) {
-        grid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align:center; padding: 5rem 0;">
-                <i class="fa-solid fa-ghost" style="font-size: 3rem; opacity: 0.1; margin-bottom: 1rem; display: block;"></i>
-                <p>لا توجد نتائج تطابق بحثك حالياً.</p>
-            </div>
-        `;
+        const emptyDiv = document.createElement('div');
+        emptyDiv.style.cssText = 'grid-column: 1 / -1; text-align:center; padding: 5rem 0;';
+        
+        const ghostIcon = document.createElement('i');
+        ghostIcon.className = 'fa-solid fa-ghost';
+        ghostIcon.style.cssText = 'font-size: 3rem; opacity: 0.1; margin-bottom: 1rem; display: block;';
+        emptyDiv.appendChild(ghostIcon);
+
+        const emptyP = document.createElement('p');
+        emptyP.textContent = 'لا توجد نتائج تطابق بحثك حالياً.';
+        emptyDiv.appendChild(emptyP);
+
+        grid.appendChild(emptyDiv);
         return;
     }
 
-    grid.innerHTML = data.map(biz => `
-        <div class="business-card fade-in">
-            <div class="card-badge">متوفر الآن</div>
-            <div class="card-image">
-                <img src="${biz.img || biz.imageUrl}" alt="${biz.name}">
-                <div class="card-fav"><i class="fa-regular fa-heart"></i></div>
-            </div>
-            <div class="card-content">
-                <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem; font-size: 0.85rem;">
-                    <span style="color:var(--primary); font-weight:700;">${biz.category}</span>
-                    <span><i class="fa-solid fa-star" style="color:#fbbf24;"></i> 4.9</span>
-                </div>
-                <h3>${biz.name}</h3>
-                <p style="font-size:0.9rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${biz.location}</p>
-                <div class="card-meta">
-                    <div class="card-price" style="font-size: 0.9rem; color: var(--text-muted);"><i class="fa-solid fa-calendar-check"></i> <span>متاح للحجز</span></div>
-                    <button class="btn btn-primary" onclick="window.location.href='business-details.html?id=${biz.id}'">احجز الآن</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
+    data.forEach(biz => {
+        const card = document.createElement('div');
+        card.className = 'business-card fade-in';
+
+        // Badge
+        const badge = document.createElement('div');
+        badge.className = 'card-badge';
+        badge.textContent = 'متوفر الآن';
+        card.appendChild(badge);
+
+        // Image section
+        const cardImage = document.createElement('div');
+        cardImage.className = 'card-image';
+
+        const img = document.createElement('img');
+        img.src = biz.img || biz.imageUrl || 'img/logo.png';
+        img.alt = biz.name;
+        cardImage.appendChild(img);
+
+        const fav = document.createElement('div');
+        fav.className = 'card-fav';
+        const heart = document.createElement('i');
+        heart.className = 'fa-regular fa-heart';
+        fav.appendChild(heart);
+        cardImage.appendChild(fav);
+
+        card.appendChild(cardImage);
+
+        // Content section
+        const cardContent = document.createElement('div');
+        cardContent.className = 'card-content';
+
+        // Meta info row
+        const metaRow = document.createElement('div');
+        metaRow.style.cssText = 'display:flex; justify-content:space-between; margin-bottom: 0.5rem; font-size: 0.85rem;';
+        
+        const categorySpan = document.createElement('span');
+        categorySpan.style.cssText = 'color:var(--primary); font-weight:700;';
+        categorySpan.textContent = biz.category;
+        metaRow.appendChild(categorySpan);
+
+        const ratingSpan = document.createElement('span');
+        const starIcon = document.createElement('i');
+        starIcon.className = 'fa-solid fa-star';
+        starIcon.style.color = '#fbbf24';
+        ratingSpan.appendChild(starIcon);
+        ratingSpan.appendChild(document.createTextNode(' 4.9'));
+        metaRow.appendChild(ratingSpan);
+
+        cardContent.appendChild(metaRow);
+
+        // Title
+        const title = document.createElement('h3');
+        title.textContent = biz.name;
+        cardContent.appendChild(title);
+
+        // Location
+        const locPara = document.createElement('p');
+        locPara.style.cssText = 'font-size:0.9rem; color:var(--text-muted);';
+        const locIcon = document.createElement('i');
+        locIcon.className = 'fa-solid fa-location-dot';
+        locPara.appendChild(locIcon);
+        locPara.appendChild(document.createTextNode(` ${biz.location}`));
+        cardContent.appendChild(locPara);
+
+        // Card footer (button & info)
+        const cardMeta = document.createElement('div');
+        cardMeta.className = 'card-meta';
+
+        const priceDiv = document.createElement('div');
+        priceDiv.className = 'card-price';
+        priceDiv.style.cssText = 'font-size: 0.9rem; color: var(--text-muted);';
+        const checkIcon = document.createElement('i');
+        checkIcon.className = 'fa-solid fa-calendar-check';
+        priceDiv.appendChild(checkIcon);
+        
+        const availabilitySpan = document.createElement('span');
+        availabilitySpan.textContent = ' متاح للحجز';
+        priceDiv.appendChild(availabilitySpan);
+        cardMeta.appendChild(priceDiv);
+
+        const bookBtn = document.createElement('button');
+        bookBtn.className = 'btn btn-primary';
+        bookBtn.textContent = 'احجز الآن';
+        bookBtn.onclick = function() {
+            window.location.href = `business-details.html?id=${biz.id}`;
+        };
+        cardMeta.appendChild(bookBtn);
+
+        cardContent.appendChild(cardMeta);
+        card.appendChild(cardContent);
+        grid.appendChild(card);
+    });
 }
 
 function initSearch() {

@@ -135,36 +135,102 @@
 
                 // Render Bookings
                 const bookingList = document.getElementById('businessBookingList');
+                bookingList.textContent = '';
+
                 if (bookings.length === 0) {
-                    bookingList.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا توجد حجوزات حالياً.</p>';
+                    const emptyPara = document.createElement('p');
+                    emptyPara.style.cssText = 'text-align:center; color:var(--text-muted);';
+                    emptyPara.textContent = 'لا توجد حجوزات حالياً.';
+                    bookingList.appendChild(emptyPara);
                 } else {
-                    bookingList.innerHTML = bookings.map(b => `
-                        <div class="data-card" style="border-right: 4px solid ${b.status === 'confirmed' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'cancelled' ? '#ef4444' : '#f59e0b'};">
-                            <div style="text-align: right;">
-                                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-                                    <span style="font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'confirmed' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'cancelled' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
-                                        ${b.status === 'confirmed' ? 'مؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'cancelled' ? 'ملغي' : 'قيد المراجعة'}
-                                    </span>
-                                    <strong>${b.userName || 'زبون'}</strong>
-                                </div>
-                                <p style="font-size:0.8rem; color:var(--text-muted);">${b.service} - ${new Date(b.startTime).toLocaleDateString('ar-SA')} ${new Date(b.startTime).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}</p>
-                                <p style="font-size:0.8rem; color:var(--text-muted);">عدد الأشخاص: ${b.numberOfPeople} - الهاتف: ${b.userPhoneNumber}</p>
-                            </div>
-                            <div style="display:flex; gap:0.5rem;">
-                                ${b.status === 'pending' ? `
-                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;" onclick="updateBookingStatus(${b.id || b.Id}, 'confirmed')">تأكيد</button>
-                                    <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="updateBookingStatus(${b.id || b.Id}, 'cancelled')">رفض</button>
-                                ` : ''}
-                                ${b.status === 'confirmed' ? `
-                                    <button class="btn btn-primary" style="padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;" onclick="updateBookingStatus(${b.id || b.Id}, 'completed')">إكمال</button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `).join('');
+                    bookings.forEach(b => {
+                        const card = document.createElement('div');
+                        card.className = 'data-card';
+                        
+                        const color = b.status === 'confirmed' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'cancelled' ? '#ef4444' : '#f59e0b';
+                        card.style.borderRight = `4px solid ${color}`;
+
+                        // Info container
+                        const infoDiv = document.createElement('div');
+                        infoDiv.style.cssText = 'text-align: right;';
+
+                        // Header wrapper for status and username
+                        const headerDiv = document.createElement('div');
+                        headerDiv.style.cssText = 'display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;';
+
+                        // Status badge
+                        const statusBadge = document.createElement('span');
+                        statusBadge.style.cssText = `font-size:0.65rem; font-weight:700; padding:0.15rem 0.4rem; border-radius:5px; background: ${b.status === 'confirmed' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'cancelled' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}`;
+                        statusBadge.textContent = b.status === 'confirmed' ? 'مؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'cancelled' ? 'ملغي' : 'قيد المراجعة';
+                        headerDiv.appendChild(statusBadge);
+
+                        // Username strong
+                        const userStrong = document.createElement('strong');
+                        userStrong.textContent = b.userName || 'زبون';
+                        headerDiv.appendChild(userStrong);
+
+                        infoDiv.appendChild(headerDiv);
+
+                        // Service & time paragraph
+                        const pService = document.createElement('p');
+                        pService.style.cssText = 'font-size:0.8rem; color:var(--text-muted);';
+                        
+                        let timeString = '';
+                        try {
+                            const dateObj = new Date(b.startTime);
+                            timeString = `${dateObj.toLocaleDateString('ar-SA')} ${dateObj.toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}`;
+                        } catch (e) {
+                            timeString = b.startTime || '';
+                        }
+                        pService.textContent = `${b.service} - ${timeString}`;
+                        infoDiv.appendChild(pService);
+
+                        // Capacity & phone paragraph
+                        const pCapacity = document.createElement('p');
+                        pCapacity.style.cssText = 'font-size:0.8rem; color:var(--text-muted);';
+                        pCapacity.textContent = `عدد الأشخاص: ${b.numberOfPeople || 0} - الهاتف: ${b.userPhoneNumber || ''}`;
+                        infoDiv.appendChild(pCapacity);
+
+                        card.appendChild(infoDiv);
+
+                        // Action container
+                        const actionDiv = document.createElement('div');
+                        actionDiv.style.cssText = 'display:flex; gap:0.5rem;';
+
+                        if (b.status === 'pending') {
+                            const confirmBtn = document.createElement('button');
+                            confirmBtn.className = 'btn btn-primary';
+                            confirmBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; background:#10b981;';
+                            confirmBtn.onclick = function() { updateBookingStatus(b.id || b.Id, 'confirmed'); };
+                            confirmBtn.textContent = 'تأكيد';
+                            actionDiv.appendChild(confirmBtn);
+
+                            const rejectBtn = document.createElement('button');
+                            rejectBtn.className = 'btn btn-outline';
+                            rejectBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;';
+                            rejectBtn.onclick = function() { updateBookingStatus(b.id || b.Id, 'cancelled'); };
+                            rejectBtn.textContent = 'رفض';
+                            actionDiv.appendChild(rejectBtn);
+                        } else if (b.status === 'confirmed') {
+                            const completeBtn = document.createElement('button');
+                            completeBtn.className = 'btn btn-primary';
+                            completeBtn.style.cssText = 'padding:0.4rem 0.8rem; font-size:0.7rem; background:#3b82f6;';
+                            completeBtn.onclick = function() { updateBookingStatus(b.id || b.Id, 'completed'); };
+                            completeBtn.textContent = 'إكمال';
+                            actionDiv.appendChild(completeBtn);
+                        }
+
+                        card.appendChild(actionDiv);
+                        bookingList.appendChild(card);
+                    });
                 }
             } catch (err) {
                 console.error("Failed to load business data:", err);
-                document.getElementById('businessBookingList').innerHTML = '<p style="text-align:center; color:red;">حدث خطأ أثناء جلب البيانات.</p>';
+                const errorPara = document.createElement('p');
+                errorPara.style.cssText = 'text-align:center; color:red;';
+                errorPara.textContent = 'حدث خطأ أثناء جلب البيانات.';
+                document.getElementById('businessBookingList').textContent = '';
+                document.getElementById('businessBookingList').appendChild(errorPara);
             }
         }
 

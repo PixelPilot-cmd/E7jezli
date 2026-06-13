@@ -123,23 +123,75 @@
         function render(data) {
             const grid = document.getElementById('servicesGrid');
             if (data.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; padding: 5rem 0; opacity: 0.5;">لا توجد نتائج مطابقة لبحثك.</p>';
+                grid.textContent = '';
+      const p = document.createElement('p');
+      p.style.textAlign = 'center';
+      p.style.gridColumn = '1/-1';
+      p.style.padding = '5rem 0';
+      p.style.opacity = '0.5';
+      p.textContent = 'لا توجد نتائج مطابقة لبحثك.';
+      grid.appendChild(p);
                 return;
             }
-            grid.innerHTML = data.map(biz => `
-                <div class="business-card">
-                    <div class="card-image"><img src="${biz.img || biz.imageUrl}"></div>
-                    <div class="card-content">
-                        <span style="color:var(--primary); font-weight:700; font-size: 0.8rem;">${biz.category}</span>
-                        <h3 style="margin: 0.5rem 0;">${biz.name}</h3>
-                        <p style="font-size:0.9rem; color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${biz.location}</p>
-                        <div class="card-meta">
-                            <div class="card-price" style="font-size: 0.9rem; color: var(--text-muted);"><i class="fa-solid fa-calendar-check"></i> <span>متاح للحجز</span></div>
-                            <button class="btn btn-primary" onclick="window.location.href='business-details.html?id=${biz.id}'">احجز الآن</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            grid.textContent = '';
+      data.forEach(biz => {
+        const card = document.createElement('div');
+        card.className = 'business-card';
+
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'card-image';
+        const img = document.createElement('img');
+        img.src = biz.img || biz.imageUrl;
+        imgDiv.appendChild(img);
+        card.appendChild(imgDiv);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'card-content';
+
+        const categorySpan = document.createElement('span');
+        categorySpan.style.color = 'var(--primary)';
+        categorySpan.style.fontWeight = '700';
+        categorySpan.style.fontSize = '0.8rem';
+        categorySpan.textContent = biz.category;
+        contentDiv.appendChild(categorySpan);
+
+        const nameH3 = document.createElement('h3');
+        nameH3.style.margin = '0.5rem 0';
+        nameH3.textContent = biz.name;
+        contentDiv.appendChild(nameH3);
+
+        const locP = document.createElement('p');
+        locP.style.fontSize = '0.9rem';
+        locP.style.color = 'var(--text-muted)';
+        const locIcon = document.createElement('i');
+        locIcon.className = 'fa-solid fa-location-dot';
+        locP.appendChild(locIcon);
+        locP.appendChild(document.createTextNode(' ' + biz.location));
+        contentDiv.appendChild(locP);
+
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'card-meta';
+
+        const priceDiv = document.createElement('div');
+        priceDiv.className = 'card-price';
+        priceDiv.style.fontSize = '0.9rem';
+        priceDiv.style.color = 'var(--text-muted)';
+        const priceIcon = document.createElement('i');
+        priceIcon.className = 'fa-solid fa-calendar-check';
+        priceDiv.appendChild(priceIcon);
+        priceDiv.appendChild(document.createTextNode(' متاح للحجز'));
+        metaDiv.appendChild(priceDiv);
+
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-primary';
+        btn.onclick = () => { window.location.href = `business-details.html?id=${biz.id}`; };
+        btn.textContent = 'احجز الآن';
+        metaDiv.appendChild(btn);
+
+        contentDiv.appendChild(metaDiv);
+        card.appendChild(contentDiv);
+        grid.appendChild(card);
+      });
         }
     </script>
 </body>

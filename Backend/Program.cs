@@ -3,6 +3,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using E7jezli.Server.Data;
+using Serilog;
+
+// Load environment variables from .env (will be added to system env before runtime)
+var configuration = builder.Configuration.AddEnvironmentVariables();
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,13 +55,13 @@ builder.Services.AddAuthentication(options =>
 // 4. Enable CORS (Allow Frontend to talk to Backend)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
+    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:5173" };
+    options.AddPolicy("AllowSpecific", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
 var app = builder.Build();
@@ -67,7 +76,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Use CORS Policy
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecific");
+
+// Content Security Policy header to mitigate XSS
+app.Use(async (context, next) => {
+    context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' https://cdnjs.cloudflare.com;";
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

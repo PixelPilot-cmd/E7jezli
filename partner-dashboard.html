@@ -121,11 +121,24 @@
                     const partners = await E7_DB.getBusinesses();
                     activeBusinessesList = partners.filter(p => p.status === 'active');
                     const select = document.getElementById('partnerSelect');
+                    select.textContent = '';
                     if (activeBusinessesList.length === 0) {
-                        select.innerHTML = '<option value="">لا توجد منشآت نشطة حالياً</option>';
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = 'لا توجد منشآت نشطة حالياً';
+                        select.appendChild(opt);
                     } else {
-                        select.innerHTML = '<option value="">-- اختر منشأتك --</option>' + 
-                            activeBusinessesList.map(p => `<option value="${p.name}" data-img="${p.imageUrl || p.img || 'img/logo.png'}">${p.name}</option>`).join('');
+                        const placeholder = document.createElement('option');
+                        placeholder.value = '';
+                        placeholder.textContent = '-- اختر منشأتك --';
+                        select.appendChild(placeholder);
+                        activeBusinessesList.forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.name;
+                            opt.setAttribute('data-img', p.imageUrl || p.img || 'img/logo.png');
+                            opt.textContent = p.name;
+                            select.appendChild(opt);
+                        });
                     }
                 } catch (e) {
                     console.error("Failed to load partners for login");
@@ -186,50 +199,154 @@
                 document.getElementById('myPendingBookings').innerText = myBookings.filter(b => b.status === 'pending').length;
 
                 const list = document.getElementById('myBookingsList');
+                list.textContent = '';
                 if (myBookings.length === 0) {
-                    list.innerHTML = `
-                        <div style="text-align:center; padding:4rem; background:white; border-radius:20px; border:1px dashed var(--border);">
-                            <i class="fa-regular fa-folder-open" style="font-size:3rem; color:var(--border); margin-bottom:1rem;"></i>
-                            <h3 style="color:var(--text-muted);">لا توجد أي حجوزات لمنشأتك حتى الآن</h3>
-                        </div>
-                    `;
+                    const container = document.createElement('div');
+                    container.style.textAlign = 'center';
+                    container.style.padding = '4rem';
+                    container.style.background = 'white';
+                    container.style.borderRadius = '20px';
+                    container.style.border = '1px dashed var(--border)';
+                    const icon = document.createElement('i');
+                    icon.className = 'fa-regular fa-folder-open';
+                    icon.style.fontSize = '3rem';
+                    icon.style.color = 'var(--border)';
+                    icon.style.marginBottom = '1rem';
+                    const heading = document.createElement('h3');
+                    heading.style.color = 'var(--text-muted)';
+                    heading.textContent = 'لا توجد أي حجوزات لمنشأتك حتى الآن';
+                    container.appendChild(icon);
+                    container.appendChild(heading);
+                    list.appendChild(container);
                 } else {
-                    list.innerHTML = myBookings.map(b => `
-                        <div class="data-card" style="border-right: 4px solid ${b.status === 'approved' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'rejected' ? '#ef4444' : '#f59e0b'};">
-                            <div style="text-align: right; flex: 1;">
-                                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.5rem;">
-                                    <span style="padding:0.3rem 0.6rem; border-radius:8px; font-size:0.7rem; font-weight:700; background: ${b.status === 'approved' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'rejected' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
-                                        ${b.status === 'approved' ? 'مقبول ومؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
-                                    </span>
-                                    <span style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-regular fa-calendar"></i> ${b.date} | ${b.time}</span>
-                                </div>
-                                <h4 style="margin-bottom:0.5rem; font-size:1.1rem;">تفاصيل الطلب:</h4>
-                                <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">${b.service}</p>
-                            </div>
-                            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-right:1.5rem;">
-                                ${b.status === 'pending' ? `
-                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#10b981;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'approved')"><i class="fa-solid fa-check"></i> قبول الحجز</button>
-                                    <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#ef4444; border-color:#ef4444;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'rejected')"><i class="fa-solid fa-xmark"></i> رفض واعتذار</button>
-                                ` : b.status === 'approved' ? `
-                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#3b82f6;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'completed')"><i class="fa-solid fa-circle-check"></i> إتمام الحجز</button>
-                                ` : b.status === 'completed' ? `
-                                    <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#10b981; border-color:#10b981;" disabled><i class="fa-solid fa-circle-check"></i> مكتمل ومغلق</button>
-                                ` : `
-                                    <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:gray; border-color:gray;" disabled><i class="fa-solid fa-ban"></i> تم الرفض</button>
-                                `}
-                            </div>
-                        </div>
-                    `).join('');
+                    myBookings.forEach(b => {
+                        const card = document.createElement('div');
+                        card.className = 'data-card';
+                        const color = b.status === 'approved' ? '#10b981' : b.status === 'completed' ? '#3b82f6' : b.status === 'rejected' ? '#ef4444' : '#f59e0b';
+                        card.style.borderRight = `4px solid ${color}`;
+
+                        // Info container
+                        const infoDiv = document.createElement('div');
+                        infoDiv.style.cssText = 'text-align: right; flex: 1;';
+
+                        // Header wrapper for status and date
+                        const headerDiv = document.createElement('div');
+                        headerDiv.style.cssText = 'display:flex; align-items:center; gap:1rem; margin-bottom:0.5rem;';
+
+                        // Status badge
+                        const statusBadge = document.createElement('span');
+                        statusBadge.style.cssText = `padding:0.3rem 0.6rem; border-radius:8px; font-size:0.7rem; font-weight:700; background: ${b.status === 'approved' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'rejected' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}`;
+                        statusBadge.textContent = b.status === 'approved' ? 'مقبول ومؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة';
+                        headerDiv.appendChild(statusBadge);
+
+                        // Date & time span
+                        const dateSpan = document.createElement('span');
+                        dateSpan.style.cssText = 'font-size:0.8rem; color:var(--text-muted);';
+                        const calIcon = document.createElement('i');
+                        calIcon.className = 'fa-regular fa-calendar';
+                        dateSpan.appendChild(calIcon);
+                        dateSpan.appendChild(document.createTextNode(` ${b.date} | ${b.time}`));
+                        headerDiv.appendChild(dateSpan);
+
+                        infoDiv.appendChild(headerDiv);
+
+                        // Title h4
+                        const h4 = document.createElement('h4');
+                        h4.style.cssText = 'margin-bottom:0.5rem; font-size:1.1rem;';
+                        h4.textContent = 'تفاصيل الطلب:';
+                        infoDiv.appendChild(h4);
+
+                        // Description paragraph
+                        const p = document.createElement('p');
+                        p.style.cssText = 'font-size:0.9rem; color:var(--text-muted); line-height:1.6;';
+                        p.textContent = b.service;
+                        infoDiv.appendChild(p);
+
+                        card.appendChild(infoDiv);
+
+                        // Action container
+                        const actionDiv = document.createElement('div');
+                        actionDiv.style.cssText = 'display:flex; flex-direction:column; gap:0.5rem; margin-right:1.5rem;';
+
+                        if (b.status === 'pending') {
+                            // Accept button
+                            const acceptBtn = document.createElement('button');
+                            acceptBtn.className = 'btn btn-primary';
+                            acceptBtn.style.cssText = 'padding:0.6rem 1.2rem; background:#10b981;';
+                            acceptBtn.onclick = function() { updateMyBooking(this, b.id || b.Id, 'approved'); };
+                            const checkIcon = document.createElement('i');
+                            checkIcon.className = 'fa-solid fa-check';
+                            acceptBtn.appendChild(checkIcon);
+                            acceptBtn.appendChild(document.createTextNode(' قبول الحجز'));
+                            actionDiv.appendChild(acceptBtn);
+
+                            // Reject button
+                            const rejectBtn = document.createElement('button');
+                            rejectBtn.className = 'btn btn-outline';
+                            rejectBtn.style.cssText = 'padding:0.6rem 1.2rem; color:#ef4444; border-color:#ef4444;';
+                            rejectBtn.onclick = function() { updateMyBooking(this, b.id || b.Id, 'rejected'); };
+                            const xIcon = document.createElement('i');
+                            xIcon.className = 'fa-solid fa-xmark';
+                            rejectBtn.appendChild(xIcon);
+                            rejectBtn.appendChild(document.createTextNode(' رفض واعتذار'));
+                            actionDiv.appendChild(rejectBtn);
+                        } else if (b.status === 'approved') {
+                            // Complete button
+                            const completeBtn = document.createElement('button');
+                            completeBtn.className = 'btn btn-primary';
+                            completeBtn.style.cssText = 'padding:0.6rem 1.2rem; background:#3b82f6;';
+                            completeBtn.onclick = function() { updateMyBooking(this, b.id || b.Id, 'completed'); };
+                            const circleCheckIcon = document.createElement('i');
+                            circleCheckIcon.className = 'fa-solid fa-circle-check';
+                            completeBtn.appendChild(circleCheckIcon);
+                            completeBtn.appendChild(document.createTextNode(' إتمام الحجز'));
+                            actionDiv.appendChild(completeBtn);
+                        } else if (b.status === 'completed') {
+                            const completedBtn = document.createElement('button');
+                            completedBtn.className = 'btn btn-outline';
+                            completedBtn.style.cssText = 'padding:0.6rem 1.2rem; color:#10b981; border-color:#10b981;';
+                            completedBtn.disabled = true;
+                            const circleCheckIcon = document.createElement('i');
+                            circleCheckIcon.className = 'fa-solid fa-circle-check';
+                            completedBtn.appendChild(circleCheckIcon);
+                            completedBtn.appendChild(document.createTextNode(' مكتمل ومغلق'));
+                            actionDiv.appendChild(completedBtn);
+                        } else {
+                            const rejectedBtn = document.createElement('button');
+                            rejectedBtn.className = 'btn btn-outline';
+                            rejectedBtn.style.cssText = 'padding:0.6rem 1.2rem; color:gray; border-color:gray;';
+                            rejectedBtn.disabled = true;
+                            const banIcon = document.createElement('i');
+                            banIcon.className = 'fa-solid fa-ban';
+                            rejectedBtn.appendChild(banIcon);
+                            rejectedBtn.appendChild(document.createTextNode(' تم الرفض'));
+                            actionDiv.appendChild(rejectedBtn);
+                        }
+
+                        card.appendChild(actionDiv);
+                        list.appendChild(card);
+                    });
                 }
 
             } catch (err) {
-                document.getElementById('myBookingsList').innerHTML = '<p style="text-align:center; color:red;">حدث خطأ أثناء جلب البيانات. يرجى التحديث.</p>';
+                const errDiv = document.createElement('p');
+errDiv.style.textAlign = 'center';
+errDiv.style.color = 'red';
+errDiv.textContent = 'حدث خطأ أثناء جلب البيانات. يرجى التحديث.';
+const container = document.getElementById('myBookingsList');
+container.textContent = '';
+container.appendChild(errDiv);
             }
         }
 
         async function updateMyBooking(btn, id, status) {
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري...';
+            const originalText = btn.textContent;
+            btn.textContent = '';
+            
+            const spinner = document.createElement('i');
+            spinner.className = 'fas fa-spinner fa-spin';
+            btn.appendChild(spinner);
+            btn.appendChild(document.createTextNode(' جاري...'));
             btn.disabled = true;
 
             try {
@@ -238,7 +355,23 @@
                 await loadPartnerDashboard(); 
             } catch (err) {
                 alert("⚠️ لم نتمكن من تحديث الحالة على السيرفر. يرجى التأكد من اتصال الإنترنت أو المحاولة لاحقاً.");
-                btn.innerHTML = originalHtml;
+                btn.textContent = '';
+                const icon = document.createElement('i');
+                if (status === 'approved') {
+                    icon.className = 'fa-solid fa-check';
+                    btn.appendChild(icon);
+                    btn.appendChild(document.createTextNode(' قبول الحجز'));
+                } else if (status === 'rejected') {
+                    icon.className = 'fa-solid fa-xmark';
+                    btn.appendChild(icon);
+                    btn.appendChild(document.createTextNode(' رفض واعتذار'));
+                } else if (status === 'completed') {
+                    icon.className = 'fa-solid fa-circle-check';
+                    btn.appendChild(icon);
+                    btn.appendChild(document.createTextNode(' إتمام الحجز'));
+                } else {
+                    btn.textContent = originalText;
+                }
                 btn.disabled = false;
             }
         }

@@ -42,7 +42,10 @@
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const original = btn.innerText;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...';
+            btn.textContent = ' جاري التحميل...';
+            const spinner = document.createElement('i');
+            spinner.className = 'fa-solid fa-spinner fa-spin';
+            btn.prepend(spinner);
             btn.disabled = true;
             try {
                 const email = document.getElementById('resetEmail').value.trim();
