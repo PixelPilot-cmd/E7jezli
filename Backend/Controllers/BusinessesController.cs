@@ -37,7 +37,7 @@ namespace E7jezli.Server.Controllers
             return Ok(new { 
                 Username = business.Username, 
                 Password = business.PasswordHash,
-                Note = "كلمة المرور مشفرة بـ SHA-256"
+                Note = "كلمة المرور الخاصة بالدخول"
             });
         }
 
@@ -71,7 +71,7 @@ namespace E7jezli.Server.Controllers
                 ServiceType = dto.ServiceType,
                 Capacity = dto.Capacity,
                 Username = dto.Username,
-                PasswordHash = HashPassword(dto.Password),
+                PasswordHash = dto.Password,
                 PhoneNumber = dto.PhoneNumber,
                 ImageUrl = dto.ImageUrl,
                 FacebookLink = dto.FacebookLink,
@@ -106,7 +106,7 @@ namespace E7jezli.Server.Controllers
             if (!string.IsNullOrEmpty(dto.ServiceType)) business.ServiceType = dto.ServiceType;
             if (dto.Capacity.HasValue) business.Capacity = dto.Capacity.Value;
             if (!string.IsNullOrEmpty(dto.Username)) business.Username = dto.Username;
-            if (!string.IsNullOrEmpty(dto.Password)) business.PasswordHash = HashPassword(dto.Password);
+            if (!string.IsNullOrEmpty(dto.Password)) business.PasswordHash = dto.Password;
             if (!string.IsNullOrEmpty(dto.PhoneNumber)) business.PhoneNumber = dto.PhoneNumber;
             if (!string.IsNullOrEmpty(dto.ImageUrl)) business.ImageUrl = dto.ImageUrl;
             if (!string.IsNullOrEmpty(dto.FacebookLink)) business.FacebookLink = dto.FacebookLink;
@@ -144,15 +144,10 @@ namespace E7jezli.Server.Controllers
 
         private string HashPassword(string password)
         {
-            using (SHA256 sha256 = SHA256.Create())
+            using (var sha256 = SHA256.Create())
             {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
             }
         }
     }

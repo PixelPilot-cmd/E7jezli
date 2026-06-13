@@ -199,7 +199,7 @@
                             <div style="text-align: right; flex: 1;">
                                 <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.5rem;">
                                     <span style="padding:0.3rem 0.6rem; border-radius:8px; font-size:0.7rem; font-weight:700; background: ${b.status === 'approved' ? '#d1fae5; color:#059669;' : b.status === 'completed' ? '#dbeafe; color:#1d4ed8;' : b.status === 'rejected' ? '#fee2e2; color:#dc2626;' : '#fef3c7; color:#d97706;'}">
-                                        ${b.status === 'approved' ? 'مقبول ومؤكد' : b.status === 'completed' ? 'مكتمل وتم منح النقاط' : b.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
+                                        ${b.status === 'approved' ? 'مقبول ومؤكد' : b.status === 'completed' ? 'مكتمل' : b.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة'}
                                     </span>
                                     <span style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-regular fa-calendar"></i> ${b.date} | ${b.time}</span>
                                 </div>
@@ -211,7 +211,7 @@
                                     <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#10b981;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'approved')"><i class="fa-solid fa-check"></i> قبول الحجز</button>
                                     <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#ef4444; border-color:#ef4444;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'rejected')"><i class="fa-solid fa-xmark"></i> رفض واعتذار</button>
                                 ` : b.status === 'approved' ? `
-                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#3b82f6;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'completed')"><i class="fa-solid fa-circle-check"></i> إتمام الحجز (+100 نقطة)</button>
+                                    <button class="btn btn-primary" style="padding:0.6rem 1.2rem; background:#3b82f6;" onclick="updateMyBooking(this, ${b.id || b.Id}, 'completed')"><i class="fa-solid fa-circle-check"></i> إتمام الحجز</button>
                                 ` : b.status === 'completed' ? `
                                     <button class="btn btn-outline" style="padding:0.6rem 1.2rem; color:#10b981; border-color:#10b981;" disabled><i class="fa-solid fa-circle-check"></i> مكتمل ومغلق</button>
                                 ` : `

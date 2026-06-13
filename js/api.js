@@ -239,7 +239,7 @@ const E7_DB = {
     // ─────────────────────────────────────────────
 
     getBusinesses: async () => {
-        const res = await _tryFetch(`${API_BASE_URL}/Business`);
+        const res = await _tryFetch(`${API_BASE_URL}/Businesses`);
         if (res && res.ok) {
             const data = await res.json();
             _saveLocalBusinesses(data); // cache
@@ -258,7 +258,7 @@ const E7_DB = {
 
     // إضافة مؤسسة جديدة (من قبل الأدمن)
     createBusiness: async (businessData) => {
-        const res = await _tryFetch(`${API_BASE_URL}/Business`, {
+        const res = await _tryFetch(`${API_BASE_URL}/Businesses`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(businessData)
@@ -277,15 +277,15 @@ const E7_DB = {
     },
 
     deleteBusiness: async (id) => {
-        _tryFetch(`${API_BASE_URL}/Business/${id}`, { method: 'DELETE' });
+        _tryFetch(`${API_BASE_URL}/Businesses/${id}`, { method: 'DELETE' });
         // حذف محلي فوري
         const local = _getLocalBusinesses().filter(b => b.id != id);
         _saveLocalBusinesses(local);
     },
 
     updateBusinessStatus: async (id, status) => {
-        _tryFetch(`${API_BASE_URL}/Business/${id}/status`, {
-            method: 'PATCH',
+        _tryFetch(`${API_BASE_URL}/Businesses/${id}/status`, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(status)
         });
@@ -345,21 +345,32 @@ const E7_DB = {
             let serverBookings = await res.json();
             
             // توحيد البيانات (Normalization) لضمان عمل camelCase
-            serverBookings = serverBookings.map(b => ({
-                id: b.id || b.Id,
-                businessId: b.businessId || b.BusinessId,
-                businessName: b.businessName || b.BusinessName,
-                businessImage: b.businessImage || b.BusinessImage,
-                service: b.service || b.Service,
-                startTime: b.startTime || b.StartTime,
-                endTime: b.endTime || b.EndTime,
-                numberOfPeople: b.numberOfPeople || b.NumberOfPeople,
-                userEmail: b.userEmail || b.UserEmail,
-                userName: b.userName || b.UserName,
-                userPhoneNumber: b.userPhoneNumber || b.UserPhoneNumber,
-                status: b.status || b.Status,
-                dateCreated: b.dateCreated || b.DateCreated
-            }));
+            serverBookings = serverBookings.map(b => {
+                const sTime = b.startTime || b.StartTime || "";
+                let d = "";
+                let t = "";
+                if (sTime && sTime.includes("T") && !sTime.startsWith("0001-01-01")) {
+                    d = sTime.split("T")[0];
+                    t = sTime.split("T")[1].slice(0, 5);
+                }
+                return {
+                    id: b.id || b.Id,
+                    businessId: b.businessId || b.BusinessId,
+                    businessName: b.businessName || b.BusinessName,
+                    businessImage: b.businessImage || b.BusinessImage,
+                    service: b.service || b.Service,
+                    startTime: sTime,
+                    endTime: b.endTime || b.EndTime,
+                    date: d || b.date || b.Date || "",
+                    time: t || b.time || b.Time || "",
+                    numberOfPeople: b.numberOfPeople || b.NumberOfPeople,
+                    userEmail: b.userEmail || b.UserEmail,
+                    userName: b.userName || b.UserName,
+                    userPhoneNumber: b.userPhoneNumber || b.UserPhoneNumber,
+                    status: b.status || b.Status,
+                    dateCreated: b.dateCreated || b.DateCreated
+                };
+            });
 
             // دمج مع البيانات المحلية غير المزامنة
             const local = _getLocalBookings().filter(lb => lb._localOnly && (!email || lb.userEmail === email));
@@ -382,21 +393,32 @@ const E7_DB = {
         const res = await _tryFetch(`${API_BASE_URL}/Bookings?businessId=${businessId}`);
         if (res && res.ok) {
             let serverBookings = await res.json();
-            serverBookings = serverBookings.map(b => ({
-                id: b.id || b.Id,
-                businessId: b.businessId || b.BusinessId,
-                businessName: b.businessName || b.BusinessName,
-                businessImage: b.businessImage || b.BusinessImage,
-                service: b.service || b.Service,
-                startTime: b.startTime || b.StartTime,
-                endTime: b.endTime || b.EndTime,
-                numberOfPeople: b.numberOfPeople || b.NumberOfPeople,
-                userEmail: b.userEmail || b.UserEmail,
-                userName: b.userName || b.UserName,
-                userPhoneNumber: b.userPhoneNumber || b.UserPhoneNumber,
-                status: b.status || b.Status,
-                dateCreated: b.dateCreated || b.DateCreated
-            }));
+            serverBookings = serverBookings.map(b => {
+                const sTime = b.startTime || b.StartTime || "";
+                let d = "";
+                let t = "";
+                if (sTime && sTime.includes("T") && !sTime.startsWith("0001-01-01")) {
+                    d = sTime.split("T")[0];
+                    t = sTime.split("T")[1].slice(0, 5);
+                }
+                return {
+                    id: b.id || b.Id,
+                    businessId: b.businessId || b.BusinessId,
+                    businessName: b.businessName || b.BusinessName,
+                    businessImage: b.businessImage || b.BusinessImage,
+                    service: b.service || b.Service,
+                    startTime: sTime,
+                    endTime: b.endTime || b.EndTime,
+                    date: d || b.date || b.Date || "",
+                    time: t || b.time || b.Time || "",
+                    numberOfPeople: b.numberOfPeople || b.NumberOfPeople,
+                    userEmail: b.userEmail || b.UserEmail,
+                    userName: b.userName || b.UserName,
+                    userPhoneNumber: b.userPhoneNumber || b.UserPhoneNumber,
+                    status: b.status || b.Status,
+                    dateCreated: b.dateCreated || b.DateCreated
+                };
+            });
             return serverBookings;
         }
         return _getLocalBookings().filter(b => b.businessId == businessId);

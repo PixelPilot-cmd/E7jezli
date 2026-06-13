@@ -118,7 +118,7 @@
             // تحقق من وجود معامل نجاح الحجز لعرض الإشعار
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('success') === 'true') {
-                showInfoModal("نجاح عملية الحجز 🎉", "تم إرسال طلب الحجز للمؤسسة بنجاح! يمكنك متابعة حالة طلبك وتحديثاته مباشرة من هذه الصفحة. بمجرد قبول الحجز ستحصل على نقاط ولاء إضافية.");
+                showInfoModal("نجاح عملية الحجز 🎉", "تم إرسال طلب الحجز للمؤسسة بنجاح! يمكنك متابعة حالة طلبك وتحديثاته مباشرة من هذه الصفحة.");
             }
 
             const bookings = await E7_DB.getBookings(profile.email);

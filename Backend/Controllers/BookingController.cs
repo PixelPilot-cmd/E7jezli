@@ -125,6 +125,12 @@ namespace E7jezli.Server.Controllers
         // Helper method to check for booking conflicts
         private async Task<bool> CheckBookingConflict(int businessId, DateTime startTime, DateTime endTime, string serviceType)
         {
+            // If the booking doesn't specify a time or uses default values, do not conflict
+            if (startTime == DateTime.MinValue || endTime == DateTime.MinValue)
+            {
+                return false;
+            }
+
             var existingBookings = await _context.Bookings
                 .Where(b => b.BusinessId == businessId && 
                            b.Status != "cancelled" && 
@@ -133,20 +139,22 @@ namespace E7jezli.Server.Controllers
 
             foreach (var existing in existingBookings)
             {
-                // Check for time overlap
-                if (startTime < existing.EndTime && endTime > existing.StartTime)
+                if (existing.StartTime == DateTime.MinValue || existing.EndTime == DateTime.MinValue)
+                    continue;
+
+                // For wedding halls and hotels, they are booked per day.
+                // If they are on the same day, they conflict, regardless of the hours!
+                if (serviceType == "wedding_hall" || serviceType == "hotel")
                 {
-                    // For wedding halls and similar venues, check if it's on the same day
-                    if (serviceType == "wedding_hall" || serviceType == "hotel")
-                    {
-                        if (startTime.Date == existing.StartTime.Date)
-                            return true;
-                    }
-                    // For restaurants, coffee shops, etc., check exact time overlap
-                    else
-                    {
+                    if (startTime.Date == existing.StartTime.Date)
                         return true;
-                    }
+                }
+                // For other services (restaurants, gyms, salons, fields, etc.), they conflict if the time slots overlap
+                else
+                {
+                    // Check for time overlap: (StartA < EndB) and (EndA > StartB)
+                    if (startTime < existing.EndTime && endTime > existing.StartTime)
+                        return true;
                 }
             }
 

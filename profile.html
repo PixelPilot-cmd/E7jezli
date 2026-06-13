@@ -61,7 +61,7 @@
         </div>
     </div>
 
-    <div class="container" style="margin-top: 2rem;">
+    <div class="container profile-container" style="margin-top: 2rem;">
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
             <div class="dashboard-card">
                 <h3 style="margin-bottom: 2rem;"><i class="fa-solid fa-clock-rotate-left"></i> آخر النشاطات</h3>
@@ -267,14 +267,22 @@
 
             const fullService = service + (notes ? ` | ملاحظات: ${notes}` : "");
 
+            const todayStr = new Date().toISOString().split('T')[0];
+            const startTimeStr = `${todayStr}T12:00:00`;
+            const endTimeStr = `${todayStr}T14:00:00`;
+
             const payload = {
+                businessId: businessId,
                 businessName: bizName,
                 businessImage: bizImage,
                 service: fullService,
                 price: 0,
-                time: "غير محدد",
-                date: new Date().toISOString().split('T')[0],
+                time: "12:00",
+                date: todayStr,
+                startTime: startTimeStr,
+                endTime: endTimeStr,
                 userEmail: profile.email,
+                userName: profile.name || "",
                 status: "pending"
             };
 
@@ -369,9 +377,8 @@
                 `;
 
                 // Insert into the profile layout
-                const targetContainer = document.querySelector('.profile-grid') || 
-                                        document.querySelector('.profile-container') || 
-                                        document.querySelector('.container') || 
+                const targetContainer = document.querySelector('.profile-container') || 
+                                        document.querySelector('.profile-grid') || 
                                         document.body.querySelector('main') || 
                                         document.body;
                                         

@@ -114,7 +114,7 @@ namespace E7jezli.Server.Controllers
 
             var business = await _context.Businesses.FirstOrDefaultAsync(b => b.Username == dto.Username);
 
-            if (business == null || business.PasswordHash != HashPassword(dto.Password))
+            if (business == null || (business.PasswordHash != dto.Password && business.PasswordHash != HashPassword(dto.Password)))
             {
                 return Unauthorized("اسم المستخدم أو كلمة المرور غير صحيحة.");
             }

@@ -211,6 +211,57 @@
         </main>
     </div>
 
+    <!-- Edit Business Modal -->
+    <div id="editBusinessModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px; text-align: right;">
+            <span class="modal-close" onclick="closeEditModal()">&times;</span>
+            <h3 style="margin-bottom: 1.5rem; text-align: center; color: var(--primary);">تعديل بيانات المؤسسة</h3>
+            <form id="editBusinessForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <input type="hidden" id="editBizId">
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; margin-bottom: 0.3rem; font-weight: 600;">اسم المؤسسة *</label>
+                    <input type="text" id="editBizName" required style="width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 10px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.3rem; font-weight: 600;">التصنيف *</label>
+                    <select id="editBizCategory" required style="width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 10px;">
+                        <option value="مطاعم">مطاعم</option>
+                        <option value="coffe">coffe</option>
+                        <option value="صالات افراح">صالات افراح</option>
+                        <option value="نوادي رياضية">نوادي رياضية</option>
+                        <option value="ملاعب كرة قدم">ملاعب كرة قدم</option>
+                        <option value="صالات ترفيهية">صالات ترفيهية</option>
+                        <option value="شركات توصيل">شركات توصيل</option>
+                        <option value="فنادق">فنادق</option>
+                        <option value="عيادات تجميلية">عيادات تجميلية</option>
+                        <option value="صالونات نسائية">صالونات نسائية</option>
+                        <option value="صالونات رجالية">صالونات رجالية</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.3rem; font-weight: 600;">السعة (عدد الأشخاص) *</label>
+                    <input type="number" id="editBizCapacity" required min="1" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 10px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.3rem; font-weight: 600;">اسم المستخدم للمؤسسة *</label>
+                    <input type="text" id="editBizUsername" required style="width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 10px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.3rem; font-weight: 600;">كلمة المرور الجديدة</label>
+                    <input type="password" id="editBizPassword" placeholder="اتركه فارغاً للإبقاء على الحالية" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 10px;">
+                </div>
+                <div style="grid-column: 1 / -1;">
+                    <label style="display: block; margin-bottom: 0.3rem; font-weight: 600;">رقم الهاتف *</label>
+                    <input type="tel" id="editBizPhone" required style="width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 10px;">
+                </div>
+                <div style="grid-column: 1 / -1; display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center; padding: 0.8rem;">حفظ التعديلات</button>
+                    <button type="button" class="btn btn-outline" onclick="closeEditModal()" style="flex: 1; justify-content: center; padding: 0.8rem; border-color: #cbd5e1; color: #64748b;">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="js/api.js"></script>
     <script>
         // Authentication Logic
@@ -367,10 +418,11 @@
                                 <div>
                                     <strong>${p.name}</strong>
                                     <p style="font-size:0.8rem; color:var(--text-muted);">${p.category} - السعة: ${p.capacity}</p>
+                                    <p style="font-size:0.75rem; color:#6b7280;">اسم المستخدم: ${p.username || 'غير محدد'} | كلمة السر: ${p.passwordHash || 'غير محدد'}</p>
                                 </div>
                             </div>
                             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#3b82f6; border-color:#3b82f6;" onclick="showBusinessCredentials(${p.id || p.Id})"><i class="fa-solid fa-key"></i> بيانات الدخول</button>
+                                <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#3b82f6; border-color:#3b82f6;" onclick="showBusinessCredentials(${p.id || p.Id})"><i class="fa-solid fa-key"></i> عرض كلمة السر</button>
                                 <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#f59e0b; border-color:#f59e0b;" onclick="editBusiness(${p.id || p.Id})"><i class="fa-solid fa-edit"></i> تعديل</button>
                                 <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.7rem; color:#ef4444; border-color:#ef4444;" onclick="adminDeleteBusiness(${p.id || p.Id})"><i class="fa-solid fa-trash"></i> حذف</button>
                             </div>
@@ -423,39 +475,58 @@
                 return;
             }
 
-            const newName = prompt('اسم المؤسسة الحالي:', business.name);
-            const newCategory = prompt('التصنيف الحالي:', business.category);
-            const newCapacity = prompt('السعة الحالية:', business.capacity);
-            const newPhone = prompt('رقم الهاتف الحالي:', business.phoneNumber);
-            const newUsername = prompt('اسم المستخدم الحالي:', business.username);
-            const newPassword = prompt('كلمة المرور الجديدة (اترك فارغاً للإبقاء على الحالية):');
+            document.getElementById('editBizId').value = business.id || business.Id;
+            document.getElementById('editBizName').value = business.name || '';
+            document.getElementById('editBizCategory').value = business.category || '';
+            document.getElementById('editBizCapacity').value = business.capacity || 1;
+            document.getElementById('editBizUsername').value = business.username || '';
+            document.getElementById('editBizPhone').value = business.phoneNumber || '';
+            document.getElementById('editBizPassword').value = '';
 
-            if (newName || newCategory || newCapacity || newPhone || newUsername || newPassword) {
-                const updateData = {};
-                if (newName) updateData.name = newName;
-                if (newCategory) updateData.category = newCategory;
-                if (newCapacity) updateData.capacity = parseInt(newCapacity);
-                if (newPhone) updateData.phoneNumber = newPhone;
-                if (newUsername) updateData.username = newUsername;
-                if (newPassword) updateData.password = newPassword;
-
-                try {
-                    const res = await fetch(`${API_BASE_URL}/Businesses/${id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updateData)
-                    });
-                    if (res.ok) {
-                        alert('تم تحديث بيانات المؤسسة بنجاح!');
-                        loadAdminData();
-                    } else {
-                        alert('فشل في تحديث بيانات المؤسسة');
-                    }
-                } catch (err) {
-                    alert('حدث خطأ: ' + err.message);
-                }
-            }
+            document.getElementById('editBusinessModal').style.display = 'flex';
         }
+
+        function closeEditModal() {
+            document.getElementById('editBusinessModal').style.display = 'none';
+        }
+
+        document.getElementById('editBusinessForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editBizId').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+            btn.disabled = true;
+
+            const updateData = {
+                name: document.getElementById('editBizName').value,
+                category: document.getElementById('editBizCategory').value,
+                capacity: parseInt(document.getElementById('editBizCapacity').value),
+                username: document.getElementById('editBizUsername').value,
+                phoneNumber: document.getElementById('editBizPhone').value
+            };
+            const pwd = document.getElementById('editBizPassword').value.trim();
+            if (pwd) updateData.password = pwd;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/Businesses/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                if (res.ok) {
+                    alert('تم تحديث بيانات المؤسسة بنجاح!');
+                    closeEditModal();
+                    loadAdminData();
+                } else {
+                    alert('فشل في تحديث بيانات المؤسسة');
+                }
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            } finally {
+                btn.innerHTML = 'حفظ التعديلات';
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
