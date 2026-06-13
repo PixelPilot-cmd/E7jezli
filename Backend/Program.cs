@@ -5,15 +5,15 @@ using System.Text;
 using E7jezli.Server.Data;
 using Serilog;
 
-// Load environment variables from .env (will be added to system env before runtime)
-var configuration = builder.Configuration.AddEnvironmentVariables();
+var builder = WebApplication.CreateBuilder(args);
+// Load environment variables (Render injects them as system env vars)
+builder.Configuration.AddEnvironmentVariables();
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateLogger();
 builder.Host.UseSerilog();
-
-var builder = WebApplication.CreateBuilder(args);
+// Builder already created above
 
 // 1. Add services to the container.
 builder.Services.AddControllers();
